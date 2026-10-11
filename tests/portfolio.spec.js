@@ -94,6 +94,47 @@ test('wheel scroll progresses smoothly instead of jumping', async ({ page }) => 
   expect(intermediate.size).toBeGreaterThan(3);
 });
 
+test('cases replay after leaving the reveal area on every return', async ({ page }) => {
+  await page.addInitScript(() => {
+    const getContext = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = function(type, ...args) {
+      return type === 'webgl2' ? null : getContext.call(this, type, ...args);
+    };
+  });
+  await page.goto('./');
+  const project = page.locator('.project').first();
+  const letter = project.locator('.reveal-letter').first();
+  await page.mouse.wheel(0, 1400);
+  await expect(project).toHaveClass(/is-visible/);
+  await expect.poll(() => letter.evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m42)).toBe(0);
+  for (let repeat = 0; repeat < 3; repeat++) {
+    await page.mouse.wheel(0, -2000);
+    await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
+    // Leave only 15px of the card visible below the observer's 20px inset.
+    // Previously this exit never reset the card, even after a later return.
+    await page.evaluate(() => {
+      const top = document.querySelector('.project').getBoundingClientRect().top + scrollY;
+      window.scrollTo({ top: top - innerHeight + 15, behavior: 'instant' });
+    });
+    await expect(project).not.toHaveClass(/is-visible/);
+    await expect.poll(() => letter.evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m42)).toBeLessThan(-100);
+    await page.mouse.wheel(0, 1200);
+    await expect(project).toHaveClass(/is-visible/);
+    const positions = await letter.evaluate(el => new Promise(resolve => {
+      const values = [];
+      const started = performance.now();
+      const sample = now => {
+        values.push(new DOMMatrix(getComputedStyle(el).transform).m42);
+        if (now - started >= 1450) resolve(values);
+        else requestAnimationFrame(sample);
+      };
+      requestAnimationFrame(sample);
+    }));
+    expect(positions.some(value => value < -1)).toBe(true);
+    expect(Math.abs(positions.at(-1))).toBeLessThan(.01);
+  }
+});
+
 test('text reveals move through masks and reflow without losing words', async ({ page }) => {
   await page.addInitScript(() => {
     const getContext = HTMLCanvasElement.prototype.getContext;
@@ -185,6 +226,68 @@ test('WebGL keeps a flat black background and paints a fading chromatic cursor t
   expect(errors).toEqual([]);
 });
 
+test('cursor refracts photo pixels, restores them, and follows the photo on scroll', async ({ page }) => {
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.goto('./');
+  const canvas = page.locator('.fluid-background');
+  await expect(canvas).toHaveAttribute('data-portrait', 'webgl');
+  await expect(page.locator('.portrait')).toHaveCSS('opacity', '1');
+  await expect(page.locator('#portrait')).toHaveCSS('opacity', '0');
+  const bounds = await page.locator('.portrait').boundingBox();
+  const readPhoto = () => canvas.evaluate((el, bounds) => new Promise(resolve => {
+    requestAnimationFrame(() => {
+      const gl = el.getContext('webgl2');
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+      const scaleX = el.width / innerWidth, scaleY = el.height / innerHeight;
+      const width = Math.floor(bounds.width * scaleX), height = Math.floor(bounds.height * scaleY);
+      const pixels = new Uint8Array(width * height * 4);
+      gl.readPixels(Math.floor(bounds.x * scaleX), Math.floor((innerHeight - bounds.y - bounds.height) * scaleY), width, height, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+      resolve(Array.from(pixels));
+    });
+  }), bounds);
+  await page.mouse.move(20, 20);
+  const before = await readPhoto();
+  expect(Math.max(...before.filter((_, index) => index % 4 !== 3))).toBeGreaterThan(100);
+  await page.mouse.move(bounds.x - 15, bounds.y + bounds.height / 2);
+  await page.mouse.move(bounds.x + bounds.width + 15, bounds.y + bounds.height / 2, { steps: 12 });
+  await page.mouse.move(bounds.x + 20, bounds.y + bounds.height / 2 + 12, { steps: 8 });
+  // An additive glow cannot darken originally bright pixels. This verifies
+  // that the photograph itself is refracted instead of merely tinted.
+  await expect.poll(async () => {
+    const painted = await readPhoto();
+    let darker = 0;
+    for (let i = 0; i < before.length; i += 4) {
+      const original = before[i] + before[i + 1] + before[i + 2];
+      if (original > 150 && original - painted[i] - painted[i + 1] - painted[i + 2] > 40) darker++;
+    }
+    return darker;
+  }).toBeGreaterThan(5);
+  await page.waitForTimeout(4500);
+  await page.mouse.move(bounds.x + 21, bounds.y + bounds.height / 2 + 13);
+  await expect.poll(readPhoto).toEqual(before);
+  await page.evaluate(() => window.scrollTo({ top: 350, behavior: 'instant' }));
+  await expect.poll(async () => (await readPhoto()).filter((_, index) => index % 4 !== 3).every(value => value === 0)).toBe(true);
+  await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+  await expect(page.locator('.portrait')).toHaveCSS('opacity', '1');
+  await expect.poll(readPhoto).toEqual(before);
+  const recovered = await canvas.evaluate(el => new Promise(resolve => {
+    const extension = el.getContext('webgl2').getExtension('WEBGL_lose_context');
+    if (!extension) throw new Error('Context recovery test requires WEBGL_lose_context');
+    el.addEventListener('webglcontextlost', () => requestAnimationFrame(() => {
+      const originalVisible = getComputedStyle(document.querySelector('#portrait')).opacity === '1';
+      extension.restoreContext();
+      resolve(originalVisible);
+    }), { once: true });
+    extension.loseContext();
+  }));
+  expect(recovered).toBe(true);
+  await expect(canvas).toHaveAttribute('data-portrait', 'webgl');
+  await page.mouse.move(20, 20);
+  await expect.poll(readPhoto).toEqual(before);
+  expect(errors).toEqual([]);
+});
+
 test('mobile layout keeps native touch scrolling and usable contacts', async ({ browser }) => {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
   const page = await context.newPage();
@@ -193,6 +296,8 @@ test('mobile layout keeps native touch scrolling and usable contacts', async ({ 
   await expect(page.locator('.bio')).toHaveCSS('opacity', '1');
   await expect(page.locator('.contacts')).toHaveCSS('opacity', '1');
   await expect(page.locator('.cursor-ring')).toHaveCSS('display', 'none');
+  await expect(page.locator('#portrait')).toHaveCSS('opacity', '1');
+  await expect(page.locator('.fluid-background')).toHaveAttribute('data-portrait', 'image');
   await expect(page.locator('html')).not.toHaveClass(/lenis/);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   const hero = await page.locator('.hero').boundingBox();
@@ -209,6 +314,8 @@ test('reduced motion disables the simulation and never hides content', async ({ 
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('./');
   await expect(page.locator('.fluid-background')).toHaveAttribute('data-motion', 'reduced');
+  await expect(page.locator('.fluid-background')).toHaveAttribute('data-portrait', 'image');
+  await expect(page.locator('#portrait')).toHaveCSS('opacity', '1');
   await expect(page.locator('.project').last()).toHaveCSS('opacity', '1');
   await expect(page.locator('html')).toHaveCSS('scroll-behavior', 'auto');
   await expect(page.locator('html')).not.toHaveClass(/lenis/);
@@ -217,6 +324,7 @@ test('reduced motion disables the simulation and never hides content', async ({ 
   await expect(cv.locator('.link-arrow')).toHaveCSS('opacity', '1');
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await expect(page.locator('.fluid-background')).toHaveAttribute('data-motion', 'active');
+  await expect(page.locator('.fluid-background')).toHaveAttribute('data-portrait', 'webgl');
 });
 
 test('content and hover affordances remain usable without WebGL', async ({ page }) => {
@@ -228,6 +336,7 @@ test('content and hover affordances remain usable without WebGL', async ({ page 
   });
   await page.goto('./');
   await expect(page.locator('.fluid-background')).toHaveAttribute('data-renderer', 'css');
+  await expect(page.locator('#portrait')).toHaveCSS('opacity', '1');
   await expect(page.getByRole('heading', { name: 'Гармаева Елена' })).toBeVisible();
   const cv = page.getByRole('button', { name: 'CV', exact: true });
   await cv.hover();

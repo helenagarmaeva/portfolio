@@ -85,6 +85,11 @@ const shaders = {
 
   display: `${header}
     uniform sampler2D uPaint;
+    uniform sampler2D uPortrait;
+    uniform vec2 uViewport;
+    uniform vec4 uPortraitRect;
+    uniform vec4 uPortraitUv;
+    uniform float uPortraitOpacity;
     void main() {
       vec4 field = texture(uPaint,vUv);
       float weight = .5*(field.b+field.a);
@@ -98,6 +103,20 @@ const shaders = {
       // The effect's light is computed in linear space and displayed in sRGB,
       // so the chromatic rim remains visible on the requested dark background.
       vec3 linearColor = max(spectrum*intensity,vec3(0.));
+      if (uPortraitOpacity > 0.) {
+        vec2 local = (vUv*uViewport-uPortraitRect.xy)/uPortraitRect.zw;
+        float circle = 1.-smoothstep(1.-2./min(uPortraitRect.z,uPortraitRect.w),1.,length((local-.5)*2.));
+        if (circle > 0.) {
+          // Refract the original photo using the SAME advected cursor field.
+          // Work in CSS pixels so the warp is consistent across DPR values.
+          vec2 displacement = clamp(direction*180.,vec2(-14.),vec2(14.));
+          vec2 uv = uPortraitUv.xy + (local+displacement/uPortraitRect.zw)*uPortraitUv.zw;
+          vec2 fringe = direction*3./uPortraitRect.zw*uPortraitUv.zw;
+          vec3 photo = vec3(texture(uPortrait,uv+fringe).r,texture(uPortrait,uv).g,texture(uPortrait,uv-fringe).b);
+          vec3 photoLinear = mix(photo/12.92,pow((photo+.055)/1.055,vec3(2.4)),step(vec3(.04045),photo));
+          linearColor = mix(linearColor,photoLinear+linearColor*.35,circle*uPortraitOpacity);
+        }
+      }
       vec3 color = mix(12.92*linearColor,1.055*pow(linearColor,vec3(1./2.4))-.055,step(vec3(.0031308),linearColor));
       fragColor = vec4(clamp(color,0.,1.),1.);
     }
@@ -107,9 +126,12 @@ const shaders = {
 /** Directional screen-paint brush with advected momentum, curl and two decay
  * masks. The background is a constant #000000; only pointer input paints it. */
 export class CursorPaint {
-  constructor(canvas, { reducedMotion }) {
+  constructor(canvas, { reducedMotion, portrait }) {
     this.canvas = canvas;
     this.reducedMotion = reducedMotion;
+    this.portrait = portrait;
+    this.portraitFrame = portrait?.closest('.portrait');
+    this.finePointer = matchMedia('(hover: hover) and (pointer: fine)');
     this.programs = {};
     this.targets = [];
     this.frame = null;
@@ -138,9 +160,23 @@ export class CursorPaint {
     document.documentElement.addEventListener('pointerleave', () => this.resetPointer(), options);
     window.addEventListener('blur', () => this.resetPointer(), options);
     window.addEventListener('resize', () => this.resize(), options);
+    window.addEventListener('scroll', () => {
+      // The shared canvas is fixed; the portrait must follow its DOM frame,
+      // including while the cursor is idle and during reveal transitions.
+      if (!this.gl || !this.portraitReady) return;
+      this.lastMovement = performance.now();
+      this.start();
+    }, options);
     document.addEventListener('visibilitychange', () => document.hidden ? this.pause() : this.start(), { signal: this.abort.signal });
     reducedMotion.addEventListener('change', () => {
-      this.pause(); this.clear(); this.start();
+      this.pause(); this.clear(); this.syncPortrait(); this.start();
+    }, { signal: this.abort.signal });
+    this.finePointer.addEventListener('change', () => {
+      this.pause(); this.clear(); this.syncPortrait(); this.start();
+    }, { signal: this.abort.signal });
+    portrait?.addEventListener('load', () => this.uploadPortrait(), { signal: this.abort.signal });
+    portrait?.addEventListener('error', () => {
+      this.portraitReady = false; this.syncPortrait(); this.render();
     }, { signal: this.abort.signal });
     canvas.addEventListener('webglcontextlost', event => {
       event.preventDefault(); this.pause(); this.gl = null; this.fallback();
@@ -162,9 +198,65 @@ export class CursorPaint {
     gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
     gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0);
     gl.disable(gl.BLEND); gl.disable(gl.DEPTH_TEST);
+    this.portraitReady = false;
+    this.portraitTexture = { texture: gl.createTexture() };
+    gl.bindTexture(gl.TEXTURE_2D,this.portraitTexture.texture);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([0,0,0,255]));
     this.canvas.dataset.renderer = 'webgl';
     document.documentElement.classList.remove('background-fallback');
     this.resize();
+    this.uploadPortrait();
+  }
+
+  uploadPortrait() {
+    const gl = this.gl, image = this.portrait;
+    if (this.destroyed || !gl || !image?.complete || !image.naturalWidth) return;
+    this.portraitReady = false;
+    try {
+      if (Math.max(image.naturalWidth,image.naturalHeight)>gl.getParameter(gl.MAX_TEXTURE_SIZE)) return;
+      gl.bindTexture(gl.TEXTURE_2D,this.portraitTexture.texture);
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);
+      gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,image);
+      this.portraitReady = gl.getError()===gl.NO_ERROR;
+    } catch {
+      // A future remote image without CORS stays a normal visible <img>.
+      this.portraitReady = false;
+    } finally {
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false);
+      this.syncPortrait();
+    }
+    this.lastMovement = performance.now(); this.start();
+  }
+
+  syncPortrait() {
+    this.portraitActive = Boolean(this.gl && this.portraitReady && this.finePointer.matches && !this.reducedMotion.matches);
+    this.portraitFrame?.classList.toggle('is-distorted',this.portraitActive);
+    this.canvas.dataset.portrait = this.portraitActive ? 'webgl' : 'image';
+  }
+
+  portraitUniforms() {
+    const empty = { uPortraitRect:[0,0,1,1],uPortraitUv:[0,0,1,1],uPortraitOpacity:0 };
+    if (!this.portraitActive) return empty;
+    const frame = this.portraitFrame.getBoundingClientRect();
+    if (!frame.width || frame.bottom<=0 || frame.top>=innerHeight) return empty;
+    const image = this.portrait.getBoundingClientRect();
+    const aspect = this.portrait.naturalWidth/this.portrait.naturalHeight;
+    const width = Math.max(image.width,image.height*aspect);
+    const height = Math.max(image.height,image.width/aspect);
+    const position = getComputedStyle(this.portrait).objectPosition.split(' ').map(value=>parseFloat(value)/100);
+    return {
+      uPortraitRect:[frame.left,innerHeight-frame.bottom,frame.width,frame.height],
+      uPortraitUv:[
+        (frame.left-image.left+(width-image.width)*position[0])/width,
+        (image.bottom-frame.bottom+(height-image.height)*(1-position[1]))/height,
+        frame.width/width,frame.height/height,
+      ],
+      uPortraitOpacity:parseFloat(getComputedStyle(this.portraitFrame).opacity),
+    };
   }
 
   program(source) {
@@ -249,7 +341,8 @@ export class CursorPaint {
         gl.activeTexture(gl.TEXTURE0+unit); gl.bindTexture(gl.TEXTURE_2D,value.texture); gl.uniform1i(location,unit++);
       } else if (Array.isArray(value)) {
         if (value.length===2) gl.uniform2f(location,...value);
-        else gl.uniform3f(location,...value);
+        else if (value.length===3) gl.uniform3f(location,...value);
+        else if (value.length===4) gl.uniform4f(location,...value);
       } else gl.uniform1f(location,value);
     }
     gl.bindFramebuffer(gl.FRAMEBUFFER,target?.framebuffer || null);
@@ -281,7 +374,9 @@ export class CursorPaint {
   }
 
   render() {
-    if (this.gl && this.paint) this.draw('display',null,{uPaint:this.paint.read});
+    if (this.gl && this.paint) this.draw('display',null,{
+      uPaint:this.paint.read,uPortrait:this.portraitTexture,uViewport:[innerWidth,innerHeight],...this.portraitUniforms(),
+    });
   }
 
   tick(timestamp) {
@@ -320,14 +415,17 @@ export class CursorPaint {
     if (!this.gl) return;
     this.releaseTargets();
     for (const {program} of Object.values(this.programs)) this.gl.deleteProgram(program);
+    this.gl.deleteTexture(this.portraitTexture?.texture);
     this.gl.deleteBuffer(this.buffer); this.gl.deleteVertexArray(this.vao);
   }
 
   fallback() {
+    this.portraitReady = false; this.syncPortrait();
     this.canvas.dataset.renderer='css'; document.documentElement.classList.add('background-fallback');
   }
 
   destroy() {
     this.destroyed=true; this.pause(); this.abort.abort(); this.release();
+    this.portraitFrame?.classList.remove('is-distorted');
   }
 }

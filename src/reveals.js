@@ -150,7 +150,10 @@ export class ScrollReveals {
           const firstAppearance = !element.classList.contains('is-visible');
           element.classList.add('is-visible');
           if (firstAppearance && element.matches('.project') && !this.mobile.matches) this.scramble(element);
-        } else if (entry.boundingClientRect.bottom <= 0 || entry.boundingClientRect.top >= innerHeight) {
+        } else {
+          // Reset at the observer boundary, including its bottom inset.
+          // There is no second callback when an already non-intersecting
+          // card subsequently passes the physical viewport boundary.
           element.classList.remove('is-visible');
           if (element.matches('.project')) this.stopScramble(element);
         }

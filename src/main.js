@@ -113,7 +113,7 @@ document.querySelectorAll('[data-project]').forEach((button, index) => {
 
 const reveals = new ScrollReveals(reducedMotion);
 
-const fluid = new CursorPaint(document.querySelector('.fluid-background'), { reducedMotion });
+const fluid = new CursorPaint(document.querySelector('.fluid-background'), { reducedMotion, portrait: document.querySelector('#portrait') });
 fluid.start();
 window.addEventListener('pagehide', () => fluid.pause());
 window.addEventListener('pageshow', () => fluid.start());
