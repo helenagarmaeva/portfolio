@@ -42,7 +42,7 @@ main { position: relative; z-index: 1; }
 .intro-copy { max-width: 560px; padding-top: 3px; }
 h1 { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 600; letter-spacing: -.8px; }
 .role { color: var(--muted); font-size: 20px; line-height: 1.4; letter-spacing: -.65px; margin: 12px 0 24px; }
-.bio { font-size: 18px; line-height: 1.4; letter-spacing: -.35px; color: #d1d1d1; }
+.bio { font-size: 16px; line-height: 1.4; letter-spacing: -.35px; color: #d1d1d1; }
 .bio p { margin: 0 0 18px; }
 .bio p:last-child { margin-bottom: 0; }
 .contacts { display: flex; align-items: center; justify-content: space-between; gap: 22px; margin-top: 48px; font-size: 20px; letter-spacing: -.35px; line-height: 1.35; color: #d8d8d8; }

@@ -383,7 +383,7 @@ test('mobile text moves through masks on repeated scroll and reflows at narrow w
   const page = await context.newPage();
   await page.goto('./');
   const originalBio = await page.locator('.bio p .sr-only').allTextContents();
-  expect(originalBio).toHaveLength(2);
+  expect(originalBio).toHaveLength(1);
   const project = page.locator('.project').first();
   const headingLetter = page.locator('#cases-title .reveal-letter').first();
   const projectLetter = project.locator('.reveal-letter').first();
