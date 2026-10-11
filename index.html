@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f7f5ee" />
+    <meta name="description" content="Маленькая фиолетовая собачка, которая радуется вашему вниманию. Наведите курсор — и познакомьтесь!" />
+    <title>Хвостик — маленькая радость</title>
+    <link rel="icon" type="image/svg+xml" href="/paw.svg" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="header">
+        <a class="brand" href="/" aria-label="Хвостик — главная"><svg class="brand-icon" viewBox="0 0 40 40" aria-hidden="true"><path d="M20 3V37M3 20H37M8 8L32 32M8 32L32 8" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg> хвостик<span class="brand-dot">.</span></a>
+        <span class="header-note"><span class="status-dot"></span> всегда рад тебе</span>
+      </header>
+
+      <main>
+        <div class="eyebrow"><span></span> МАЛЕНЬКАЯ РАДОСТЬ НА КАЖДЫЙ ДЕНЬ</div>
+        <h1>Счастье — это<br />когда <span class="title-accent">виляют хвостом<svg viewBox="0 0 500 18" aria-hidden="true"><path d="M4 12 Q220 -3 495 10 M50 16 Q260 5 450 14" /></svg></span></h1>
+        <p class="intro">Знакомься, это Хвостик. Ему нужно совсем немного —<br class="desktop-break" /> просто капелька твоего внимания.</p>
+
+        <section class="dog-scene" aria-label="Познакомьтесь с Хвостиком">
+          <div class="floating-note note-left">давай дружить!<svg viewBox="0 0 100 60" aria-hidden="true"><path d="M5 5 Q0 50 85 35 M72 27 L87 35 L75 44" /></svg></div>
+          <span class="spark spark-one" aria-hidden="true">✧</span>
+          <svg class="spark spark-two" viewBox="0 0 40 40" aria-hidden="true"><path d="M20 3V37M3 20H37M8 8L32 32M8 32L32 8" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+          <span class="tiny-circle" aria-hidden="true"></span>
+          <div class="dog-ground" aria-hidden="true"></div>
+          <button class="dog-button" type="button" aria-label="Погладить Хвостика" aria-pressed="false">
+            <svg class="dog" viewBox="0 0 420 320" role="img" aria-labelledby="dog-title">
+              <title id="dog-title">Фиолетовая собачка Хвостик</title>
+              <defs>
+                <linearGradient id="fur" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8061bb"/><stop offset="1" stop-color="#6038ca"/></linearGradient>
+              </defs>
+              <g class="tail"><path fill="url(#fur)" d="M281 210 C324 215 351 188 342 162 C335 142 319 140 302 155 C317 120 344 106 362 125 C386 126 396 155 378 174 C393 198 366 229 344 219 C329 239 300 243 281 231 Z"/></g>
+              <g class="dog-body">
+                <path fill="url(#fur)" d="M103 87 C91 116 83 142 87 164 C91 181 110 186 119 178 C115 203 108 242 108 263 C109 286 121 293 139 287 C150 300 170 287 180 281 C195 296 217 281 231 271 C253 285 271 274 275 261 C291 277 314 273 326 262 C343 251 341 228 326 207 C315 188 296 176 281 162 C256 139 257 117 253 88 C275 84 289 73 290 59 C292 47 278 52 271 53 C259 48 256 36 241 33 C226 27 214 34 209 43 C174 36 142 37 121 44 C94 50 80 59 71 74 C62 82 48 83 38 84 C41 99 62 109 88 107 Z"/>
+                <g class="eyes-open" fill="#fff"><ellipse cx="132" cy="103" rx="7" ry="10"/><ellipse cx="204" cy="103" rx="7" ry="10"/></g>
+                <g class="eyes-closed" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"><path d="M124 105 Q132 95 140 105"/><path d="M196 105 Q204 95 212 105"/></g>
+                <path class="nose" fill="#fff" d="M153 131 Q153 124 168 125 Q185 124 181 133 Q175 144 168 144 Q159 143 153 131"/>
+                <g class="cheeks" fill="#b89af1" opacity=".65"><ellipse cx="129" cy="132" rx="12" ry="6"/><ellipse cx="207" cy="132" rx="12" ry="6"/></g>
+              </g>
+            </svg>
+            <span class="heart heart-one" aria-hidden="true">♥</span>
+            <span class="heart heart-two" aria-hidden="true">♥</span>
+            <span class="heart heart-three" aria-hidden="true">♥</span>
+          </button>
+          <div class="floating-note note-right">осторожно,<br />очень любит ласку <span aria-hidden="true">♡</span></div>
+        </section>
+
+        <div class="interaction-hint"><svg class="hint-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3L19 12L12 13L9 20Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span id="hint-text">Наведи на меня курсор</span><span class="hint-heart" aria-hidden="true">♡</span></div>
+        <p class="small-note">А я подарю тебе немного хорошего настроения</p>
+      </main>
+
+      <footer><span>Никаких забот. Только хвостик.</span><span>Сделано с теплом <span class="footer-heart">♡</span></span></footer>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
