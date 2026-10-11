@@ -4,7 +4,6 @@ import Lenis from 'lenis';
 import { content } from './content.js';
 import { CursorPaint } from './cursor-paint.js';
 import { ScrollReveals } from './reveals.js';
-import { ProjectParallax } from './project-parallax.js';
 
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const finePointer = matchMedia('(hover: hover) and (pointer: fine)');
@@ -103,54 +102,17 @@ document.querySelectorAll('[data-project]').forEach((button, index) => {
   const coverUrl = safeUrl(project.cover);
   if (coverUrl) {
     const cover = button.querySelector('.project-cover');
-    const foregroundUrl = safeUrl(project.foreground);
-    cover.style.setProperty('--source-ratio', project.sourceRatio || 1.68);
-    if (project.foregroundMotion) cover.style.setProperty('--foreground-motion', `${project.foregroundMotion}px`);
-    const scene = document.createElement('span');
-    scene.className = 'project-scene';
-    const layerImages = [];
-    for (const [plane, url] of [['background', coverUrl], ['foreground', foregroundUrl]]) {
-      if (!url) continue;
-      const layer = document.createElement('span');
-      layer.className = `project-layer project-${plane}`;
-      const media = document.createElement('span');
-      media.className = 'project-media';
-      if (plane === 'foreground' && project.foregroundClip) media.style.clipPath = project.foregroundClip;
-      const image = new Image();
-      image.src = url;
-      image.alt = '';
-      image.loading = 'lazy';
-      image.decoding = 'async';
-      media.append(image); layer.append(media); scene.append(layer);
-      layerImages.push(image);
-    }
-    // The supplied photograph is the idle/touch/failure view. Its clipped
-    // pixels form the foreground, so lettering and illustrations stay exact.
-    const original = document.createElement('span');
-    original.className = 'project-original';
-    const media = document.createElement('span');
-    media.className = 'project-media';
     const image = new Image();
-    image.src = foregroundUrl || coverUrl;
+    image.src = coverUrl;
     image.alt = project.title;
     image.loading = 'lazy';
     image.decoding = 'async';
-    media.append(image); original.append(media);
-    cover.replaceChildren(scene, original);
-    // Lazy loading should not decode all offscreen layers eagerly.
-    const loaded = image => new Promise((resolve, reject) => {
-      if (image.complete) return image.naturalWidth ? resolve() : reject();
-      image.addEventListener('load', resolve, { once: true });
-      image.addEventListener('error', reject, { once: true });
-    }).then(() => image.decode());
-    Promise.all(layerImages.map(loaded)).then(() => cover.classList.add('layers-ready')).catch(() => {});
-    if (foregroundUrl) { cover.classList.add('has-parallax'); cover.dataset.parallax = ''; }
+    cover.replaceChildren(image);
   }
   linkButton(button, project.url);
 });
 
 const reveals = new ScrollReveals(reducedMotion);
-const parallax = new ProjectParallax(reducedMotion);
 
 const fluid = new CursorPaint(document.querySelector('.fluid-background'), { reducedMotion, portrait: document.querySelector('#portrait') });
 fluid.start();
@@ -161,7 +123,6 @@ if (import.meta.hot) {
   import.meta.hot.dispose(() => {
     fluid.destroy();
     reveals.destroy();
-    parallax.destroy();
     smoothScroll?.destroy();
   });
 }

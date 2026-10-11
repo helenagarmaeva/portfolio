@@ -197,49 +197,21 @@ test('text reveals move through masks and reflow without losing words', async ({
   expect((await page.locator('#cases').boundingBox()).height).toBeGreaterThanOrEqual(1800);
 });
 
-test('cover parallax moves foreground and background at different depths and resets', async ({ page }) => {
-  await page.addInitScript(() => {
-    const getContext = HTMLCanvasElement.prototype.getContext;
-    HTMLCanvasElement.prototype.getContext = function(type, ...args) {
-      return type === 'webgl2' ? null : getContext.call(this, type, ...args);
-    };
-  });
+test('supplied covers stay still and have no border on hover', async ({ page }) => {
   await page.goto('./');
-  await page.getByRole('link', { name: 'Перейти к кейсам' }).click();
-  const cover = page.locator('.project-cover').first();
-  await expect(cover).toHaveCSS('clip-path', 'inset(0px round 16px)');
-  await expect(cover).toHaveClass(/layers-ready/);
-  await expect(cover.locator('.project-original')).toHaveCSS('opacity', '1');
-  await expect(cover.locator('.project-foreground .project-media')).toHaveCSS('clip-path', /polygon/);
-  const bounds = await cover.boundingBox();
-  const foreground = cover.locator('.project-foreground');
-  const background = cover.locator('.project-background');
-  const offset = (layer, axis) => layer.evaluate((el, axis) => new DOMMatrix(getComputedStyle(el).transform)[axis], axis);
-  await page.mouse.move(bounds.x + bounds.width * .85, bounds.y + bounds.height * .25);
-  await expect.poll(() => offset(foreground, 'm41')).toBeGreaterThan(8);
-  expect(await offset(background, 'm41')).toBeLessThan(-2);
-  expect(await offset(foreground, 'm43')).toBeGreaterThan(15);
-  expect(await offset(background, 'm43')).toBe(0);
-  await expect(cover.locator('.project-original')).toHaveCSS('opacity', '0');
-  await page.mouse.move(20, 20);
-  await expect.poll(() => offset(foreground, 'm41')).toBe(0);
-  await expect.poll(() => offset(foreground, 'm43')).toBe(0);
-  await expect(cover).not.toHaveClass(/is-parallax-active/);
-  await expect(cover.locator('.project-original')).toHaveCSS('opacity', '1');
-  // Every supplied cover decodes, including the differently shaped calendar.
-  for (const item of await page.locator('.project-cover').all()) {
-    await item.scrollIntoViewIfNeeded();
-    await expect(item).toHaveClass(/layers-ready/);
-    expect(await item.locator('img').evaluateAll(images => images.every(img => img.complete && img.naturalWidth > 0))).toBe(true);
-    const ratios = await item.locator('.project-media').evaluateAll(media => media.map(el => {
-      return el.offsetWidth / el.offsetHeight;
-    }));
-    expect(Math.max(...ratios) - Math.min(...ratios)).toBeLessThan(.01);
+  for (const cover of await page.locator('.project-cover').all()) {
+    await cover.scrollIntoViewIfNeeded();
+    await expect(cover).toHaveCSS('clip-path', 'inset(0px round 16px)');
+    const image = cover.locator('img');
+    await expect.poll(() => image.evaluate(img => img.complete && img.naturalWidth > 0)).toBe(true);
+    await expect(cover).toHaveCSS('border-top-width', '0px');
+    await expect(cover).toHaveCSS('transform', 'none');
+    const bounds = await cover.boundingBox();
+    await cover.hover({ position: { x: bounds.width * .85, y: bounds.height * .25 } });
+    await expect(image).toHaveCSS('transform', 'none');
+    await expect(cover).toHaveCSS('transform', 'none');
+    await expect(cover).toHaveCSS('border-top-width', '0px');
   }
-  await page.emulateMedia({ reducedMotion: 'reduce' });
-  await cover.hover();
-  expect(await offset(foreground, 'm43')).toBe(0);
-  await expect(cover).not.toHaveClass(/is-parallax-active/);
 });
 
 test('long project captions wrap without clipping or duplicated subtitle lines on mobile', async ({ browser }) => {
@@ -489,27 +461,16 @@ test('content and hover affordances remain usable without WebGL', async ({ page 
 });
 
 
-test('missing parallax background retains the supplied cover on hover', async ({ page }) => {
-  await page.route('**/covers/cosmospray-background.png', route => route.abort());
-  await page.goto('./');
-  await page.getByRole('link', { name: 'Перейти к кейсам' }).click();
-  const cover = page.locator('.project-cover').first();
-  await cover.hover();
-  await expect(cover).not.toHaveClass(/layers-ready/);
-  await expect(cover.locator('.project-original')).toHaveCSS('opacity', '1');
-  expect(await cover.locator('.project-original img').evaluate(img => img.complete && img.naturalWidth === 1672)).toBe(true);
-});
-
-test('touch devices keep all four supplied covers intact without parallax', async ({ browser }) => {
+test('touch devices keep all four supplied covers intact', async ({ browser }) => {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
   const page = await context.newPage();
   await page.goto('./');
   for (const cover of await page.locator('.project-cover').all()) {
     await cover.scrollIntoViewIfNeeded();
-    await expect.poll(() => cover.locator('.project-original img').evaluate(img => img.complete && img.naturalWidth > 0)).toBe(true);
+    await expect.poll(() => cover.locator('img').evaluate(img => img.complete && img.naturalWidth > 0)).toBe(true);
     await cover.tap();
-    await expect(cover.locator('.project-original')).toHaveCSS('opacity', '1');
-    await expect(cover).not.toHaveClass(/is-parallax-active/);
+    await expect(cover).toHaveCSS('border-top-width', '0px');
+    await expect(cover.locator('img')).toHaveCSS('transform', 'none');
   }
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await context.close();
