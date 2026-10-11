@@ -89,7 +89,7 @@ h2 { font-size: 48px; font-weight: 600; line-height: 1.15; letter-spacing: -2.5p
 .intro-copy > .reveal:nth-child(1) { --reveal-delay: 60ms; }
 .intro-copy > .reveal:nth-child(2) { --reveal-delay: 130ms; }
 .intro-copy > .reveal:nth-child(3) { --reveal-delay: 200ms; }
-.background-fallback .fluid-background { background: repeating-linear-gradient(120deg, #080808 0 110px, #160d20 110px 112px, #080808 112px 190px); opacity: .8; }
+.background-fallback .fluid-background { background: #080808; }
 
 @media (min-width: 1600px) { .intro-layout { width: 1120px; } }
 @media (max-width: 1180px) {

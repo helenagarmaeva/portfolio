@@ -2,7 +2,7 @@ import './style.css';
 import 'lenis/dist/lenis.css';
 import Lenis from 'lenis';
 import { content } from './content.js';
-import { FluidBackground } from './fluid.js';
+import { CursorPaint } from './cursor-paint.js';
 
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const finePointer = matchMedia('(hover: hover) and (pointer: fine)');
@@ -130,7 +130,7 @@ document.querySelectorAll('[data-project]').forEach((button, index) => {
   linkButton(button, project.url);
 });
 
-const fluid = new FluidBackground(document.querySelector('.fluid-background'), { reducedMotion });
+const fluid = new CursorPaint(document.querySelector('.fluid-background'), { reducedMotion });
 fluid.start();
 window.addEventListener('pagehide', () => fluid.pause());
 window.addEventListener('pageshow', () => fluid.start());

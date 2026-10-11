@@ -91,7 +91,7 @@ test('wheel scroll progresses smoothly instead of jumping', async ({ page }) => 
   expect(intermediate.size).toBeGreaterThan(3);
 });
 
-test('WebGL draws a fluid trail behind text and also over the cases background', async ({ page }) => {
+test('WebGL keeps a flat black background and paints a fading chromatic cursor trail', async ({ page }) => {
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.goto('./');
@@ -102,17 +102,30 @@ test('WebGL draws a fluid trail behind text and also over the cases background',
     requestAnimationFrame(() => {
       const gl = el.getContext('webgl2');
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-      const x = Math.floor(900 / innerWidth * el.width);
+      const x = Math.floor(350 / innerWidth * el.width);
       const y = Math.floor((1 - 750 / innerHeight) * el.height);
-      const pixel = new Uint8Array(4);
-      gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
-      resolve(pixel[0] + pixel[1] + pixel[2]);
+      // The Lusion-style brush shades the edges, so sample the painted region
+      // rather than assuming the centre is an opaque coloured smoke plume.
+      const height = Math.floor(160 / innerHeight * el.height);
+      const width = Math.floor(900 / innerWidth * el.width);
+      const pixels = new Uint8Array(width * height * 4);
+      gl.readPixels(x, y - Math.floor(height / 2), width, height, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+      let brightest = 0;
+      for (let i = 0; i < pixels.length; i += 4) {
+        brightest = Math.max(brightest, pixels[i] + pixels[i + 1] + pixels[i + 2]);
+      }
+      resolve(brightest);
     });
   }));
   const before = await brightness();
+  expect(before).toBe(24);
   await page.mouse.move(400, 750);
   await page.mouse.move(1100, 750, { steps: 24 });
   await expect.poll(brightness).toBeGreaterThan(before + 18);
+  await page.waitForTimeout(4500);
+  // Resume one frame without adding a brush stroke after the idle clear.
+  await page.mouse.move(1101, 751);
+  await expect.poll(brightness).toBe(24);
   await page.evaluate(() => window.scrollTo(0, 1150));
   await page.mouse.move(350, 700);
   await page.mouse.move(1000, 700, { steps: 24 });
