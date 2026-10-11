@@ -239,13 +239,26 @@ test('long project captions wrap without clipping or duplicated subtitle lines o
   await context.close();
 });
 
-test('WebGL keeps a flat black background and paints a fading chromatic cursor trail', async ({ page }) => {
+test('WebGL draws the purple top glow, keeps cases black and paints a fading cursor trail', async ({ page }) => {
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.goto('./');
   const canvas = page.locator('.fluid-background');
   await expect(canvas).toHaveAttribute('data-renderer', 'webgl');
   await expect(canvas).toHaveCSS('pointer-events', 'none');
+  const topColor = () => canvas.evaluate(el => new Promise(resolve => {
+    requestAnimationFrame(() => {
+      const gl = el.getContext('webgl2');
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+      const pixel = new Uint8Array(4);
+      gl.readPixels(Math.floor(el.width * .3), Math.floor(el.height * (1 - 30 / innerHeight)), 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
+      resolve(Array.from(pixel).slice(0, 3));
+    });
+  }));
+  const glow = await topColor();
+  expect(glow[2]).toBeGreaterThan(glow[0]);
+  expect(glow[0]).toBeGreaterThan(glow[1]);
+  expect(glow[2]).toBeGreaterThan(30);
   const brightness = () => canvas.evaluate(el => new Promise(resolve => {
     requestAnimationFrame(() => {
       const gl = el.getContext('webgl2');
@@ -275,6 +288,7 @@ test('WebGL keeps a flat black background and paints a fading chromatic cursor t
   await page.mouse.move(1101, 751);
   await expect.poll(brightness).toBe(0);
   await page.evaluate(() => window.scrollTo(0, 1150));
+  await expect.poll(topColor).toEqual([0, 0, 0]);
   await page.mouse.move(350, 700);
   await page.mouse.move(1000, 700, { steps: 24 });
   await expect(canvas).toHaveAttribute('data-motion', 'active');

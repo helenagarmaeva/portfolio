@@ -64,6 +64,8 @@ export class ScrollReveals {
     const words = text.split(/\s+/).map(word => {
       const span = document.createElement('span');
       span.textContent = word;
+      // Measure whole words; a hyphenated word must not span two measured lines.
+      span.style.whiteSpace = 'nowrap';
       return span;
     });
     words.forEach((word, index) => {
