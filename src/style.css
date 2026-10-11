@@ -42,7 +42,7 @@ main { position: relative; z-index: 1; }
 .intro-copy { max-width: 560px; padding-top: 3px; }
 h1 { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 600; letter-spacing: -.8px; }
 .role { color: var(--muted); font-size: 20px; line-height: 1.4; letter-spacing: -.65px; margin: 12px 0 24px; }
-.bio { font-size: 16px; line-height: 1.4; letter-spacing: -.35px; color: #d1d1d1; }
+.bio { font-size: 18px; line-height: 1.4; letter-spacing: -.35px; color: #d1d1d1; }
 .bio p { margin: 0 0 18px; }
 .bio p:last-child { margin-bottom: 0; }
 .contacts { display: flex; align-items: center; justify-content: space-between; gap: 22px; margin-top: 48px; font-size: 20px; letter-spacing: -.35px; line-height: 1.35; color: #d8d8d8; }
@@ -115,7 +115,6 @@ h2 { font-size: 40px; font-weight: 600; line-height: 1.15; letter-spacing: -1.8p
   .intro-layout { width: 84%; grid-template-columns: 128px minmax(0, 1fr); column-gap: 40px; }
   .portrait { width: 128px; height: 128px; }
   h1 { font-size: 24px; }
-  .bio { font-size: 16px; }
   .role { font-size: 20px; }
   .contacts { gap: 26px; flex-wrap: wrap; justify-content: flex-start; }
   .email-link { margin-right: 12px; }
@@ -131,7 +130,7 @@ h2 { font-size: 40px; font-weight: 600; line-height: 1.15; letter-spacing: -1.8p
   .intro-copy { padding-top: 0; max-width: 600px; }
   h1 { font-size: 28px; letter-spacing: -1px; }
   .role { font-size: 20px; margin: 9px 0 22px; }
-  .bio { font-size: 16px; line-height: 1.5; letter-spacing: -.25px; }
+  .bio { line-height: 1.5; letter-spacing: -.25px; }
   .bio p { margin-bottom: 16px; }
   .contacts { display: grid; grid-template-columns: repeat(3, max-content); margin-top: 36px; gap: 22px 4px; justify-content: space-between; }
   .email-link { grid-column: 1 / -1; width: max-content; margin-right: 0; }
