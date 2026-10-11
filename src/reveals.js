@@ -87,6 +87,7 @@ export class ScrollReveals {
       const line = document.createElement('span');
       line.className = 'reveal-line';
       line.textContent = wordsInLine.join(' ');
+      line.dataset.revealText = line.textContent;
       line.style.setProperty('--line-delay', `${index * 50}ms`);
       mask.append(line);
       visual.append(mask);
@@ -95,23 +96,29 @@ export class ScrollReveals {
 
   scramble(project) {
     const element = project.querySelector('.project-description');
-    const line = element.querySelector('.reveal-line');
+    const lines = [...element.querySelectorAll('.reveal-line')];
     const text = this.originals.get(element);
-    if (!line || !text) return;
+    if (!lines.length || !text) return;
     this.stopScramble(project);
     const started = performance.now();
     const update = now => {
       const revealed = Math.floor((now - started) / 1000 * 40);
       const stable = Math.max(0, revealed - 5);
       if (stable >= text.length) {
-        line.textContent = text;
-        this.scrambles.delete(project);
+        this.stopScramble(project);
         return;
       }
-      const randomPart = [...text.slice(stable, revealed)].map(character =>
-        character === ' ' ? ' ' : String.fromCharCode(33 + Math.floor(Math.random() * 93))
-      ).join('');
-      line.textContent = text.slice(0, stable) + randomPart;
+      let offset = 0;
+      for (const line of lines) {
+        const original = line.dataset.revealText;
+        const lineStable = Math.max(0, stable - offset);
+        const lineRevealed = Math.max(0, revealed - offset);
+        const randomPart = [...original.slice(lineStable, lineRevealed)].map(character =>
+          character === ' ' ? ' ' : String.fromCharCode(33 + Math.floor(Math.random() * 93))
+        ).join('');
+        line.textContent = original.slice(0, lineStable) + randomPart;
+        offset += original.length + 1;
+      }
       this.scrambles.set(project, requestAnimationFrame(update));
     };
     this.scrambles.set(project, requestAnimationFrame(update));
@@ -121,8 +128,7 @@ export class ScrollReveals {
     cancelAnimationFrame(this.scrambles.get(project));
     this.scrambles.delete(project);
     const element = project.querySelector('.project-description');
-    const line = element?.querySelector('.reveal-line');
-    if (line) line.textContent = this.originals.get(element);
+    element?.querySelectorAll('.reveal-line').forEach(line => { line.textContent = line.dataset.revealText; });
   }
 
   setup() {

@@ -4,6 +4,7 @@ import Lenis from 'lenis';
 import { content } from './content.js';
 import { CursorPaint } from './cursor-paint.js';
 import { ScrollReveals } from './reveals.js';
+import { ProjectParallax } from './project-parallax.js';
 
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const finePointer = matchMedia('(hover: hover) and (pointer: fine)');
@@ -101,17 +102,29 @@ document.querySelectorAll('[data-project]').forEach((button, index) => {
   button.querySelector('.project-description').textContent = project.description;
   const coverUrl = safeUrl(project.cover);
   if (coverUrl) {
-    const image = new Image();
-    image.src = coverUrl;
-    image.alt = project.title;
-    image.loading = 'lazy';
-    image.decoding = 'async';
-    button.querySelector('.project-cover').replaceChildren(image);
+    const cover = button.querySelector('.project-cover');
+    const foregroundUrl = safeUrl(project.foreground);
+    const scene = document.createElement('span');
+    scene.className = 'project-scene';
+    for (const [plane, url] of [['background', coverUrl], ['foreground', foregroundUrl]]) {
+      if (!url) continue;
+      const layer = document.createElement('span');
+      layer.className = `project-layer project-${plane}`;
+      const image = new Image();
+      image.src = url;
+      image.alt = plane === 'background' ? project.title : '';
+      image.loading = 'lazy';
+      image.decoding = 'async';
+      layer.append(image); scene.append(layer);
+    }
+    cover.replaceChildren(scene);
+    if (foregroundUrl) { cover.classList.add('has-parallax'); cover.dataset.parallax = ''; }
   }
   linkButton(button, project.url);
 });
 
 const reveals = new ScrollReveals(reducedMotion);
+const parallax = new ProjectParallax(reducedMotion);
 
 const fluid = new CursorPaint(document.querySelector('.fluid-background'), { reducedMotion, portrait: document.querySelector('#portrait') });
 fluid.start();
@@ -122,6 +135,7 @@ if (import.meta.hot) {
   import.meta.hot.dispose(() => {
     fluid.destroy();
     reveals.destroy();
+    parallax.destroy();
     smoothScroll?.destroy();
   });
 }

@@ -174,7 +174,7 @@ test('text reveals move through masks and reflow without losing words', async ({
   }));
   expect(motion.some(value => value > 1 && value < 40)).toBe(true);
   expect(Math.abs(motion.at(-1))).toBeLessThan(.01);
-  await expect(page.locator('.project-description').first().locator('.reveal-line')).toHaveText('Название проекта 1');
+  await expect.poll(() => page.locator('.project-description').first().locator('.reveal-line').allTextContents()).toEqual(['Web, В2В, E-com, Graphic design']);
   await page.setViewportSize({ width: 840, height: 1000 });
   await page.mouse.wheel(0, -1600);
   await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
@@ -193,6 +193,70 @@ test('text reveals move through masks and reflow without losing words', async ({
   await page.getByRole('link', { name: 'Перейти к кейсам' }).click();
   await expect.poll(() => page.locator('#cases').evaluate(el => el.getBoundingClientRect().top)).toBe(0);
   expect((await page.locator('#cases').boundingBox()).height).toBeGreaterThanOrEqual(1800);
+});
+
+test('cover parallax moves foreground and background at different depths and resets', async ({ page }) => {
+  // Exercise the two planes while the user's four cover files are pending.
+  await page.addInitScript(() => {
+    const getContext = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = function(type, ...args) {
+      return type === 'webgl2' ? null : getContext.call(this, type, ...args);
+    };
+  });
+  let injected = false;
+  await page.route('**/*', async route => {
+    if (route.request().resourceType() !== 'document' || injected) return route.continue();
+    injected = true;
+    const response = await route.fetch();
+    const html = (await response.text()).replace(
+      '<span class="project-cover"><span class="cover-label">Обложка проекта</span></span>',
+      '<span class="project-cover has-parallax" data-parallax><span class="project-scene"><span class="project-layer project-background"></span><span class="project-layer project-foreground"></span></span></span>'
+    );
+    await route.fulfill({ response, body: html });
+  });
+  await page.goto('./');
+  await page.getByRole('link', { name: 'Перейти к кейсам' }).click();
+  const cover = page.locator('.project-cover').first();
+  await expect(cover).toHaveCSS('clip-path', 'inset(0px round 16px)');
+  const bounds = await cover.boundingBox();
+  const foreground = cover.locator('.project-foreground');
+  const background = cover.locator('.project-background');
+  const offset = (layer, axis) => layer.evaluate((el, axis) => new DOMMatrix(getComputedStyle(el).transform)[axis], axis);
+  await page.mouse.move(bounds.x + bounds.width * .85, bounds.y + bounds.height * .25);
+  await expect.poll(() => offset(foreground, 'm41')).toBeGreaterThan(8);
+  expect(await offset(background, 'm41')).toBeLessThan(-2);
+  expect(await offset(foreground, 'm43')).toBeGreaterThan(15);
+  expect(await offset(background, 'm43')).toBe(0);
+  await page.mouse.move(20, 20);
+  await expect.poll(() => offset(foreground, 'm41')).toBe(0);
+  await expect.poll(() => offset(foreground, 'm43')).toBe(0);
+  await expect(cover).not.toHaveClass(/is-parallax-active/);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await cover.hover();
+  expect(await offset(foreground, 'm43')).toBe(0);
+  await expect(cover).not.toHaveClass(/is-parallax-active/);
+});
+
+test('long project captions wrap without clipping or duplicated subtitle lines on mobile', async ({ browser }) => {
+  const context = await browser.newContext({ viewport: { width: 320, height: 844 }, isMobile: true, hasTouch: true });
+  const page = await context.newPage();
+  await page.goto('./');
+  await page.getByRole('link', { name: 'Перейти к кейсам' }).tap();
+  const descriptions = ['Web, В2В, E-com, Graphic design', 'Web, В2В, Dashboard', 'Web, В2С, E-com, Graphic design', 'Illustration, Graphic design'];
+  const firstDescription = page.locator('.project-description').first();
+  await expect.poll(() => firstDescription.locator('.reveal-line').allTextContents().then(lines => lines.join(' '))).toBe(descriptions[0]);
+  expect(await firstDescription.locator('.reveal-line').count()).toBeGreaterThan(1);
+  for (const width of [320, 390]) {
+    await page.setViewportSize({ width, height: 844 });
+    await expect.poll(() => page.locator('.project-description').evaluateAll(elements => elements.map(el =>
+      [...el.querySelectorAll('.reveal-line')].map(line => line.textContent).join(' ')
+    ))).toEqual(descriptions);
+    expect(await page.locator('.project-name, .project-name .reveal-word-mask, .project-description .reveal-line').evaluateAll(elements =>
+      elements.every(el => el.scrollWidth <= el.clientWidth + 1)
+    )).toBe(true);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  }
+  await context.close();
 });
 
 test('WebGL keeps a flat black background and paints a fading chromatic cursor trail', async ({ page }) => {

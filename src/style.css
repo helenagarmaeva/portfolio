@@ -75,7 +75,7 @@ h2 { font-size: 40px; font-weight: 600; line-height: 1.15; letter-spacing: -1.8p
 .cover-label { font-size: 16px; letter-spacing: -.35px; color: #d2d2d2; transition: transform .7s var(--ease); }
 .project-cover img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; transition: transform .8s var(--ease); }
 .project-title { display: block; position: relative; font-size: 24px; line-height: 1.25; letter-spacing: -.8px; margin-top: 30px; }
-.project-name { display: inline-block; transition: transform .55s var(--ease); }
+.project-name { display: inline-block; max-width: calc(100% - 36px); overflow-wrap: anywhere; transition: transform .55s var(--ease); }
 .project-title .link-arrow { left: 0; width: 28px; height: 28px; }
 .project-description { display: block; color: var(--muted); font-size: 20px; line-height: 1.4; letter-spacing: -.8px; margin-top: 8px; }
 .project-button:is(:hover, :focus-visible) .project-name { transform: translateX(36px); }
@@ -83,12 +83,20 @@ h2 { font-size: 40px; font-weight: 600; line-height: 1.15; letter-spacing: -1.8p
 .project-button:is(:hover, :focus-visible) .project-cover { border-color: #fff; background: rgb(116 75 175 / 7%); transform: translateY(-4px); }
 .project-button:is(:hover, :focus-visible) .cover-label { transform: scale(1.035); }
 .project-button:is(:hover, :focus-visible) .project-cover img { transform: scale(1.045); }
+.project-scene { position: absolute; inset: 0; display: block; }
+.project-layer { position: absolute; inset: 0; display: block; }
+.project-cover.has-parallax { perspective: 1000px; }
+.has-parallax .project-scene { transform-style: preserve-3d; transform: rotateX(calc(var(--parallax-y, 0) * -3deg)) rotateY(calc(var(--parallax-x, 0) * 4deg)); }
+.has-parallax .project-background { transform: translate3d(calc(var(--parallax-x, 0) * -4px), calc(var(--parallax-y, 0) * -3px), 0) scale(1.06); }
+.has-parallax .project-foreground { transform: translate3d(calc(var(--parallax-x, 0) * 14px), calc(var(--parallax-y, 0) * 10px), calc(var(--parallax-hover, 0) * 18px)) scale(1.06); }
+.project-button:is(:hover, :focus-visible) .has-parallax img { transform: none; }
+.is-parallax-active .project-scene, .is-parallax-active .project-layer { will-change: transform; }
 
 /* Content is visible without JavaScript; motion is an enhancement. */
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
 .motion-ready .reveal { opacity: 0; transition: opacity .7s var(--ease); }
 .motion-ready .reveal.is-visible { opacity: 1; }
-.reveal-word-mask { display: inline-block; overflow: clip; vertical-align: top; padding: .15em .05em; margin: -.15em -.05em; }
+.reveal-word-mask { display: inline-block; max-width: 100%; overflow: clip; vertical-align: top; padding: .15em .05em; margin: -.15em -.05em; }
 .reveal-letter { display: inline-block; transform-origin: left bottom; }
 .reveal-line-mask { display: block; overflow: clip; }
 .reveal-line { display: block; min-height: 1lh; }

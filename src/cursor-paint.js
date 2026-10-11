@@ -1,3 +1,6 @@
+const TRAIL_VISIBILITY = .12;
+const REFRACTION_STRENGTH = .35;
+
 const vertex = `#version 300 es
 in vec2 aPosition;
 out vec2 vUv;
@@ -90,6 +93,14 @@ const shaders = {
     uniform vec4 uPortraitRect;
     uniform vec4 uPortraitUv;
     uniform float uPortraitOpacity;
+    uniform float uTrailVisibility;
+    uniform float uRefractionStrength;
+    vec3 toSrgb(vec3 linearColor) {
+      return mix(12.92*linearColor,1.055*pow(linearColor,vec3(1./2.4))-.055,step(vec3(.0031308),linearColor));
+    }
+    vec3 toLinear(vec3 color) {
+      return mix(color/12.92,pow((color+.055)/1.055,vec3(2.4)),step(vec3(.04045),color));
+    }
     void main() {
       vec4 field = texture(uPaint,vUv);
       float weight = .5*(field.b+field.a);
@@ -103,21 +114,23 @@ const shaders = {
       // The effect's light is computed in linear space and displayed in sRGB,
       // so the chromatic rim remains visible on the requested dark background.
       vec3 linearColor = max(spectrum*intensity,vec3(0.));
+      // Keep only a faint chromatic rim over black, like the reference's glass.
+      linearColor = toLinear(clamp(toSrgb(linearColor),0.,1.)*uTrailVisibility);
       if (uPortraitOpacity > 0.) {
         vec2 local = (vUv*uViewport-uPortraitRect.xy)/uPortraitRect.zw;
         float circle = 1.-smoothstep(1.-2./min(uPortraitRect.z,uPortraitRect.w),1.,length((local-.5)*2.));
         if (circle > 0.) {
           // Refract the original photo using the SAME advected cursor field.
           // Work in CSS pixels so the warp is consistent across DPR values.
-          vec2 displacement = clamp(direction*180.,vec2(-14.),vec2(14.));
+          vec2 displacement = clamp(direction*180.,vec2(-14.),vec2(14.))*uRefractionStrength;
           vec2 uv = uPortraitUv.xy + (local+displacement/uPortraitRect.zw)*uPortraitUv.zw;
-          vec2 fringe = direction*3./uPortraitRect.zw*uPortraitUv.zw;
+          vec2 fringe = direction*3./uPortraitRect.zw*uPortraitUv.zw*uRefractionStrength;
           vec3 photo = vec3(texture(uPortrait,uv+fringe).r,texture(uPortrait,uv).g,texture(uPortrait,uv-fringe).b);
-          vec3 photoLinear = mix(photo/12.92,pow((photo+.055)/1.055,vec3(2.4)),step(vec3(.04045),photo));
+          vec3 photoLinear = toLinear(photo);
           linearColor = mix(linearColor,photoLinear+linearColor*.35,circle*uPortraitOpacity);
         }
       }
-      vec3 color = mix(12.92*linearColor,1.055*pow(linearColor,vec3(1./2.4))-.055,step(vec3(.0031308),linearColor));
+      vec3 color = toSrgb(linearColor);
       fragColor = vec4(clamp(color,0.,1.),1.);
     }
   `,
@@ -375,7 +388,7 @@ export class CursorPaint {
 
   render() {
     if (this.gl && this.paint) this.draw('display',null,{
-      uPaint:this.paint.read,uPortrait:this.portraitTexture,uViewport:[innerWidth,innerHeight],...this.portraitUniforms(),
+      uPaint:this.paint.read,uPortrait:this.portraitTexture,uViewport:[innerWidth,innerHeight],uTrailVisibility:TRAIL_VISIBILITY,uRefractionStrength:REFRACTION_STRENGTH,...this.portraitUniforms(),
     });
   }
 
