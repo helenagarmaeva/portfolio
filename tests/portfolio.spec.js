@@ -52,7 +52,12 @@ test('contact arrows, rolling text, email underline and keyboard focus', async (
   await expect(email).toHaveAttribute('href', 'mailto:lenputka@gmail.com');
   await email.hover();
   await expect.poll(() => email.evaluate(el => new DOMMatrix(getComputedStyle(el, '::after').transform).m11)).toBe(1);
-  const cv = page.getByRole('button', { name: 'CV', exact: true });
+  const cv = page.getByRole('link', { name: 'CV', exact: true });
+  await expect(cv).toHaveAttribute('href', new URL('./ResumeEG.pdf', page.url()).href);
+  const pdf = await page.request.get(await cv.getAttribute('href'));
+  expect(pdf.ok()).toBe(true);
+  expect(pdf.headers()['content-type']).toContain('application/pdf');
+  expect((await pdf.body()).subarray(0, 5).toString()).toBe('%PDF-');
   await email.focus();
   await page.keyboard.press('Tab');
   await expect(cv).toBeFocused();
@@ -390,7 +395,7 @@ test('reduced motion disables the simulation and never hides content', async ({ 
   await expect(page.locator('.project').last()).toHaveCSS('opacity', '1');
   await expect(page.locator('html')).toHaveCSS('scroll-behavior', 'auto');
   await expect(page.locator('html')).not.toHaveClass(/lenis/);
-  const cv = page.getByRole('button', { name: 'CV', exact: true });
+  const cv = page.getByRole('link', { name: 'CV', exact: true });
   await cv.hover();
   await expect(cv.locator('.link-arrow')).toHaveCSS('opacity', '1');
   await page.emulateMedia({ reducedMotion: 'no-preference' });
@@ -409,7 +414,7 @@ test('content and hover affordances remain usable without WebGL', async ({ page 
   await expect(page.locator('.fluid-background')).toHaveAttribute('data-renderer', 'css');
   await expect(page.locator('#portrait')).toHaveCSS('opacity', '1');
   await expect(page.getByRole('heading', { name: 'Гармаева Елена' })).toBeVisible();
-  const cv = page.getByRole('button', { name: 'CV', exact: true });
+  const cv = page.getByRole('link', { name: 'CV', exact: true });
   await cv.hover();
   await expect(cv.locator('.link-arrow')).toHaveCSS('opacity', '1');
 });
