@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#080808" />
+    <meta name="description" content="Гармаева Елена — продуктовый дизайнер. Дизайн B2B и B2C продуктов, исследования, интерактивные прототипы." />
+    <title>Гармаева Елена — продуктовый дизайнер</title>
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+  </head>
+  <body>
+    <canvas class="fluid-background" aria-hidden="true"></canvas>
+    <div class="cursor-ring" aria-hidden="true"></div>
+
+    <svg class="svg-definitions" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <symbol id="arrow-right" viewBox="0 0 24 24"><path d="M3 12H20M12 4L20 12L12 20" /></symbol>
+      <symbol id="arrow-down" viewBox="0 0 24 24"><path d="M12 3V21M4 13L12 21L20 13" /></symbol>
+    </svg>
+
+    <button class="language-button roll-link" type="button" aria-label="Язык сайта — русский" aria-pressed="true">
+      <span class="roll-viewport"><span class="roll-label">RU</span><span class="roll-copy" aria-hidden="true">RU</span></span>
+    </button>
+
+    <main>
+      <section class="hero" aria-labelledby="intro-title">
+        <div class="intro-layout">
+          <div class="portrait reveal" data-reveal>
+            <img id="portrait" src="./portrait-placeholder.svg" alt="Место для фотографии Елены Гармаевой" width="200" height="200" />
+          </div>
+
+          <div class="intro-copy">
+            <div class="reveal" data-reveal>
+              <h1 id="intro-title">Гармаева Елена</h1>
+              <p class="role">Продуктовый дизайнер</p>
+            </div>
+            <div class="bio reveal" data-reveal>
+              <p>У меня 3 года опыта работы с B2B и B2C продуктами в дизайн-студии и на фрилансе. Разрабатываю решения с учетом проведения UX-исследований. Также внедряю ИИ в свой рабочий процесс: создаю работающие прототипы, анимации и генерирую контент. Люблю создавать дизайн, который помогает людям и понятен с первого взгляда.</p>
+              <p>Помимо дизайна я люблю рисовать от руки и увлекаюсь созданием игр. Также являюсь волонтером в приюте для собак «Дубовая Роща».</p>
+            </div>
+
+            <nav class="contacts reveal" data-reveal aria-label="Контакты">
+              <a class="email-link" href="mailto:helenagarm@gmail.com">helenagarm@gmail.com</a>
+              <button class="contact-link arrow-link roll-link" type="button" data-contact="cv" aria-label="CV">
+                <svg class="link-arrow" aria-hidden="true"><use href="#arrow-right" /></svg>
+                <span class="roll-viewport"><span class="roll-label">CV</span><span class="roll-copy" aria-hidden="true">CV</span></span>
+              </button>
+              <button class="contact-link arrow-link roll-link" type="button" data-contact="telegram" aria-label="Telegram">
+                <svg class="link-arrow" aria-hidden="true"><use href="#arrow-right" /></svg>
+                <span class="roll-viewport"><span class="roll-label">Telegram</span><span class="roll-copy" aria-hidden="true">Telegram</span></span>
+              </button>
+              <button class="contact-link arrow-link roll-link" type="button" data-contact="linkedin" aria-label="LinkedIn">
+                <svg class="link-arrow" aria-hidden="true"><use href="#arrow-right" /></svg>
+                <span class="roll-viewport"><span class="roll-label">Linkedin</span><span class="roll-copy" aria-hidden="true">Linkedin</span></span>
+              </button>
+            </nav>
+          </div>
+        </div>
+
+        <a class="scroll-cue" href="#cases" aria-label="Перейти к кейсам">
+          <svg aria-hidden="true"><use href="#arrow-down" /></svg>
+          <span class="roll-viewport"><span class="roll-label">КЕЙСЫ</span><span class="roll-copy" aria-hidden="true">КЕЙСЫ</span></span>
+          <svg aria-hidden="true"><use href="#arrow-down" /></svg>
+        </a>
+      </section>
+
+      <section class="cases" id="cases" aria-labelledby="cases-title">
+        <h2 class="reveal" data-reveal id="cases-title">Кейсы</h2>
+        <div class="project-grid">
+          <article class="project reveal" data-reveal>
+            <button class="project-button" type="button" data-project="1" aria-labelledby="project-1-title">
+              <span class="project-cover"><span class="cover-label">Обложка проекта</span></span>
+              <span class="project-title" id="project-1-title"><svg class="link-arrow" aria-hidden="true"><use href="#arrow-right" /></svg><span class="project-name">Название проекта 1</span></span>
+              <span class="project-description">Название проекта 1</span>
+            </button>
+          </article>
+          <article class="project reveal" data-reveal>
+            <button class="project-button" type="button" data-project="2" aria-labelledby="project-2-title">
+              <span class="project-cover"><span class="cover-label">Обложка проекта</span></span>
+              <span class="project-title" id="project-2-title"><svg class="link-arrow" aria-hidden="true"><use href="#arrow-right" /></svg><span class="project-name">Название проекта 1</span></span>
+              <span class="project-description">Название проекта 1</span>
+            </button>
+          </article>
+          <article class="project reveal" data-reveal>
+            <button class="project-button" type="button" data-project="3" aria-labelledby="project-3-title">
+              <span class="project-cover"><span class="cover-label">Обложка проекта</span></span>
+              <span class="project-title" id="project-3-title"><svg class="link-arrow" aria-hidden="true"><use href="#arrow-right" /></svg><span class="project-name">Название проекта 1</span></span>
+              <span class="project-description">Название проекта 1</span>
+            </button>
+          </article>
+          <article class="project reveal" data-reveal>
+            <button class="project-button" type="button" data-project="4" aria-labelledby="project-4-title">
+              <span class="project-cover"><span class="cover-label">Обложка проекта</span></span>
+              <span class="project-title" id="project-4-title"><svg class="link-arrow" aria-hidden="true"><use href="#arrow-right" /></svg><span class="project-name">Название проекта 1</span></span>
+              <span class="project-description">Название проекта 1</span>
+            </button>
+          </article>
+        </div>
+      </section>
+    </main>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

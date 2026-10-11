@@ -1,0 +1,143 @@
+import './style.css';
+import 'lenis/dist/lenis.css';
+import Lenis from 'lenis';
+import { content } from './content.js';
+import { FluidBackground } from './fluid.js';
+
+const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+const finePointer = matchMedia('(hover: hover) and (pointer: fine)');
+let smoothScroll;
+
+function setupScrolling() {
+  smoothScroll?.destroy();
+  smoothScroll = null;
+  if (!finePointer.matches || reducedMotion.matches) return;
+  smoothScroll = new Lenis({
+    autoRaf: true,
+    smoothWheel: true,
+    syncTouch: false,
+    lerp: .085,
+    wheelMultiplier: .9,
+  });
+}
+setupScrolling();
+finePointer.addEventListener('change', setupScrolling);
+reducedMotion.addEventListener('change', setupScrolling);
+document.querySelector('.scroll-cue').addEventListener('click', event => {
+  if (!smoothScroll) return;
+  event.preventDefault();
+  if (location.hash !== '#cases') history.pushState(null, '', '#cases');
+  smoothScroll.scrollTo('#cases', { offset: -36 });
+});
+const cursor = document.querySelector('.cursor-ring');
+let cursorX = -100;
+let cursorY = -100;
+let pointerFrame;
+
+function updateCursorMode() {
+  document.documentElement.classList.toggle('has-custom-cursor', finePointer.matches);
+  cursor.classList.remove('is-visible');
+}
+updateCursorMode();
+finePointer.addEventListener('change', updateCursorMode);
+
+// Pointer position is applied once per animation frame, without a slow lerp.
+window.addEventListener('pointermove', (event) => {
+  if (!finePointer.matches || event.pointerType === 'touch') return;
+  cursorX = event.clientX;
+  cursorY = event.clientY;
+  cursor.classList.add('is-visible');
+  if (!pointerFrame) {
+    pointerFrame = requestAnimationFrame(() => {
+      cursor.style.transform = `translate3d(${cursorX - 8}px, ${cursorY - 8}px, 0)`;
+      pointerFrame = null;
+    });
+  }
+}, { passive: true });
+document.documentElement.addEventListener('pointerleave', () => cursor.classList.remove('is-visible'));
+window.addEventListener('blur', () => cursor.classList.remove('is-visible'));
+window.addEventListener('pointerdown', (event) => {
+  if (event.pointerType === 'touch') cursor.classList.remove('is-visible');
+}, { passive: true });
+
+let observer;
+function setupReveals() {
+  observer?.disconnect();
+  const elements = document.querySelectorAll('[data-reveal]');
+  if (reducedMotion.matches || !('IntersectionObserver' in window)) {
+    document.documentElement.classList.remove('motion-ready');
+    elements.forEach(element => element.classList.add('is-visible'));
+    return;
+  }
+  document.documentElement.classList.add('motion-ready');
+  observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('is-visible');
+      observer.unobserve(entry.target);
+    });
+  }, { threshold: .12, rootMargin: '0px 0px -20px 0px' });
+  elements.forEach(element => observer.observe(element));
+}
+setupReveals();
+reducedMotion.addEventListener('change', setupReveals);
+
+function safeUrl(value) {
+  if (!value) return null;
+  try {
+    const url = new URL(value, location.href);
+    return ['https:', 'http:'].includes(url.protocol) ? url.href : null;
+  } catch { return null; }
+}
+
+function linkButton(button, value) {
+  const url = safeUrl(value);
+  if (!url) return;
+  const link = document.createElement('a');
+  [...button.attributes].forEach(attribute => {
+    if (attribute.name !== 'type') link.setAttribute(attribute.name, attribute.value);
+  });
+  link.href = url;
+  link.target = '_blank';
+  link.rel = 'noopener noreferrer';
+  link.append(...button.childNodes);
+  button.replaceWith(link);
+}
+
+const portraitUrl = safeUrl(content.portrait);
+if (portraitUrl) {
+  const portrait = document.querySelector('#portrait');
+  portrait.src = portraitUrl;
+  portrait.alt = 'Елена Гармаева';
+}
+document.querySelectorAll('[data-contact]').forEach(button => {
+  linkButton(button, content.contacts[button.dataset.contact]);
+});
+document.querySelectorAll('[data-project]').forEach((button, index) => {
+  const project = content.projects[index];
+  if (!project) return;
+  button.querySelector('.project-name').textContent = project.title;
+  button.querySelector('.project-description').textContent = project.description;
+  const coverUrl = safeUrl(project.cover);
+  if (coverUrl) {
+    const image = new Image();
+    image.src = coverUrl;
+    image.alt = project.title;
+    image.loading = 'lazy';
+    image.decoding = 'async';
+    button.querySelector('.project-cover').replaceChildren(image);
+  }
+  linkButton(button, project.url);
+});
+
+const fluid = new FluidBackground(document.querySelector('.fluid-background'), { reducedMotion });
+fluid.start();
+window.addEventListener('pagehide', () => fluid.pause());
+window.addEventListener('pageshow', () => fluid.start());
+
+if (import.meta.hot) {
+  import.meta.hot.dispose(() => {
+    fluid.destroy();
+    smoothScroll?.destroy();
+  });
+}
