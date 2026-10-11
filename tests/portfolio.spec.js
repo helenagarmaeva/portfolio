@@ -27,22 +27,29 @@ test('contact arrows, rolling text, email underline and keyboard focus', async (
   await page.goto('./');
   await expect(page.locator('.contacts')).toHaveCSS('opacity', '1');
   for (const name of ['CV', 'Telegram', 'LinkedIn']) {
-    const button = page.getByRole('button', { name, exact: true });
+    const button = page.locator(`[data-contact="${name.toLowerCase()}"]`);
     await expect(button).toHaveCSS('font-size', '20px');
     await expect(button.locator('.link-arrow')).toHaveCSS('opacity', '0');
     await button.hover();
     await expect(button.locator('.link-arrow')).toHaveCSS('opacity', '1');
     await expect.poll(() => button.locator('.link-arrow').evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m12)).toBeCloseTo(-Math.SQRT1_2, 4);
     await expect.poll(async () => button.locator('.roll-label').evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m42)).toBeLessThan(-15);
-    const url = page.url();
-    await button.click();
-    expect(page.url()).toBe(url);
+    if (await button.evaluate(el => el.tagName === 'A')) {
+      await expect(button).toHaveAttribute('target', '_blank');
+      await expect(button).toHaveAttribute('rel', 'noopener noreferrer');
+    } else {
+      const url = page.url();
+      await button.click();
+      expect(page.url()).toBe(url);
+    }
     await page.mouse.move(30, 30);
     await expect(button.locator('.link-arrow')).toHaveCSS('opacity', '0');
   }
-  const email = page.getByRole('link', { name: 'helenagarm@gmail.com' });
+  await expect(page.getByRole('link', { name: 'Telegram', exact: true })).toHaveAttribute('href', 'https://t.me/hgrmv');
+  await expect(page.getByRole('link', { name: 'LinkedIn', exact: true })).toHaveAttribute('href', 'https://www.linkedin.com/in/helena-garmaeva/');
+  const email = page.getByRole('link', { name: 'lenputka@gmail.com' });
   await expect(email).toHaveCSS('font-size', '20px');
-  await expect(email).toHaveAttribute('href', 'mailto:helenagarm@gmail.com');
+  await expect(email).toHaveAttribute('href', 'mailto:lenputka@gmail.com');
   await email.hover();
   await expect.poll(() => email.evaluate(el => new DOMMatrix(getComputedStyle(el, '::after').transform).m11)).toBe(1);
   const cv = page.getByRole('button', { name: 'CV', exact: true });
@@ -298,12 +305,12 @@ test('mobile layout keeps native touch scrolling and usable contacts', async ({ 
   await expect(page.locator('.bio')).toHaveCSS('opacity', '1');
   await expect(page.locator('.contacts')).toHaveCSS('opacity', '1');
   await expect(page.locator('.cursor-ring')).toHaveCSS('display', 'none');
-  const email = page.getByRole('link', { name: 'helenagarm@gmail.com' });
+  const email = page.getByRole('link', { name: 'lenputka@gmail.com' });
   await expect(email).toHaveCSS('font-size', '20px');
   expect(await email.evaluate(el => new DOMMatrix(getComputedStyle(el, '::after').transform).m11)).toBe(1);
   expect(await email.evaluate(el => getComputedStyle(el, '::after').height)).toBe('0.5px');
   for (const name of ['CV', 'Telegram', 'LinkedIn']) {
-    const button = page.getByRole('button', { name, exact: true });
+    const button = page.locator(`[data-contact="${name.toLowerCase()}"]`);
     await expect(button).toHaveCSS('font-size', '20px');
     await expect(button.locator('.link-arrow')).toHaveCSS('opacity', '1');
   }
@@ -313,7 +320,7 @@ test('mobile layout keeps native touch scrolling and usable contacts', async ({ 
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   const hero = await page.locator('.hero').boundingBox();
   expect(hero.height).toBeGreaterThanOrEqual(844);
-  await expect(page.getByRole('button', { name: 'Telegram', exact: true })).toBeVisible();
+  await expect(page.locator('[data-contact="telegram"]')).toBeVisible();
   await page.getByRole('link', { name: 'Перейти к кейсам' }).tap();
   await expect(page.locator('.project').first()).toHaveCSS('opacity', '1');
   await expect(page.locator('.project').first().locator('.link-arrow')).toHaveCSS('opacity', '1');
