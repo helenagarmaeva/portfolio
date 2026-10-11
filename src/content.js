@@ -4,7 +4,7 @@ const russianContent = {
   portrait: './IMG_1498.JPG',
   portraitAlt: 'Елена Гармаева',
   contacts: {
-    cv: './ResumeEG.pdf',
+    cv: './HelenagrmvCV.pdf',
     telegram: 'https://t.me/hgrmv',
     linkedin: 'https://www.linkedin.com/in/helena-garmaeva/',
   },
