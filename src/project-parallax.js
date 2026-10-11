@@ -41,9 +41,9 @@ export class ProjectParallax {
   }
 
   render(item) {
-    item.scene.style.setProperty('--parallax-x', item.current[0]);
-    item.scene.style.setProperty('--parallax-y', item.current[1]);
-    item.scene.style.setProperty('--parallax-hover', item.current[2]);
+    item.cover.style.setProperty('--parallax-x', item.current[0]);
+    item.cover.style.setProperty('--parallax-y', item.current[1]);
+    item.cover.style.setProperty('--parallax-hover', item.current[2]);
   }
 
   start() {
