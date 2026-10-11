@@ -301,6 +301,7 @@ test('mobile layout keeps native touch scrolling and usable contacts', async ({ 
   const email = page.getByRole('link', { name: 'helenagarm@gmail.com' });
   await expect(email).toHaveCSS('font-size', '20px');
   expect(await email.evaluate(el => new DOMMatrix(getComputedStyle(el, '::after').transform).m11)).toBe(1);
+  expect(await email.evaluate(el => getComputedStyle(el, '::after').height)).toBe('0.5px');
   for (const name of ['CV', 'Telegram', 'LinkedIn']) {
     const button = page.getByRole('button', { name, exact: true });
     await expect(button).toHaveCSS('font-size', '20px');
@@ -318,6 +319,58 @@ test('mobile layout keeps native touch scrolling and usable contacts', async ({ 
   await expect(page.locator('.project').first().locator('.link-arrow')).toHaveCSS('opacity', '1');
   await expect.poll(() => page.locator('#cases').evaluate(el => el.getBoundingClientRect().top)).toBeCloseTo(0, 0);
   expect(await page.locator('.project-grid').evaluate(el => getComputedStyle(el).gridTemplateColumns.split(' ').length)).toBe(1);
+  await context.close();
+});
+
+test('mobile text moves through masks on repeated scroll and reflows at narrow widths', async ({ browser }) => {
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+  const page = await context.newPage();
+  await page.goto('./');
+  const originalBio = await page.locator('.bio p .sr-only').allTextContents();
+  expect(originalBio).toHaveLength(2);
+  const project = page.locator('.project').first();
+  const headingLetter = page.locator('#cases-title .reveal-letter').first();
+  const projectLetter = project.locator('.reveal-letter').first();
+  const bioLine = page.locator('.bio .reveal-line').first();
+  const sampleMotion = locator => locator.evaluate(el => new Promise(resolve => {
+    const values = [];
+    const started = performance.now();
+    const sample = now => {
+      values.push(new DOMMatrix(getComputedStyle(el).transform).m42);
+      if (now - started >= 1500) resolve(values);
+      else requestAnimationFrame(sample);
+    };
+    requestAnimationFrame(sample);
+  }));
+  for (let repeat = 0; repeat < 2; repeat++) {
+    await expect(project).not.toHaveClass(/is-visible/);
+    expect(await headingLetter.evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m42)).toBeGreaterThan(20);
+    expect(await projectLetter.evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m42)).toBeLessThan(-100);
+    await page.evaluate(() => window.scrollTo({ top: document.querySelector('#cases').offsetTop, behavior: 'instant' }));
+    await expect(project).toHaveClass(/is-visible/);
+    const [headingMotion, projectMotion] = await Promise.all([sampleMotion(headingLetter), sampleMotion(projectLetter)]);
+    expect(headingMotion.some(value => value > 1 && value < 40)).toBe(true);
+    expect(projectMotion.some(value => value < -1)).toBe(true);
+    expect(Math.abs(headingMotion.at(-1))).toBeLessThan(.01);
+    expect(Math.abs(projectMotion.at(-1))).toBeLessThan(.01);
+    await expect(page.locator('.bio')).not.toHaveClass(/is-visible/);
+    expect(await bioLine.evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m42)).toBeGreaterThan(20);
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+    await expect(page.locator('.bio')).toHaveClass(/is-visible/);
+    const bioMotion = await sampleMotion(bioLine);
+    expect(bioMotion.some(value => value > 1)).toBe(true);
+    expect(Math.abs(bioMotion.at(-1))).toBeLessThan(.01);
+  }
+  await page.setViewportSize({ width: 320, height: 844 });
+  await expect.poll(() => page.locator('.bio p').evaluateAll(elements => elements.map(element =>
+    [...element.querySelectorAll('.reveal-line')].map(line => line.textContent).join(' ')
+  ))).toEqual(originalBio);
+  expect(await page.locator('.bio .reveal-line').evaluateAll(lines => lines.every(line => line.scrollWidth <= line.clientWidth + 1))).toBe(true);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await expect(page.locator('.bio .reveal-line')).toHaveCount(0);
+  await expect(page.locator('.bio p').first()).toHaveText(originalBio[0]);
+  await expect(project).toHaveCSS('opacity', '1');
   await context.close();
 });
 

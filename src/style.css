@@ -148,7 +148,7 @@ h2 { font-size: 40px; font-weight: 600; line-height: 1.15; letter-spacing: -1.8p
 @media (hover: none), (pointer: coarse) {
   .cursor-ring { display: none; }
   .email-link, .arrow-link { color: #fff; }
-  .email-link::after { transform: scaleX(1); transform-origin: left center; }
+  .email-link::after { height: .5px; transform: scaleX(1); transform-origin: left center; }
   .arrow-link { padding-left: 26px; }
   .arrow-link .link-arrow, .arrow-link:is(:hover, :focus-visible) .link-arrow { left: 0; width: 20px; height: 20px; opacity: 1; transform: translate(0, -50%) rotate(-45deg); }
   .arrow-link .roll-viewport, .arrow-link:is(:hover, :focus-visible) .roll-viewport { transform: none; }

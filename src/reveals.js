@@ -3,7 +3,6 @@
 export class ScrollReveals {
   constructor(reducedMotion) {
     this.reducedMotion = reducedMotion;
-    this.mobile = matchMedia('(max-width: 760px)');
     this.originals = new Map();
     this.scrambles = new Map();
     this.abort = new AbortController();
@@ -136,12 +135,10 @@ export class ScrollReveals {
       this.elements.forEach(element => element.classList.add('is-visible'));
       return;
     }
-    if (!this.mobile.matches) {
-      this.originals.forEach((text, element) => {
-        if (element.matches('h1, h2, .project-name')) this.letters(element, text);
-        else this.lines(element, text);
-      });
-    }
+    this.originals.forEach((text, element) => {
+      if (element.matches('h1, h2, .project-name')) this.letters(element, text);
+      else this.lines(element, text);
+    });
     document.documentElement.classList.add('motion-ready');
     this.observer = new IntersectionObserver(entries => {
       for (const entry of entries) {
@@ -149,7 +146,7 @@ export class ScrollReveals {
         if (entry.isIntersecting) {
           const firstAppearance = !element.classList.contains('is-visible');
           element.classList.add('is-visible');
-          if (firstAppearance && element.matches('.project') && !this.mobile.matches) this.scramble(element);
+          if (firstAppearance && element.matches('.project')) this.scramble(element);
         } else {
           // Reset at the observer boundary, including its bottom inset.
           // There is no second callback when an already non-intersecting
