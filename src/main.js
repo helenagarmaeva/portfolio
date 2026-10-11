@@ -52,7 +52,7 @@ window.addEventListener('pointermove', (event) => {
   cursor.classList.add('is-visible');
   if (!pointerFrame) {
     pointerFrame = requestAnimationFrame(() => {
-      cursor.style.transform = `translate3d(${cursorX - 8}px, ${cursorY - 8}px, 0)`;
+      cursor.style.transform = `translate3d(${cursorX - 10}px, ${cursorY - 10}px, 0)`;
       pointerFrame = null;
     });
   }

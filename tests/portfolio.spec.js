@@ -8,13 +8,13 @@ test('first screen, fixed language switch and exact custom cursor', async ({ pag
   expect(hero.height).toBe(1000);
   await page.mouse.move(800, 600);
   const cursor = page.locator('.cursor-ring');
-  await expect(cursor).toHaveCSS('width', '16px');
-  await expect(cursor).toHaveCSS('height', '16px');
+  await expect(cursor).toHaveCSS('width', '20px');
+  await expect(cursor).toHaveCSS('height', '20px');
   await expect(cursor).toHaveCSS('border-top-width', '1px');
-  await expect(cursor).toHaveCSS('border-top-color', 'rgb(113, 113, 113)');
+  await expect(cursor).toHaveCSS('border-top-color', 'rgb(231, 231, 231)');
   await expect(cursor).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
   await expect(page.locator('body')).toHaveCSS('cursor', 'none');
-  await expect.poll(async () => (await cursor.boundingBox()).x).toBe(792);
+  await expect.poll(async () => (await cursor.boundingBox()).x).toBe(790);
   const language = page.getByRole('button', { name: 'Язык сайта — русский' });
   const before = await language.boundingBox();
   await page.evaluate(() => window.scrollTo(0, 1200));
@@ -28,6 +28,7 @@ test('contact arrows, rolling text, email underline and keyboard focus', async (
   await expect(page.locator('.contacts')).toHaveCSS('opacity', '1');
   for (const name of ['CV', 'Telegram', 'LinkedIn']) {
     const button = page.getByRole('button', { name, exact: true });
+    await expect(button).toHaveCSS('font-size', '20px');
     await expect(button.locator('.link-arrow')).toHaveCSS('opacity', '0');
     await button.hover();
     await expect(button.locator('.link-arrow')).toHaveCSS('opacity', '1');
@@ -40,6 +41,7 @@ test('contact arrows, rolling text, email underline and keyboard focus', async (
     await expect(button.locator('.link-arrow')).toHaveCSS('opacity', '0');
   }
   const email = page.getByRole('link', { name: 'helenagarm@gmail.com' });
+  await expect(email).toHaveCSS('font-size', '20px');
   await expect(email).toHaveAttribute('href', 'mailto:helenagarm@gmail.com');
   await email.hover();
   await expect.poll(() => email.evaluate(el => new DOMMatrix(getComputedStyle(el, '::after').transform).m11)).toBe(1);
@@ -296,6 +298,14 @@ test('mobile layout keeps native touch scrolling and usable contacts', async ({ 
   await expect(page.locator('.bio')).toHaveCSS('opacity', '1');
   await expect(page.locator('.contacts')).toHaveCSS('opacity', '1');
   await expect(page.locator('.cursor-ring')).toHaveCSS('display', 'none');
+  const email = page.getByRole('link', { name: 'helenagarm@gmail.com' });
+  await expect(email).toHaveCSS('font-size', '20px');
+  expect(await email.evaluate(el => new DOMMatrix(getComputedStyle(el, '::after').transform).m11)).toBe(1);
+  for (const name of ['CV', 'Telegram', 'LinkedIn']) {
+    const button = page.getByRole('button', { name, exact: true });
+    await expect(button).toHaveCSS('font-size', '20px');
+    await expect(button.locator('.link-arrow')).toHaveCSS('opacity', '1');
+  }
   await expect(page.locator('#portrait')).toHaveCSS('opacity', '1');
   await expect(page.locator('.fluid-background')).toHaveAttribute('data-portrait', 'image');
   await expect(page.locator('html')).not.toHaveClass(/lenis/);
@@ -305,6 +315,7 @@ test('mobile layout keeps native touch scrolling and usable contacts', async ({ 
   await expect(page.getByRole('button', { name: 'Telegram', exact: true })).toBeVisible();
   await page.getByRole('link', { name: 'Перейти к кейсам' }).tap();
   await expect(page.locator('.project').first()).toHaveCSS('opacity', '1');
+  await expect(page.locator('.project').first().locator('.link-arrow')).toHaveCSS('opacity', '1');
   await expect.poll(() => page.locator('#cases').evaluate(el => el.getBoundingClientRect().top)).toBeCloseTo(0, 0);
   expect(await page.locator('.project-grid').evaluate(el => getComputedStyle(el).gridTemplateColumns.split(' ').length)).toBe(1);
   await context.close();
