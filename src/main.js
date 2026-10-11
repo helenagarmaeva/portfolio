@@ -89,7 +89,7 @@ const portraitUrl = safeUrl(content.portrait);
 if (portraitUrl) {
   const portrait = document.querySelector('#portrait');
   portrait.src = portraitUrl;
-  portrait.alt = 'Елена Гармаева';
+  portrait.alt = content.portraitAlt;
 }
 document.querySelectorAll('[data-contact]').forEach(button => {
   linkButton(button, content.contacts[button.dataset.contact]);

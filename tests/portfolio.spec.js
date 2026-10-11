@@ -15,7 +15,7 @@ test('first screen, fixed language switch and exact custom cursor', async ({ pag
   await expect(cursor).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
   await expect(page.locator('body')).toHaveCSS('cursor', 'none');
   await expect.poll(async () => (await cursor.boundingBox()).x).toBe(790);
-  const language = page.getByRole('button', { name: 'ENG' });
+  const language = page.getByRole('link', { name: 'ENG', exact: true });
   const before = await language.boundingBox();
   await page.evaluate(() => window.scrollTo(0, 1200));
   await expect.poll(async () => (await language.boundingBox()).y).toBe(before.y);
