@@ -33,7 +33,7 @@ const russianContent = {
 };
 
 const englishProjects = [
-  { title: 'TPK KOSMOSPRAY — corporate website', description: 'Web, B2B, E-com, Graphic design' },
+  { title: 'TPK COSMOSPRAY — corporate website', description: 'Web, B2B, E-com, Graphic design' },
   { title: 'Delta Security — comprehensive B2B dashboard', description: 'Web, B2B, Dashboard' },
   { title: 'SOLOK COSMETICS — natural cosmetics online store', description: 'Web, B2C, E-com, Graphic design' },
   { title: 'Dubovaya Roshcha dog shelter — volunteer projects', description: 'Illustration, Graphic design' },

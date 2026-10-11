@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 const englishTitles = [
-  'TPK KOSMOSPRAY — corporate website',
+  'TPK COSMOSPRAY — corporate website',
   'Delta Security — comprehensive B2B dashboard',
   'SOLOK COSMETICS — natural cosmetics online store',
   'Dubovaya Roshcha dog shelter — volunteer projects',
