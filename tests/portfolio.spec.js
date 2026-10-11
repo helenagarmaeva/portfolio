@@ -3,6 +3,7 @@ import { test, expect } from '@playwright/test';
 test('first screen, fixed language switch and exact custom cursor', async ({ page }) => {
   await page.goto('./');
   await expect(page.getByRole('heading', { name: 'Гармаева Елена' })).toBeVisible();
+  await expect(page.locator('.intro-copy > .reveal').first()).toHaveCSS('opacity', '1');
   const hero = await page.locator('.hero').boundingBox();
   expect(hero.height).toBe(1000);
   await page.mouse.move(800, 600);
@@ -64,7 +65,7 @@ test('case navigation, scroll reveal and project arrows', async ({ page }) => {
 
 test('wheel scroll progresses smoothly instead of jumping', async ({ page }) => {
   // Isolate input timing from software GPU rendering in headless Chromium.
-  // The separate WebGL test above verifies fluid rendering during scrolling.
+  // The separate WebGL test verifies fluid rendering during scrolling.
   await page.addInitScript(() => {
     const getContext = HTMLCanvasElement.prototype.getContext;
     HTMLCanvasElement.prototype.getContext = function(type, ...args) {
@@ -126,6 +127,9 @@ test('mobile layout keeps native touch scrolling and usable contacts', async ({ 
   const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
   const page = await context.newPage();
   await page.goto('./');
+  await expect(page.locator('.portrait')).toHaveCSS('opacity', '1');
+  await expect(page.locator('.bio')).toHaveCSS('opacity', '1');
+  await expect(page.locator('.contacts')).toHaveCSS('opacity', '1');
   await expect(page.locator('.cursor-ring')).toHaveCSS('display', 'none');
   await expect(page.locator('html')).not.toHaveClass(/lenis/);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
