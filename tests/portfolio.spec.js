@@ -197,20 +197,23 @@ test('text reveals move through masks and reflow without losing words', async ({
   expect((await page.locator('#cases').boundingBox()).height).toBeGreaterThanOrEqual(1800);
 });
 
-test('supplied covers stay still and have no border on hover', async ({ page }) => {
+test('darkened covers zoom smoothly inside a fixed borderless frame on hover', async ({ page }) => {
   await page.goto('./');
   for (const cover of await page.locator('.project-cover').all()) {
     await cover.scrollIntoViewIfNeeded();
     await expect(cover).toHaveCSS('clip-path', 'inset(0px round 16px)');
     const image = cover.locator('img');
     await expect.poll(() => image.evaluate(img => img.complete && img.naturalWidth > 0)).toBe(true);
+    await expect(image).toHaveCSS('filter', 'brightness(0.75)');
     await expect(cover).toHaveCSS('border-top-width', '0px');
     await expect(cover).toHaveCSS('transform', 'none');
     const bounds = await cover.boundingBox();
     await cover.hover({ position: { x: bounds.width * .85, y: bounds.height * .25 } });
-    await expect(image).toHaveCSS('transform', 'none');
+    await expect.poll(() => image.evaluate(img => new DOMMatrix(getComputedStyle(img).transform).m11)).toBeCloseTo(1.05, 4);
     await expect(cover).toHaveCSS('transform', 'none');
     await expect(cover).toHaveCSS('border-top-width', '0px');
+    await page.mouse.move(20, 20);
+    await expect(image).toHaveCSS('transform', 'none');
   }
 });
 
@@ -471,6 +474,7 @@ test('touch devices keep all four supplied covers intact', async ({ browser }) =
     await cover.tap();
     await expect(cover).toHaveCSS('border-top-width', '0px');
     await expect(cover.locator('img')).toHaveCSS('transform', 'none');
+    await expect(cover.locator('img')).toHaveCSS('filter', 'brightness(0.75)');
   }
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await context.close();

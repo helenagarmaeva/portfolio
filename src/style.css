@@ -73,7 +73,10 @@ h2 { font-size: 40px; font-weight: 600; line-height: 1.15; letter-spacing: -1.8p
 .project-button { display: block; width: 100%; text-align: left; }
 .project-cover { --cover-ratio: 1.68; position: relative; display: grid; place-items: center; aspect-ratio: var(--cover-ratio); border: 0; border-radius: 16px; background: transparent; overflow: hidden; }
 .cover-label { font-size: 16px; letter-spacing: -.35px; color: #d2d2d2; transition: transform .7s var(--ease); }
-.project-cover img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
+.project-cover img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; filter: brightness(.75); transition: transform .8s var(--ease); }
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .project-button:is(:hover, :focus-visible) .project-cover img { transform: scale(1.05); }
+}
 .project-title { display: block; position: relative; font-size: 24px; line-height: 1.25; letter-spacing: -.8px; margin-top: 30px; }
 .project-name { display: inline-block; max-width: calc(100% - 36px); overflow-wrap: anywhere; transition: transform .55s var(--ease); }
 .project-title .link-arrow { left: 0; width: 28px; height: 28px; }
