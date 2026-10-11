@@ -1,0 +1,170 @@
+// Lusion's reveal rhythm: staggered rotating letters, masked lines, and
+// project covers entering from opposite sides. All text stays accessible.
+export class ScrollReveals {
+  constructor(reducedMotion) {
+    this.reducedMotion = reducedMotion;
+    this.mobile = matchMedia('(max-width: 760px)');
+    this.originals = new Map();
+    this.scrambles = new Map();
+    this.abort = new AbortController();
+    this.elements = [...document.querySelectorAll('[data-reveal]')];
+    document.querySelectorAll('h1, h2, .role, .bio p, .project-name, .project-description').forEach(element => {
+      this.originals.set(element, element.textContent.trim());
+    });
+    this.width = innerWidth;
+    const options = { signal: this.abort.signal };
+    reducedMotion.addEventListener('change', () => this.setup(), options);
+    window.addEventListener('resize', () => {
+      if (this.width === innerWidth) return;
+      this.width = innerWidth;
+      cancelAnimationFrame(this.resizeFrame);
+      this.resizeFrame = requestAnimationFrame(() => this.setup());
+    }, options);
+    this.setup();
+    document.fonts?.ready.then(() => { if (!this.abort.signal.aborted) this.setup(); });
+  }
+
+  accessibleVisual(element, text) {
+    const accessible = document.createElement('span');
+    accessible.className = 'sr-only';
+    accessible.textContent = text;
+    const visual = document.createElement('span');
+    visual.className = 'reveal-text';
+    visual.setAttribute('aria-hidden', 'true');
+    element.replaceChildren(accessible, visual);
+    return visual;
+  }
+
+  letters(element, text) {
+    const visual = this.accessibleVisual(element, text);
+    const project = element.matches('.project-name');
+    let index = 0;
+    const count = text.replace(/\s/g, '').length;
+    text.split(/(\s+)/).forEach(word => {
+      if (/^\s+$/.test(word)) { visual.append(document.createTextNode(word)); return; }
+      const mask = document.createElement('span');
+      mask.className = 'reveal-word-mask';
+      for (const character of word) {
+        const letter = document.createElement('span');
+        letter.className = 'reveal-letter';
+        letter.textContent = character;
+        // Project captions follow the reference's centre-weighted wave.
+        const delay = project
+          ? (1 + Math.cos(Math.PI / 2 + index / Math.max(1, count - 1) * Math.PI)) * 62.5
+          : index * 1000 / 30;
+        letter.style.setProperty('--letter-delay', `${delay}ms`);
+        mask.append(letter);
+        index++;
+      }
+      visual.append(mask);
+    });
+  }
+
+  lines(element, text) {
+    const visual = this.accessibleVisual(element, text);
+    const words = text.split(/\s+/).map(word => {
+      const span = document.createElement('span');
+      span.textContent = word;
+      return span;
+    });
+    words.forEach((word, index) => {
+      if (index) visual.append(document.createTextNode(' '));
+      visual.append(word);
+    });
+    const lines = [];
+    let previousTop;
+    for (const word of words) {
+      const top = word.offsetTop;
+      if (previousTop === undefined || Math.abs(top - previousTop) > 2) {
+        lines.push([]);
+        previousTop = top;
+      }
+      lines.at(-1).push(word.textContent);
+    }
+    visual.replaceChildren();
+    lines.forEach((wordsInLine, index) => {
+      const mask = document.createElement('span');
+      mask.className = 'reveal-line-mask';
+      const line = document.createElement('span');
+      line.className = 'reveal-line';
+      line.textContent = wordsInLine.join(' ');
+      line.style.setProperty('--line-delay', `${index * 50}ms`);
+      mask.append(line);
+      visual.append(mask);
+    });
+  }
+
+  scramble(project) {
+    const element = project.querySelector('.project-description');
+    const line = element.querySelector('.reveal-line');
+    const text = this.originals.get(element);
+    if (!line || !text) return;
+    this.stopScramble(project);
+    const started = performance.now();
+    const update = now => {
+      const revealed = Math.floor((now - started) / 1000 * 40);
+      const stable = Math.max(0, revealed - 5);
+      if (stable >= text.length) {
+        line.textContent = text;
+        this.scrambles.delete(project);
+        return;
+      }
+      const randomPart = [...text.slice(stable, revealed)].map(character =>
+        character === ' ' ? ' ' : String.fromCharCode(33 + Math.floor(Math.random() * 93))
+      ).join('');
+      line.textContent = text.slice(0, stable) + randomPart;
+      this.scrambles.set(project, requestAnimationFrame(update));
+    };
+    this.scrambles.set(project, requestAnimationFrame(update));
+  }
+
+  stopScramble(project) {
+    cancelAnimationFrame(this.scrambles.get(project));
+    this.scrambles.delete(project);
+    const element = project.querySelector('.project-description');
+    const line = element?.querySelector('.reveal-line');
+    if (line) line.textContent = this.originals.get(element);
+  }
+
+  setup() {
+    this.observer?.disconnect();
+    for (const project of this.scrambles.keys()) this.stopScramble(project);
+    // Restore before measuring, so a resized paragraph gets new line breaks.
+    this.originals.forEach((text, element) => { element.textContent = text; });
+    if (this.reducedMotion.matches || !('IntersectionObserver' in window)) {
+      document.documentElement.classList.remove('motion-ready');
+      this.elements.forEach(element => element.classList.add('is-visible'));
+      return;
+    }
+    if (!this.mobile.matches) {
+      this.originals.forEach((text, element) => {
+        if (element.matches('h1, h2, .project-name')) this.letters(element, text);
+        else this.lines(element, text);
+      });
+    }
+    document.documentElement.classList.add('motion-ready');
+    this.observer = new IntersectionObserver(entries => {
+      for (const entry of entries) {
+        const element = entry.target;
+        if (entry.isIntersecting) {
+          const firstAppearance = !element.classList.contains('is-visible');
+          element.classList.add('is-visible');
+          if (firstAppearance && element.matches('.project') && !this.mobile.matches) this.scramble(element);
+        } else if (entry.boundingClientRect.bottom <= 0 || entry.boundingClientRect.top >= innerHeight) {
+          element.classList.remove('is-visible');
+          if (element.matches('.project')) this.stopScramble(element);
+        }
+      }
+    }, { threshold: [0, .12], rootMargin: '0px 0px -20px 0px' });
+    this.elements.forEach(element => this.observer.observe(element));
+  }
+
+  destroy() {
+    this.abort.abort();
+    this.observer?.disconnect();
+    cancelAnimationFrame(this.resizeFrame);
+    for (const project of this.scrambles.keys()) this.stopScramble(project);
+    this.originals.forEach((text, element) => { element.textContent = text; });
+    document.documentElement.classList.remove('motion-ready');
+  }
+}

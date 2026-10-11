@@ -3,6 +3,7 @@ import 'lenis/dist/lenis.css';
 import Lenis from 'lenis';
 import { content } from './content.js';
 import { CursorPaint } from './cursor-paint.js';
+import { ScrollReveals } from './reveals.js';
 
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const finePointer = matchMedia('(hover: hover) and (pointer: fine)');
@@ -24,10 +25,12 @@ setupScrolling();
 finePointer.addEventListener('change', setupScrolling);
 reducedMotion.addEventListener('change', setupScrolling);
 document.querySelector('.scroll-cue').addEventListener('click', event => {
-  if (!smoothScroll) return;
   event.preventDefault();
   if (location.hash !== '#cases') history.pushState(null, '', '#cases');
-  smoothScroll.scrollTo('#cases', { offset: -36 });
+  const section = document.querySelector('#cases');
+  const top = Math.round(section.getBoundingClientRect().top + scrollY);
+  if (smoothScroll) smoothScroll.scrollTo(top, { duration: 1.3 });
+  else window.scrollTo({ top, behavior: reducedMotion.matches ? 'instant' : 'smooth' });
 });
 const cursor = document.querySelector('.cursor-ring');
 let cursorX = -100;
@@ -59,28 +62,6 @@ window.addEventListener('blur', () => cursor.classList.remove('is-visible'));
 window.addEventListener('pointerdown', (event) => {
   if (event.pointerType === 'touch') cursor.classList.remove('is-visible');
 }, { passive: true });
-
-let observer;
-function setupReveals() {
-  observer?.disconnect();
-  const elements = document.querySelectorAll('[data-reveal]');
-  if (reducedMotion.matches || !('IntersectionObserver' in window)) {
-    document.documentElement.classList.remove('motion-ready');
-    elements.forEach(element => element.classList.add('is-visible'));
-    return;
-  }
-  document.documentElement.classList.add('motion-ready');
-  observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (!entry.isIntersecting) return;
-      entry.target.classList.add('is-visible');
-      observer.unobserve(entry.target);
-    });
-  }, { threshold: .12, rootMargin: '0px 0px -20px 0px' });
-  elements.forEach(element => observer.observe(element));
-}
-setupReveals();
-reducedMotion.addEventListener('change', setupReveals);
 
 function safeUrl(value) {
   if (!value) return null;
@@ -130,6 +111,8 @@ document.querySelectorAll('[data-project]').forEach((button, index) => {
   linkButton(button, project.url);
 });
 
+const reveals = new ScrollReveals(reducedMotion);
+
 const fluid = new CursorPaint(document.querySelector('.fluid-background'), { reducedMotion });
 fluid.start();
 window.addEventListener('pagehide', () => fluid.pause());
@@ -138,6 +121,7 @@ window.addEventListener('pageshow', () => fluid.start());
 if (import.meta.hot) {
   import.meta.hot.dispose(() => {
     fluid.destroy();
+    reveals.destroy();
     smoothScroll?.destroy();
   });
 }

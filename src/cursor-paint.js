@@ -97,7 +97,7 @@ const shaders = {
       float intensity = edge*max(abs(direction.x),abs(direction.y))*12.5;
       // The effect's light is computed in linear space and displayed in sRGB,
       // so the chromatic rim remains visible on the requested dark background.
-      vec3 linearColor = max(vec3(.002428216) + spectrum*intensity,vec3(0.));
+      vec3 linearColor = max(spectrum*intensity,vec3(0.));
       vec3 color = mix(12.92*linearColor,1.055*pow(linearColor,vec3(1./2.4))-.055,step(vec3(.0031308),linearColor));
       fragColor = vec4(clamp(color,0.,1.),1.);
     }
@@ -105,7 +105,7 @@ const shaders = {
 };
 
 /** Directional screen-paint brush with advected momentum, curl and two decay
- * masks. The background is a constant #080808; only pointer input paints it. */
+ * masks. The background is a constant #000000; only pointer input paints it. */
 export class CursorPaint {
   constructor(canvas, { reducedMotion }) {
     this.canvas = canvas;

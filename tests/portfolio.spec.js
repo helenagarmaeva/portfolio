@@ -31,7 +31,8 @@ test('contact arrows, rolling text, email underline and keyboard focus', async (
     await expect(button.locator('.link-arrow')).toHaveCSS('opacity', '0');
     await button.hover();
     await expect(button.locator('.link-arrow')).toHaveCSS('opacity', '1');
-    await expect.poll(async () => button.locator('.roll-label').evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m42)).toBeLessThan(-20);
+    await expect.poll(() => button.locator('.link-arrow').evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m12)).toBeCloseTo(-Math.SQRT1_2, 4);
+    await expect.poll(async () => button.locator('.roll-label').evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m42)).toBeLessThan(-15);
     const url = page.url();
     await button.click();
     expect(page.url()).toBe(url);
@@ -56,6 +57,8 @@ test('case navigation, scroll reveal and project arrows', async ({ page }) => {
   await expect(page).toHaveURL(/#cases$/);
   const first = page.locator('.project').first();
   await expect(first).toHaveCSS('opacity', '1');
+  await expect.poll(() => page.locator('#cases').evaluate(el => el.getBoundingClientRect().top)).toBeCloseTo(0, 0);
+  expect((await page.locator('.hero').boundingBox()).y + (await page.locator('.hero').boundingBox()).height).toBeLessThanOrEqual(1);
   await first.locator('.project-button').hover();
   await expect(first.locator('.link-arrow')).toHaveCSS('opacity', '1');
   await expect.poll(() => first.locator('.project-name').evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m41)).toBe(36);
@@ -91,6 +94,52 @@ test('wheel scroll progresses smoothly instead of jumping', async ({ page }) => 
   expect(intermediate.size).toBeGreaterThan(3);
 });
 
+test('text reveals move through masks and reflow without losing words', async ({ page }) => {
+  await page.addInitScript(() => {
+    const getContext = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = function(type, ...args) {
+      return type === 'webgl2' ? null : getContext.call(this, type, ...args);
+    };
+  });
+  await page.goto('./');
+  const originalBio = await page.locator('.bio p .sr-only').allTextContents();
+  const headingLetter = page.locator('#cases-title .reveal-letter').first();
+  expect(await headingLetter.evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m42)).toBeGreaterThan(20);
+  await page.getByRole('link', { name: 'Перейти к кейсам' }).click();
+  await expect(page.locator('#cases-title')).toHaveClass(/is-visible/);
+  const motion = await headingLetter.evaluate(el => new Promise(resolve => {
+    const positions = [];
+    const started = performance.now();
+    const sample = now => {
+      positions.push(new DOMMatrix(getComputedStyle(el).transform).m42);
+      if (now - started > 900) resolve(positions);
+      else requestAnimationFrame(sample);
+    };
+    requestAnimationFrame(sample);
+  }));
+  expect(motion.some(value => value > 1 && value < 40)).toBe(true);
+  expect(Math.abs(motion.at(-1))).toBeLessThan(.01);
+  await expect(page.locator('.project-description').first().locator('.reveal-line')).toHaveText('Название проекта 1');
+  await page.setViewportSize({ width: 840, height: 1000 });
+  await page.mouse.wheel(0, -1600);
+  await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
+  await expect(page.locator('.bio')).toHaveClass(/is-visible/);
+  await expect.poll(() => page.locator('.bio p').evaluateAll(elements => elements.map(element =>
+    [...element.querySelectorAll('.reveal-line')].map(line => line.textContent).join(' ')
+  ))).toEqual(originalBio);
+  await expect.poll(() => page.locator('.bio .reveal-line').evaluateAll(lines =>
+    lines.every(line => line.scrollWidth <= line.clientWidth + 1)
+  )).toBe(true);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await expect(page.locator('.bio p').first()).toHaveText(originalBio[0]);
+  await expect(page.locator('.bio .reveal-line')).toHaveCount(0);
+  // A short case list must still occupy a full screen on a tall display.
+  await page.setViewportSize({ width: 1440, height: 1800 });
+  await page.getByRole('link', { name: 'Перейти к кейсам' }).click();
+  await expect.poll(() => page.locator('#cases').evaluate(el => el.getBoundingClientRect().top)).toBe(0);
+  expect((await page.locator('#cases').boundingBox()).height).toBeGreaterThanOrEqual(1800);
+});
+
 test('WebGL keeps a flat black background and paints a fading chromatic cursor trail', async ({ page }) => {
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
@@ -118,14 +167,14 @@ test('WebGL keeps a flat black background and paints a fading chromatic cursor t
     });
   }));
   const before = await brightness();
-  expect(before).toBe(24);
+  expect(before).toBe(0);
   await page.mouse.move(400, 750);
   await page.mouse.move(1100, 750, { steps: 24 });
   await expect.poll(brightness).toBeGreaterThan(before + 18);
   await page.waitForTimeout(4500);
   // Resume one frame without adding a brush stroke after the idle clear.
   await page.mouse.move(1101, 751);
-  await expect.poll(brightness).toBe(24);
+  await expect.poll(brightness).toBe(0);
   await page.evaluate(() => window.scrollTo(0, 1150));
   await page.mouse.move(350, 700);
   await page.mouse.move(1000, 700, { steps: 24 });
@@ -151,6 +200,7 @@ test('mobile layout keeps native touch scrolling and usable contacts', async ({ 
   await expect(page.getByRole('button', { name: 'Telegram', exact: true })).toBeVisible();
   await page.getByRole('link', { name: 'Перейти к кейсам' }).tap();
   await expect(page.locator('.project').first()).toHaveCSS('opacity', '1');
+  await expect.poll(() => page.locator('#cases').evaluate(el => el.getBoundingClientRect().top)).toBeCloseTo(0, 0);
   expect(await page.locator('.project-grid').evaluate(el => getComputedStyle(el).gridTemplateColumns.split(' ').length)).toBe(1);
   await context.close();
 });
