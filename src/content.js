@@ -41,6 +41,7 @@ const englishProjects = [
 
 export const content = document.documentElement.lang === 'en' ? {
   ...russianContent,
+  contacts: { ...russianContent.contacts, cv: './HelenagrmvCVEng.pdf' },
   portraitAlt: 'Helena Garmaeva',
   projects: russianContent.projects.map((project, index) => ({ ...project, ...englishProjects[index] })),
 } : russianContent;
