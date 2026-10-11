@@ -24,7 +24,7 @@ export const content = {
       cover: './солок.png', url: '',
     },
     {
-      title: 'Приют для собак «Дубовая Роща» — настольный календарь',
+      title: 'Приют для собак «Дубовая Роща» — волонтерские проекты',
       description: 'Illustration, Graphic design',
       cover: './календарь.png', url: '',
     },
