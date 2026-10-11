@@ -37,7 +37,7 @@ main { position: relative; z-index: 1; }
 .hero { min-height: 100svh; position: relative; display: flex; flex-direction: column; padding: clamp(110px, 14svh, 154px) 0 58px; }
 .intro-layout { width: min(1120px, 78%); margin: 0 auto; display: grid; grid-template-columns: 128px minmax(0, 1fr); column-gap: 48px; }
 .portrait { width: 128px; height: 128px; border-radius: 50%; overflow: hidden; }
-.portrait img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.portrait img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 62% 50%; transform: scale(1.35); transform-origin: 58% 65%; }
 .intro-copy { max-width: 560px; padding-top: 3px; }
 h1 { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 600; letter-spacing: -.8px; }
 .role { color: var(--muted); font-size: 20px; line-height: 1.4; letter-spacing: -.65px; margin: 12px 0 24px; }
