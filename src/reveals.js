@@ -11,7 +11,22 @@ export class ScrollReveals {
       this.originals.set(element, element.textContent.trim());
     });
     this.width = innerWidth;
+    this.scrollPosition = scrollY;
+    this.direction = 1;
     const options = { signal: this.abort.signal };
+    window.addEventListener('scroll', () => {
+      if (scrollY === this.scrollPosition) return;
+      this.direction = scrollY > this.scrollPosition ? 1 : -1;
+      this.scrollPosition = scrollY;
+      if (this.direction < 0) {
+        // Finish any running reveal as soon as scrolling reverses.
+        this.elements.forEach(element => {
+          if (!element.classList.contains('is-visible')) return;
+          element.classList.add('is-instant');
+          if (element.matches('.project')) this.stopScramble(element);
+        });
+      }
+    }, { ...options, passive: true });
     reducedMotion.addEventListener('change', () => this.setup(), options);
     window.addEventListener('resize', () => {
       if (this.width === innerWidth) return;
@@ -153,13 +168,14 @@ export class ScrollReveals {
         const element = entry.target;
         if (entry.isIntersecting) {
           const firstAppearance = !element.classList.contains('is-visible');
+          if (firstAppearance) element.classList.toggle('is-instant', this.direction < 0);
           element.classList.add('is-visible');
-          if (firstAppearance && element.matches('.project')) this.scramble(element);
+          if (firstAppearance && element.matches('.project') && this.direction > 0) this.scramble(element);
         } else {
           // Reset at the observer boundary, including its bottom inset.
           // There is no second callback when an already non-intersecting
           // card subsequently passes the physical viewport boundary.
-          element.classList.remove('is-visible');
+          element.classList.remove('is-visible', 'is-instant');
           if (element.matches('.project')) this.stopScramble(element);
         }
       }
@@ -173,6 +189,7 @@ export class ScrollReveals {
     cancelAnimationFrame(this.resizeFrame);
     for (const project of this.scrambles.keys()) this.stopScramble(project);
     this.originals.forEach((text, element) => { element.textContent = text; });
+    this.elements.forEach(element => element.classList.remove('is-instant'));
     document.documentElement.classList.remove('motion-ready');
   }
 }

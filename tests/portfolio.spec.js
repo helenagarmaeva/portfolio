@@ -26,6 +26,9 @@ test('first screen, fixed language switch and exact custom cursor', async ({ pag
 test('contact arrows, rolling text, email underline and keyboard focus', async ({ page }) => {
   await page.goto('./');
   await expect(page.locator('.contacts')).toHaveCSS('opacity', '1');
+  expect(await page.locator('.contacts .reveal-word-mask').evaluateAll(masks => masks.every(mask =>
+    new Set([...mask.querySelectorAll('.reveal-letter')].map(letter => letter.offsetTop)).size === 1
+  ))).toBe(true);
   for (const name of ['CV', 'Telegram', 'LinkedIn']) {
     const button = page.locator(`[data-contact="${name.toLowerCase()}"]`);
     await expect(button).toHaveCSS('font-size', '18px');
@@ -108,7 +111,7 @@ test('wheel scroll progresses smoothly instead of jumping', async ({ page }) => 
   expect(intermediate.size).toBeGreaterThan(3);
 });
 
-test('cases replay after leaving the reveal area on every return', async ({ page }) => {
+test('cases replay scrolling down and return immediately scrolling up', async ({ page }) => {
   await page.addInitScript(() => {
     const getContext = HTMLCanvasElement.prototype.getContext;
     HTMLCanvasElement.prototype.getContext = function(type, ...args) {
@@ -147,6 +150,46 @@ test('cases replay after leaving the reveal area on every return', async ({ page
     expect(positions.some(value => value < -1)).toBe(true);
     expect(Math.abs(positions.at(-1))).toBeLessThan(.01);
   }
+  // Use a shorter viewport so the first card can leave above the screen.
+  await page.setViewportSize({ width: 1440, height: 500 });
+  await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' }));
+  await expect(project).not.toHaveClass(/is-visible/);
+  await page.evaluate(() => window.scrollTo({ top: document.querySelector('#cases').offsetTop, behavior: 'instant' }));
+  await expect(project).toHaveClass(/is-instant/);
+  await expect(project).toHaveCSS('opacity', '1');
+  await expect(letter).toHaveCSS('transition-duration', '0s');
+  expect(await letter.evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m42)).toBe(0);
+  await expect(project.locator('.project-cover')).toHaveCSS('clip-path', 'inset(0px round 16px)');
+  await expect(project.locator('.project-cover')).toHaveCSS('transform', 'none');
+  await expect(project.locator('.project-cover')).toHaveCSS('transition-duration', '0s');
+  expect((await project.locator('.project-description .reveal-line').allTextContents()).join(' ')).toBe('Web, В2В, E-com, Graphic design');
+});
+
+test('portrait scrolls gently toward the heading and stops with a 16px gap', async ({ page }) => {
+  await page.addInitScript(() => {
+    const getContext = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = function(type, ...args) {
+      return type === 'webgl2' ? null : getContext.call(this, type, ...args);
+    };
+  });
+  await page.goto('./');
+  const gap = () => page.evaluate(() => document.querySelector('#intro-title').getBoundingClientRect().top - document.querySelector('.portrait').getBoundingClientRect().bottom);
+  for (const width of [1440, 390, 320]) {
+    await page.setViewportSize({ width, height: 844 });
+    await page.evaluate(() => scrollTo({ top: 0, behavior: 'instant' }));
+    await expect.poll(gap).toBeCloseTo(40, 1);
+    await page.evaluate(() => scrollTo({ top: 100, behavior: 'instant' }));
+    await expect.poll(gap).toBeCloseTo(28, 1);
+    for (const top of [200, 350]) {
+      await page.evaluate(top => scrollTo({ top, behavior: 'instant' }), top);
+      await expect.poll(gap).toBeCloseTo(16, 1);
+    }
+    expect(await page.locator('.contacts .reveal-word-mask').evaluateAll(masks => masks.every(mask =>
+      new Set([...mask.querySelectorAll('.reveal-letter')].map(letter => letter.offsetTop)).size === 1
+    ))).toBe(true);
+  }
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await expect.poll(gap).toBeCloseTo(40, 1);
 });
 
 test('text reveals move through masks and reflow without losing words', async ({ page }) => {
@@ -393,7 +436,7 @@ test('mobile layout keeps native touch scrolling and usable contacts', async ({ 
   await context.close();
 });
 
-test('mobile text moves through masks on repeated scroll and reflows at narrow widths', async ({ browser }) => {
+test('mobile text animates scrolling down, returns instantly scrolling up and reflows', async ({ browser }) => {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
   const page = await context.newPage();
   await page.goto('./');
@@ -429,7 +472,7 @@ test('mobile text moves through masks on repeated scroll and reflows at narrow w
     await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
     await expect(page.locator('.bio')).toHaveClass(/is-visible/);
     const bioMotion = await sampleMotion(bioLine);
-    expect(bioMotion.some(value => value > 1)).toBe(true);
+    expect(bioMotion.every(value => Math.abs(value) < .01)).toBe(true);
     expect(Math.abs(bioMotion.at(-1))).toBeLessThan(.01);
   }
   await page.setViewportSize({ width: 320, height: 844 });

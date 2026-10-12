@@ -114,6 +114,27 @@ document.querySelectorAll('[data-project]').forEach((button, index) => {
 
 const reveals = new ScrollReveals(reducedMotion);
 
+const portraitFrame = document.querySelector('.portrait');
+const portraitHeading = document.querySelector('#intro-title');
+const portraitMotionAbort = new AbortController();
+let portraitShift = 0;
+let portraitMaxShift = 0;
+function updatePortraitScroll() {
+  portraitShift = reducedMotion.matches ? 0 : Math.min(portraitMaxShift, Math.max(0, scrollY) * .12);
+  portraitFrame.style.setProperty('--portrait-shift', `${portraitShift}px`);
+}
+function measurePortraitScroll() {
+  // Subtract the current translation to measure the original layout gap.
+  portraitMaxShift = Math.max(0, portraitHeading.getBoundingClientRect().top - portraitFrame.getBoundingClientRect().bottom + portraitShift - 16);
+  updatePortraitScroll();
+}
+window.addEventListener('scroll', updatePortraitScroll, { passive: true, signal: portraitMotionAbort.signal });
+window.addEventListener('resize', measurePortraitScroll, { signal: portraitMotionAbort.signal });
+reducedMotion.addEventListener('change', updatePortraitScroll, { signal: portraitMotionAbort.signal });
+const portraitLayoutObserver = new ResizeObserver(measurePortraitScroll);
+portraitLayoutObserver.observe(document.querySelector('.intro-layout'));
+measurePortraitScroll();
+
 const fluid = new CursorPaint(document.querySelector('.fluid-background'), { reducedMotion, portrait: document.querySelector('#portrait') });
 fluid.start();
 window.addEventListener('pagehide', () => fluid.pause());
@@ -123,6 +144,9 @@ if (import.meta.hot) {
   import.meta.hot.dispose(() => {
     fluid.destroy();
     reveals.destroy();
+    portraitMotionAbort.abort();
+    portraitLayoutObserver.disconnect();
+    portraitFrame.style.removeProperty('--portrait-shift');
     smoothScroll?.destroy();
   });
 }
