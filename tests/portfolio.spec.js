@@ -243,7 +243,7 @@ test('long project captions wrap without clipping or duplicated subtitle lines o
   await context.close();
 });
 
-test('WebGL keeps the background black and paints a fading cursor trail', async ({ page }) => {
+test('WebGL keeps the background #040404 and paints a fading cursor trail', async ({ page }) => {
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.goto('./');
@@ -259,7 +259,7 @@ test('WebGL keeps the background black and paints a fading cursor trail', async 
       resolve(Array.from(pixel).slice(0, 3));
     });
   }));
-  await expect.poll(topColor).toEqual([0, 0, 0]);
+  await expect.poll(topColor).toEqual([4, 4, 4]);
   const brightness = () => canvas.evaluate(el => new Promise(resolve => {
     requestAnimationFrame(() => {
       const gl = el.getContext('webgl2');
@@ -280,16 +280,16 @@ test('WebGL keeps the background black and paints a fading cursor trail', async 
     });
   }));
   const before = await brightness();
-  expect(before).toBe(0);
+  expect(before).toBe(12);
   await page.mouse.move(400, 750);
   await page.mouse.move(1100, 750, { steps: 24 });
   await expect.poll(brightness).toBeGreaterThan(before + 18);
   await page.waitForTimeout(4500);
   // Resume one frame without adding a brush stroke after the idle clear.
   await page.mouse.move(1101, 751);
-  await expect.poll(brightness).toBe(0);
+  await expect.poll(brightness).toBe(12);
   await page.evaluate(() => window.scrollTo(0, 1150));
-  await expect.poll(topColor).toEqual([0, 0, 0]);
+  await expect.poll(topColor).toEqual([4, 4, 4]);
   await page.mouse.move(350, 700);
   await page.mouse.move(1000, 700, { steps: 24 });
   await expect(canvas).toHaveAttribute('data-motion', 'active');
@@ -340,7 +340,7 @@ test('cursor refracts photo pixels, restores them, and follows the photo on scro
   await page.mouse.move(bounds.x + 21, bounds.y + bounds.height / 2 + 13);
   await expect.poll(readPhoto).toEqual(before);
   await page.evaluate(() => window.scrollTo({ top: 350, behavior: 'instant' }));
-  await expect.poll(async () => (await readPhoto()).filter((_, index) => index % 4 !== 3).every(value => value === 0)).toBe(true);
+  await expect.poll(async () => (await readPhoto()).filter((_, index) => index % 4 !== 3).every(value => value === 4)).toBe(true);
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
   await expect(page.locator('.portrait')).toHaveCSS('opacity', '1');
   await expect.poll(readPhoto).toEqual(before);

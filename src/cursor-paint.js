@@ -114,8 +114,9 @@ const shaders = {
       // The effect's light is computed in linear space and displayed in sRGB,
       // so the chromatic rim remains visible on the requested dark background.
       vec3 linearColor = max(spectrum*intensity,vec3(0.));
-      // Keep only a faint chromatic rim over black, like the reference's glass.
-      linearColor = toLinear(clamp(toSrgb(linearColor),0.,1.)*uTrailVisibility);
+      // Compose the faint brush over the page background without tinting the photo.
+      vec3 trailLinear = toLinear(clamp(toSrgb(linearColor),0.,1.)*uTrailVisibility);
+      linearColor = trailLinear + toLinear(vec3(4./255.));
       if (uPortraitOpacity > 0.) {
         vec2 local = (vUv*uViewport-uPortraitRect.xy)/uPortraitRect.zw;
         float circle = 1.-smoothstep(1.-2./min(uPortraitRect.z,uPortraitRect.w),1.,length((local-.5)*2.));
@@ -127,7 +128,7 @@ const shaders = {
           vec2 fringe = direction*3./uPortraitRect.zw*uPortraitUv.zw*uRefractionStrength;
           vec3 photo = vec3(texture(uPortrait,uv+fringe).r,texture(uPortrait,uv).g,texture(uPortrait,uv-fringe).b);
           vec3 photoLinear = toLinear(photo);
-          linearColor = mix(linearColor,photoLinear+linearColor*.35,circle*uPortraitOpacity);
+          linearColor = mix(linearColor,photoLinear+trailLinear*.35,circle*uPortraitOpacity);
         }
       }
       vec3 color = toSrgb(linearColor);
@@ -137,7 +138,7 @@ const shaders = {
 };
 
 /** Directional screen-paint brush with advected momentum, curl and two decay
- * masks. The background is a constant #000000; only pointer input paints it. */
+ * masks. The background is a constant #040404; only pointer input paints it. */
 export class CursorPaint {
   constructor(canvas, { reducedMotion, portrait }) {
     this.canvas = canvas;
