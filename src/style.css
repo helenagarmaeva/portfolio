@@ -13,16 +13,7 @@
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 html.lenis { scroll-behavior: auto; }
-body { position: relative; margin: 0; overflow-x: clip; }
-/* Static fallback for the same top glow rendered below the WebGL portrait. */
-body::before {
-  content: ''; position: absolute; z-index: 0; top: 0; left: 0; width: 100%;
-  height: clamp(400px, 60svh, 600px); pointer-events: none;
-  background:
-    radial-gradient(ellipse 85% 100% at 28% -20%, rgb(118 57 186 / 38%), rgb(118 57 186 / 0%)),
-    radial-gradient(ellipse 55% 90% at 70% -35%, rgb(122 53 131 / 20%), rgb(122 53 131 / 0%)),
-    radial-gradient(ellipse 60% 85% at 95% -10%, rgb(48 89 127 / 15%), rgb(48 89 127 / 0%));
-}
+body { margin: 0; overflow-x: clip; }
 button, a { -webkit-tap-highlight-color: transparent; }
 button { color: inherit; font: inherit; border: 0; padding: 0; background: none; }
 a { color: inherit; text-decoration: none; }
@@ -43,7 +34,7 @@ main { position: relative; z-index: 1; }
 
 .language-button { position: fixed; z-index: 20; right: max(5.5vw, 24px); top: 25px; color: var(--muted); font-size: 18px; line-height: 1.4; padding: 4px 0; transition: color .35s ease; }
 .language-button:is(:hover, :focus-visible) { color: #fff; }
-.hero { min-height: 100svh; position: relative; display: flex; flex-direction: column; padding: clamp(110px, 14svh, 154px) 0 58px; }
+.hero { min-height: 100svh; position: relative; display: flex; flex-direction: column; padding: clamp(110px, 14svh, 154px) 0 24px; }
 .intro-layout { width: min(1120px, 78%); margin: 0 auto; display: grid; grid-template-columns: 128px minmax(0, 1fr); column-gap: 48px; }
 .portrait { width: 128px; height: 128px; border-radius: 50%; overflow: hidden; }
 .portrait img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 62% 50%; transform: scale(1.35); transform-origin: 58% 65%; }
@@ -51,10 +42,11 @@ main { position: relative; z-index: 1; }
 .intro-copy { max-width: 560px; padding-top: 3px; }
 h1 { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 600; letter-spacing: -.8px; }
 .role { color: var(--muted); font-size: 20px; line-height: 1.4; letter-spacing: -.65px; margin: 12px 0 24px; }
-.bio { font-size: 18px; line-height: 1.4; letter-spacing: -.35px; color: #d1d1d1; }
+.bio { width: 100%; text-align: justify; text-align-last: left; font-size: 18px; line-height: 1.4; letter-spacing: -.35px; color: #d1d1d1; }
 .bio p { margin: 0 0 18px; }
 .bio p:last-child { margin-bottom: 0; }
-.contacts { display: flex; align-items: center; justify-content: space-between; gap: 22px; margin-top: 48px; font-size: 20px; letter-spacing: -.35px; line-height: 1.35; color: #d8d8d8; }
+.bio .reveal-line-mask:not(:last-child) .reveal-line { text-align-last: justify; }
+.contacts { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 22px; margin-top: 48px; font-size: 20px; letter-spacing: -.35px; line-height: 1.35; color: #d8d8d8; }
 .email-link { position: relative; white-space: nowrap; transition: color .35s ease; }
 .email-link::after { content: ''; position: absolute; height: 1px; left: 0; right: 0; bottom: -3px; background: currentColor; transform: scaleX(0); transform-origin: right center; transition: transform .55s var(--ease); }
 .email-link:is(:hover, :focus-visible) { color: #fff; }
@@ -86,10 +78,10 @@ h2 { font-size: 40px; font-weight: 600; line-height: 1.15; letter-spacing: -1.8p
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
   .project-button:is(:hover, :focus-visible) .project-cover img { transform: scale(1.05); }
 }
-.project-title { display: block; position: relative; font-size: 24px; line-height: 1.25; letter-spacing: -.8px; margin-top: 30px; }
+.project-title { display: block; position: relative; font-size: 20px; line-height: 1.25; letter-spacing: -.8px; margin-top: 30px; }
 .project-name { display: inline-block; max-width: calc(100% - 36px); overflow-wrap: anywhere; transition: transform .55s var(--ease); }
 .project-title .link-arrow { left: 0; width: 28px; height: 28px; }
-.project-description { display: block; color: var(--muted); font-size: 20px; line-height: 1.4; letter-spacing: -.8px; margin-top: 8px; }
+.project-description { display: block; color: var(--muted); font-size: 18px; line-height: 1.4; letter-spacing: -.8px; margin-top: 8px; }
 .project-button:is(:hover, :focus-visible) .project-name { transform: translateX(36px); }
 .project-button:is(:hover, :focus-visible) .link-arrow { transform: translate(0, -50%); opacity: 1; }
 .project-button:is(:hover, :focus-visible) .cover-label { transform: scale(1.035); }
@@ -125,15 +117,13 @@ h2 { font-size: 40px; font-weight: 600; line-height: 1.15; letter-spacing: -1.8p
   .portrait { width: 128px; height: 128px; }
   h1 { font-size: 24px; }
   .role { font-size: 20px; }
-  .contacts { gap: 26px; flex-wrap: wrap; justify-content: flex-start; }
+  .contacts { gap: 26px; flex-wrap: wrap; justify-content: space-between; }
   .email-link { margin-right: 12px; }
   .cases { width: 80%; }
-  .project-title { font-size: 24px; }
-  .project-description { font-size: 20px; }
 }
 @media (max-width: 760px) {
   .language-button { top: 18px; right: 24px; font-size: 16px; }
-  .hero { min-height: 100svh; padding: 84px 24px 30px; }
+  .hero { min-height: 100svh; padding: 84px 24px 18px; }
   .intro-layout { width: 100%; grid-template-columns: 1fr; gap: 27px; }
   .portrait { width: 112px; height: 112px; }
   .intro-copy { padding-top: 0; max-width: 600px; }
@@ -143,14 +133,14 @@ h2 { font-size: 40px; font-weight: 600; line-height: 1.15; letter-spacing: -1.8p
   .bio p { margin-bottom: 16px; }
   .contacts { display: grid; grid-template-columns: repeat(3, max-content); margin-top: 36px; gap: 22px 4px; justify-content: space-between; }
   .email-link { grid-column: 1 / -1; width: max-content; margin-right: 0; }
-  .scroll-cue { padding-top: 56px; gap: 44px; font-size: 18px; }
+  .scroll-cue { padding-top: 72px; gap: 44px; font-size: 18px; }
   .scroll-cue svg { width: 24px; height: 24px; }
   .cases { width: auto; margin: 0 24px; padding: 52px 0 80px; }
   h2 { font-size: 36px; margin-bottom: 36px; letter-spacing: -1.7px; }
   .project-grid { grid-template-columns: 1fr; gap: 38px; }
   .project-cover { border-radius: 12px; }
-  .project-title { font-size: 25px; margin-top: 19px; letter-spacing: -.8px; }
-  .project-description { font-size: 19px; letter-spacing: -.5px; margin-top: 7px; }
+  .project-title { margin-top: 19px; letter-spacing: -.8px; }
+  .project-description { letter-spacing: -.5px; margin-top: 7px; }
   .cover-label { font-size: 14px; }
   .project:nth-child(even) { --reveal-delay: 0ms; }
 }

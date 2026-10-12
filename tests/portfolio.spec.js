@@ -47,9 +47,9 @@ test('contact arrows, rolling text, email underline and keyboard focus', async (
   }
   await expect(page.getByRole('link', { name: 'Telegram', exact: true })).toHaveAttribute('href', 'https://t.me/hgrmv');
   await expect(page.getByRole('link', { name: 'LinkedIn', exact: true })).toHaveAttribute('href', 'https://www.linkedin.com/in/helena-garmaeva/');
-  const email = page.getByRole('link', { name: 'lenputka@gmail.com' });
+  const email = page.getByRole('link', { name: 'helenagarm@gmail.com' });
   await expect(email).toHaveCSS('font-size', '20px');
-  await expect(email).toHaveAttribute('href', 'mailto:lenputka@gmail.com');
+  await expect(email).toHaveAttribute('href', 'mailto:helenagarm@gmail.com');
   await email.hover();
   await expect.poll(() => email.evaluate(el => new DOMMatrix(getComputedStyle(el, '::after').transform).m11)).toBe(1);
   const cv = page.getByRole('link', { name: 'CV', exact: true });
@@ -177,6 +177,8 @@ test('text reveals move through masks and reflow without losing words', async ({
   // Check completion separately from the captured intermediate movement.
   await expect.poll(() => headingLetter.evaluate(el => Math.abs(new DOMMatrix(getComputedStyle(el).transform).m42))).toBeLessThan(.01);
   await expect.poll(() => page.locator('.project-description').first().locator('.reveal-line').allTextContents()).toEqual(['Web, В2В, E-com, Graphic design']);
+  // Finish the cue's programmatic scroll before resizing and testing wheel input.
+  await expect(page.locator('html')).not.toHaveClass(/lenis-scrolling/);
   await page.setViewportSize({ width: 840, height: 1000 });
   await page.mouse.wheel(0, -1600);
   await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
@@ -225,7 +227,9 @@ test('long project captions wrap without clipping or duplicated subtitle lines o
   const descriptions = ['Web, В2В, E-com, Graphic design', 'Web, В2В, Dashboard', 'Web, В2С, E-com, Graphic design', 'Illustration, Graphic design'];
   const firstDescription = page.locator('.project-description').first();
   await expect.poll(() => firstDescription.locator('.reveal-line').allTextContents().then(lines => lines.join(' '))).toBe(descriptions[0]);
-  expect(await firstDescription.locator('.reveal-line').count()).toBeGreaterThan(1);
+  expect(await page.locator('.project-name').first().evaluate(el =>
+    el.clientHeight > parseFloat(getComputedStyle(el).lineHeight)
+  )).toBe(true);
   for (const width of [320, 390]) {
     await page.setViewportSize({ width, height: 844 });
     await expect.poll(() => page.locator('.project-description').evaluateAll(elements => elements.map(el =>
@@ -239,7 +243,7 @@ test('long project captions wrap without clipping or duplicated subtitle lines o
   await context.close();
 });
 
-test('WebGL draws the purple top glow, keeps cases black and paints a fading cursor trail', async ({ page }) => {
+test('WebGL keeps the background black and paints a fading cursor trail', async ({ page }) => {
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.goto('./');
@@ -255,10 +259,7 @@ test('WebGL draws the purple top glow, keeps cases black and paints a fading cur
       resolve(Array.from(pixel).slice(0, 3));
     });
   }));
-  const glow = await topColor();
-  expect(glow[2]).toBeGreaterThan(glow[0]);
-  expect(glow[0]).toBeGreaterThan(glow[1]);
-  expect(glow[2]).toBeGreaterThan(30);
+  await expect.poll(topColor).toEqual([0, 0, 0]);
   const brightness = () => canvas.evaluate(el => new Promise(resolve => {
     requestAnimationFrame(() => {
       const gl = el.getContext('webgl2');
@@ -368,7 +369,7 @@ test('mobile layout keeps native touch scrolling and usable contacts', async ({ 
   await expect(page.locator('.bio')).toHaveCSS('opacity', '1');
   await expect(page.locator('.contacts')).toHaveCSS('opacity', '1');
   await expect(page.locator('.cursor-ring')).toHaveCSS('display', 'none');
-  const email = page.getByRole('link', { name: 'lenputka@gmail.com' });
+  const email = page.getByRole('link', { name: 'helenagarm@gmail.com' });
   await expect(email).toHaveCSS('font-size', '20px');
   expect(await email.evaluate(el => new DOMMatrix(getComputedStyle(el, '::after').transform).m11)).toBe(1);
   expect(await email.evaluate(el => getComputedStyle(el, '::after').height)).toBe('0.5px');
@@ -397,7 +398,7 @@ test('mobile text moves through masks on repeated scroll and reflows at narrow w
   const page = await context.newPage();
   await page.goto('./');
   const originalBio = await page.locator('.bio p .sr-only').allTextContents();
-  expect(originalBio).toHaveLength(1);
+  expect(originalBio).toHaveLength(2);
   const project = page.locator('.project').first();
   const headingLetter = page.locator('#cases-title .reveal-letter').first();
   const projectLetter = project.locator('.reveal-letter').first();

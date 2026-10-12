@@ -90,8 +90,6 @@ const shaders = {
     uniform sampler2D uPaint;
     uniform sampler2D uPortrait;
     uniform vec2 uViewport;
-    uniform float uScrollY;
-    uniform float uGlowHeight;
     uniform vec4 uPortraitRect;
     uniform vec4 uPortraitUv;
     uniform float uPortraitOpacity;
@@ -102,19 +100,6 @@ const shaders = {
     }
     vec3 toLinear(vec3 color) {
       return mix(color/12.92,pow((color+.055)/1.055,vec3(2.4)),step(vec3(.04045),color));
-    }
-    float glowFalloff(vec2 point, vec2 center, vec2 radius) {
-      return max(0.,1.-length((point-center)/radius));
-    }
-    vec3 topGlow() {
-      // Match body::before in sRGB, tied to the document rather than the cursor.
-      vec2 point = vec2(vUv.x,((1.-vUv.y)*uViewport.y+uScrollY)/uGlowHeight);
-      vec3 blue = vec3(48.,89.,127.)/255.;
-      vec3 pink = vec3(122.,53.,131.)/255.;
-      vec3 purple = vec3(118.,57.,186.)/255.;
-      vec3 color = blue*.15*glowFalloff(point,vec2(.95,-.1),vec2(.6,.85));
-      color = mix(color,pink,.2*glowFalloff(point,vec2(.7,-.35),vec2(.55,.9)));
-      return mix(color,purple,.38*glowFalloff(point,vec2(.28,-.2),vec2(.85,1.)));
     }
     void main() {
       vec4 field = texture(uPaint,vUv);
@@ -131,9 +116,6 @@ const shaders = {
       vec3 linearColor = max(spectrum*intensity,vec3(0.));
       // Keep only a faint chromatic rim over black, like the reference's glass.
       linearColor = toLinear(clamp(toSrgb(linearColor),0.,1.)*uTrailVisibility);
-      vec3 trailLinear = linearColor;
-      // Composite the glow BEFORE the original photograph, preserving its colors.
-      linearColor += toLinear(topGlow());
       if (uPortraitOpacity > 0.) {
         vec2 local = (vUv*uViewport-uPortraitRect.xy)/uPortraitRect.zw;
         float circle = 1.-smoothstep(1.-2./min(uPortraitRect.z,uPortraitRect.w),1.,length((local-.5)*2.));
@@ -145,7 +127,7 @@ const shaders = {
           vec2 fringe = direction*3./uPortraitRect.zw*uPortraitUv.zw*uRefractionStrength;
           vec3 photo = vec3(texture(uPortrait,uv+fringe).r,texture(uPortrait,uv).g,texture(uPortrait,uv-fringe).b);
           vec3 photoLinear = toLinear(photo);
-          linearColor = mix(linearColor,photoLinear+trailLinear*.35,circle*uPortraitOpacity);
+          linearColor = mix(linearColor,photoLinear+linearColor*.35,circle*uPortraitOpacity);
         }
       }
       vec3 color = toSrgb(linearColor);
@@ -155,7 +137,7 @@ const shaders = {
 };
 
 /** Directional screen-paint brush with advected momentum, curl and two decay
- * masks. A static top glow fades into #000000; pointer input paints above it. */
+ * masks. The background is a constant #000000; only pointer input paints it. */
 export class CursorPaint {
   constructor(canvas, { reducedMotion, portrait }) {
     this.canvas = canvas;
@@ -194,7 +176,7 @@ export class CursorPaint {
     window.addEventListener('scroll', () => {
       // The shared canvas is fixed; the portrait must follow its DOM frame,
       // including while the cursor is idle and during reveal transitions.
-      if (!this.gl) return;
+      if (!this.gl || !this.portraitReady) return;
       this.lastMovement = performance.now();
       this.start();
     }, options);
@@ -406,7 +388,7 @@ export class CursorPaint {
 
   render() {
     if (this.gl && this.paint) this.draw('display',null,{
-      uPaint:this.paint.read,uPortrait:this.portraitTexture,uViewport:[innerWidth,innerHeight],uScrollY:scrollY,uGlowHeight:Math.min(600,Math.max(400,innerHeight*.6)),uTrailVisibility:TRAIL_VISIBILITY,uRefractionStrength:REFRACTION_STRENGTH,...this.portraitUniforms(),
+      uPaint:this.paint.read,uPortrait:this.portraitTexture,uViewport:[innerWidth,innerHeight],uTrailVisibility:TRAIL_VISIBILITY,uRefractionStrength:REFRACTION_STRENGTH,...this.portraitUniforms(),
     });
   }
 
