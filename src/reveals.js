@@ -173,7 +173,7 @@ export class ScrollReveals {
       return;
     }
     this.originals.forEach((text, element) => {
-      if (element.matches('h1, h2, .project-name, .contacts .contact-label, .contacts .roll-label, .scroll-cue .roll-label')) this.letters(element, text);
+      if (element.matches('h1, h2, .role, .project-name, .contacts .contact-label, .contacts .roll-label, .scroll-cue .roll-label')) this.letters(element, text);
       else this.lines(element, text);
     });
     const intro = document.querySelector('.intro-layout').getBoundingClientRect();
