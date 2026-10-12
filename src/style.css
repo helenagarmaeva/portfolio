@@ -34,19 +34,18 @@ main { position: relative; z-index: 1; }
 
 .language-button { position: fixed; z-index: 20; right: max(5.5vw, 24px); top: 25px; color: var(--muted); font-size: 18px; line-height: 1.4; padding: 4px 0; transition: color .35s ease; }
 .language-button:is(:hover, :focus-visible) { color: #fff; }
-.hero { min-height: 100svh; position: relative; display: flex; flex-direction: column; padding: clamp(110px, 14svh, 154px) 0 32px; }
-.intro-layout { width: min(1120px, 78%); margin: 0 auto; display: grid; grid-template-columns: 128px minmax(0, 1fr); column-gap: 48px; }
+.hero { min-height: 100svh; position: relative; display: flex; flex-direction: column; padding: 80px 0 48px; }
+.intro-layout { width: min(736px, calc(100% - 48px)); margin: 0 auto; display: flex; flex-direction: column; gap: 40px; }
 .portrait { width: 128px; height: 128px; border-radius: 50%; overflow: hidden; }
 .portrait img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 62% 50%; transform: scale(1.35); transform-origin: 58% 65%; }
 .portrait.is-distorted img { opacity: 0; }
-.intro-copy { max-width: 560px; padding-top: 3px; }
+.intro-copy { width: 100%; max-width: 640px; padding-top: 0; }
 h1 { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 600; letter-spacing: -.8px; }
 .role { color: var(--muted); font-size: 20px; line-height: 1.4; letter-spacing: -.65px; margin: 12px 0 24px; }
-.bio { width: 100%; text-align: justify; text-align-last: left; font-size: 18px; line-height: 1.4; letter-spacing: -.35px; color: #d1d1d1; }
-.bio p { margin: 0 0 18px; }
+.bio { width: 100%; text-align: left; font-size: 18px; line-height: 1.4; letter-spacing: -.35px; color: #efefef; }
+.bio p { margin: 0; }
 .bio p:last-child { margin-bottom: 0; }
-.bio .reveal-line-mask:not(:last-child) .reveal-line { text-align-last: justify; }
-.contacts { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 22px; margin-top: 48px; font-size: 20px; letter-spacing: -.35px; line-height: 1.35; color: #d8d8d8; }
+.contacts { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 22px; margin-top: 48px; font-size: 18px; letter-spacing: -.35px; line-height: 1.35; color: #d8d8d8; }
 .email-link { position: relative; white-space: nowrap; transition: color .35s ease; }
 .email-link::after { content: ''; position: absolute; height: 1px; left: 0; right: 0; bottom: -3px; background: currentColor; transform: scaleX(0); transform-origin: right center; transition: transform .55s var(--ease); }
 .email-link:is(:hover, :focus-visible) { color: #fff; }
@@ -62,8 +61,8 @@ h1 { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 600; letter-spa
 .arrow-link:is(:hover, :focus-visible) { color: #fff; }
 .arrow-link:is(:hover, :focus-visible) .link-arrow { opacity: 1; transform: translate(-4px, -50%) rotate(-45deg); }
 .arrow-link:is(:hover, :focus-visible) .roll-viewport { transform: translateX(24px); }
-.scroll-cue { display: flex; justify-content: center; align-items: center; gap: 78px; width: max-content; margin: auto auto 0; padding: 62px 10px 0; font-size: 20px; letter-spacing: -.7px; }
-.scroll-cue svg { width: 26px; height: 26px; transition: transform .6s var(--ease); }
+.scroll-cue { display: flex; justify-content: center; align-items: center; gap: 80px; width: max-content; margin: auto auto 0; padding: 62px 10px 0; font-size: 24px; font-weight: 600; letter-spacing: -.7px; }
+.scroll-cue svg { width: 32px; height: 32px; transition: transform .6s var(--ease); }
 .scroll-cue:is(:hover, :focus-visible) svg { transform: translateY(7px); }
 .scroll-cue:is(:hover, :focus-visible) .roll-label, .scroll-cue:is(:hover, :focus-visible) .roll-copy { transform: translateY(-100%); }
 
@@ -111,9 +110,7 @@ h2 { font-size: 40px; font-weight: 600; line-height: 1.15; letter-spacing: -1.8p
 .intro-copy > .reveal:nth-child(3) { --reveal-delay: 200ms; }
 .background-fallback .fluid-background { visibility: hidden; }
 
-@media (min-width: 1600px) { .intro-layout { width: 1120px; } }
 @media (max-width: 1180px) {
-  .intro-layout { width: 84%; grid-template-columns: 128px minmax(0, 1fr); column-gap: 40px; }
   .portrait { width: 128px; height: 128px; }
   h1 { font-size: 24px; }
   .role { font-size: 20px; }
@@ -123,18 +120,18 @@ h2 { font-size: 40px; font-weight: 600; line-height: 1.15; letter-spacing: -1.8p
 }
 @media (max-width: 760px) {
   .language-button { top: 18px; right: 24px; font-size: 16px; }
-  .hero { min-height: 100svh; padding: 84px 24px 32px; }
-  .intro-layout { width: 100%; grid-template-columns: 1fr; gap: 27px; }
+  .hero { min-height: 100svh; padding: 80px 24px 48px; }
+  .intro-layout { width: 100%; gap: 40px; }
   .portrait { width: 112px; height: 112px; }
-  .intro-copy { padding-top: 0; max-width: 600px; }
-  h1 { font-size: 28px; letter-spacing: -1px; }
-  .role { font-size: 20px; margin: 9px 0 22px; }
+  .intro-copy { padding-top: 0; max-width: 640px; }
+  h1 { letter-spacing: -.8px; }
+  .role { font-size: 20px; margin: 12px 0 24px; }
   .bio { line-height: 1.5; letter-spacing: -.25px; }
-  .bio p { margin-bottom: 16px; }
-  .contacts { display: grid; grid-template-columns: repeat(3, max-content); margin-top: 36px; gap: 22px 4px; justify-content: space-between; }
+  .bio p { margin-bottom: 0; }
+  .contacts { display: grid; grid-template-columns: repeat(3, max-content); margin-top: 48px; gap: 22px 4px; justify-content: space-between; }
   .email-link { grid-column: 1 / -1; width: max-content; margin-right: 0; }
-  .scroll-cue { padding-top: 72px; gap: 44px; font-size: 18px; }
-  .scroll-cue svg { width: 24px; height: 24px; }
+  .scroll-cue { padding-top: 62px; gap: 32px; font-size: 20px; }
+  .scroll-cue svg { width: 28px; height: 28px; }
   .cases { width: auto; margin: 0 24px; padding: 52px 0 80px; }
   h2 { font-size: 36px; margin-bottom: 36px; letter-spacing: -1.7px; }
   .project-grid { grid-template-columns: 1fr; gap: 38px; }

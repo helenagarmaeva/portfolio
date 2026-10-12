@@ -28,7 +28,7 @@ test('contact arrows, rolling text, email underline and keyboard focus', async (
   await expect(page.locator('.contacts')).toHaveCSS('opacity', '1');
   for (const name of ['CV', 'Telegram', 'LinkedIn']) {
     const button = page.locator(`[data-contact="${name.toLowerCase()}"]`);
-    await expect(button).toHaveCSS('font-size', '20px');
+    await expect(button).toHaveCSS('font-size', '18px');
     await expect(button.locator('.link-arrow')).toHaveCSS('opacity', '0');
     await button.hover();
     await expect(button.locator('.link-arrow')).toHaveCSS('opacity', '1');
@@ -48,7 +48,7 @@ test('contact arrows, rolling text, email underline and keyboard focus', async (
   await expect(page.getByRole('link', { name: 'Telegram', exact: true })).toHaveAttribute('href', 'https://t.me/hgrmv');
   await expect(page.getByRole('link', { name: 'LinkedIn', exact: true })).toHaveAttribute('href', 'https://www.linkedin.com/in/helena-garmaeva/');
   const email = page.getByRole('link', { name: 'helenagarm@gmail.com' });
-  await expect(email).toHaveCSS('font-size', '20px');
+  await expect(email).toHaveCSS('font-size', '18px');
   await expect(email).toHaveAttribute('href', 'mailto:helenagarm@gmail.com');
   await email.hover();
   await expect.poll(() => email.evaluate(el => new DOMMatrix(getComputedStyle(el, '::after').transform).m11)).toBe(1);
@@ -370,12 +370,12 @@ test('mobile layout keeps native touch scrolling and usable contacts', async ({ 
   await expect(page.locator('.contacts')).toHaveCSS('opacity', '1');
   await expect(page.locator('.cursor-ring')).toHaveCSS('display', 'none');
   const email = page.getByRole('link', { name: 'helenagarm@gmail.com' });
-  await expect(email).toHaveCSS('font-size', '20px');
+  await expect(email).toHaveCSS('font-size', '18px');
   expect(await email.evaluate(el => new DOMMatrix(getComputedStyle(el, '::after').transform).m11)).toBe(1);
   expect(await email.evaluate(el => getComputedStyle(el, '::after').height)).toBe('0.5px');
   for (const name of ['CV', 'Telegram', 'LinkedIn']) {
     const button = page.locator(`[data-contact="${name.toLowerCase()}"]`);
-    await expect(button).toHaveCSS('font-size', '20px');
+    await expect(button).toHaveCSS('font-size', '18px');
     await expect(button.locator('.link-arrow')).toHaveCSS('opacity', '1');
   }
   await expect(page.locator('#portrait')).toHaveCSS('opacity', '1');
