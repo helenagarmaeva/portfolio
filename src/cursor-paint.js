@@ -191,7 +191,7 @@ export class CursorPaint {
       this.pause(); this.clear(); this.syncPortrait(); this.start();
     }, { signal: this.abort.signal });
     this.finePointer.addEventListener('change', () => {
-      this.pause(); this.clear(); this.syncPortrait(); this.start();
+      this.pause(); this.resize(); this.clear(); this.syncPortrait(); this.start();
     }, { signal: this.abort.signal });
     portrait?.addEventListener('load', () => this.uploadPortrait(), { signal: this.abort.signal });
     portrait?.addEventListener('error', () => {
@@ -220,7 +220,7 @@ export class CursorPaint {
     this.portraitReady = false;
     this.portraitTexture = { texture: gl.createTexture() };
     gl.bindTexture(gl.TEXTURE_2D,this.portraitTexture.texture);
-    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);
     gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
@@ -240,6 +240,7 @@ export class CursorPaint {
       gl.bindTexture(gl.TEXTURE_2D,this.portraitTexture.texture);
       gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);
       gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,image);
+      gl.generateMipmap(gl.TEXTURE_2D);
       this.portraitReady = gl.getError()===gl.NO_ERROR;
     } catch {
       // A future remote image without CORS stays a normal visible <img>.
@@ -322,13 +323,19 @@ export class CursorPaint {
 
   resize() {
     if (!this.gl) return;
-    const dpr = Math.min(devicePixelRatio || 1,1.5);
-    const width = Math.min(2400,Math.round(innerWidth*dpr));
-    const height = Math.min(1800,Math.round(innerHeight*dpr));
+    const dpr = Math.min(devicePixelRatio || 1,this.finePointer.matches ? 2 : 1.5);
+    const width = Math.min(3840,Math.round(innerWidth*dpr));
+    const height = Math.min(2160,Math.round(innerHeight*dpr));
     if (width===this.canvas.width && height===this.canvas.height && this.paint) return;
     this.canvas.width=width; this.canvas.height=height;
     this.releaseTargets();
-    const w = Math.max(32,Math.round(width/4)), h = Math.max(32,Math.round(height/4));
+    // Render the portrait at Retina resolution while retaining the brush's
+    // original simulation resolution and movement characteristics.
+    const paintDpr = Math.min(devicePixelRatio || 1,1.5);
+    const paintWidth = Math.min(2400,Math.round(innerWidth*paintDpr));
+    const paintHeight = Math.min(1800,Math.round(innerHeight*paintDpr));
+    const w = Math.max(32,Math.round(paintWidth/4));
+    const h = Math.max(32,Math.round(paintHeight/4));
     this.paint={read:this.target(w,h),write:this.target(w,h)};
     this.low=this.target(Math.max(16,Math.round(w/2)),Math.max(16,Math.round(h/2)));
     this.blur=this.target(this.low.width,this.low.height);

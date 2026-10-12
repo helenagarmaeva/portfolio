@@ -70,6 +70,21 @@ h1 { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 600; letter-spa
 }
 .motion-ready .scroll-cue.is-visible .reveal-letter { animation: cue-letter-in .667s var(--ease) both; animation-delay: calc(var(--reveal-delay, 0ms) + var(--letter-delay, 0ms)); }
 .motion-ready .scroll-cue.is-instant .reveal-letter { animation: none; }
+.cue-arrow { display: flex; align-items: center; justify-content: center; width: 20px; height: 20px; flex-shrink: 0; --arrow-delay: 0ms; }
+.cue-arrow:last-child { --arrow-delay: 90ms; }
+@keyframes cue-arrow-in {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes cue-arrow-drift {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(5px); }
+}
+.motion-ready .scroll-cue.is-visible .cue-arrow { animation: cue-arrow-in .7s var(--ease) both; animation-delay: calc(var(--reveal-delay, 0ms) + var(--arrow-delay)); }
+.motion-ready .scroll-cue.is-visible .cue-arrow svg { animation: cue-arrow-drift 2.6s ease-in-out infinite; animation-delay: calc(var(--reveal-delay, 0ms) + .7s + var(--arrow-delay)); }
+.motion-ready .scroll-cue.is-instant .cue-arrow,
+.motion-ready .scroll-cue.is-instant .cue-arrow svg,
+.motion-ready .scroll-cue:is(:hover, :focus-visible) .cue-arrow svg { animation: none; }
 .scroll-cue svg { width: 20px; height: 20px; transition: transform .6s var(--ease); }
 .scroll-cue:is(:hover, :focus-visible) svg { transform: translateY(7px); }
 .scroll-cue:is(:hover, :focus-visible) .roll-label, .scroll-cue:is(:hover, :focus-visible) .roll-copy { transform: translateY(-100%); }
