@@ -148,6 +148,11 @@ h2 { font-size: 40px; font-weight: 600; line-height: 1.15; letter-spacing: -1.8p
   .cursor-ring { display: none; }
   .email-link, .arrow-link { color: #fff; }
   .email-link::after { height: .5px; transform: scaleX(1); transform-origin: left center; }
+  /* Each underline segment shares its letter's reveal timing and motion. */
+  .motion-ready .email-link::after { display: none; }
+  .motion-ready .email-link .reveal-word-mask { padding-bottom: calc(.15em + 4px); margin-bottom: calc(-.15em - 4px); }
+  .motion-ready .email-link .reveal-letter { position: relative; }
+  .motion-ready .email-link .reveal-letter::after { content: ''; position: absolute; left: 0; right: 0; bottom: -3px; height: .5px; background: currentColor; }
   .arrow-link { padding-left: 26px; }
   .arrow-link .link-arrow, .arrow-link:is(:hover, :focus-visible) .link-arrow { left: 0; width: 20px; height: 20px; opacity: 1; transform: translate(0, -50%) rotate(-45deg); }
   .arrow-link .roll-viewport, .arrow-link:is(:hover, :focus-visible) .roll-viewport { transform: none; }
