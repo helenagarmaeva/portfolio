@@ -131,7 +131,9 @@ const shaders = {
           vec2 displacement = clamp(direction*180.,vec2(-14.),vec2(14.))*uRefractionStrength;
           vec2 uv = uPortraitUv.xy + (local+displacement/uPortraitRect.zw)*uPortraitUv.zw;
           vec2 fringe = direction*3./uPortraitRect.zw*uPortraitUv.zw*uRefractionStrength;
-          vec3 photo = vec3(texture(uPortrait,uv+fringe).r,texture(uPortrait,uv).g,texture(uPortrait,uv-fringe).b);
+          // A small mip bias preserves facial detail in the 96px portrait
+          // while retaining smooth filtering as the cursor refracts it.
+          vec3 photo = vec3(texture(uPortrait,uv+fringe,-.5).r,texture(uPortrait,uv,-.5).g,texture(uPortrait,uv-fringe,-.5).b);
           vec3 photoLinear = toLinear(photo);
           linearColor = mix(linearColor,photoLinear+trailLinear*.35,circle*uPortraitOpacity);
         }
@@ -323,9 +325,10 @@ export class CursorPaint {
 
   resize() {
     if (!this.gl) return;
-    const dpr = Math.min(devicePixelRatio || 1,this.finePointer.matches ? 2 : 1.5);
-    const width = Math.min(3840,Math.round(innerWidth*dpr));
-    const height = Math.min(2160,Math.round(innerHeight*dpr));
+    // Keep the same density in both axes, including tall and 3x displays.
+    const dpr = Math.min(devicePixelRatio || 1,this.finePointer.matches ? 3 : 1.5,4096/innerWidth,4096/innerHeight);
+    const width = Math.round(innerWidth*dpr);
+    const height = Math.round(innerHeight*dpr);
     if (width===this.canvas.width && height===this.canvas.height && this.paint) return;
     this.canvas.width=width; this.canvas.height=height;
     this.releaseTargets();

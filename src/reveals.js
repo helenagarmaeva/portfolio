@@ -51,6 +51,10 @@ export class ScrollReveals {
 
   letters(element, text) {
     const visual = this.accessibleVisual(element, text);
+    this.appendLetters(visual, element, text);
+  }
+
+  appendLetters(visual, element, text) {
     const project = element.matches('.project-name');
     let index = 0;
     const count = text.replace(/\s/g, '').length;
@@ -107,6 +111,10 @@ export class ScrollReveals {
       line.textContent = wordsInLine.join(' ');
       line.dataset.revealText = line.textContent;
       line.style.setProperty('--line-delay', `${index * 50}ms`);
+      if (element.closest('.bio')) {
+        line.textContent = '';
+        this.appendLetters(line, element, wordsInLine.join(' '));
+      }
       mask.append(line);
       visual.append(mask);
     });
@@ -151,9 +159,11 @@ export class ScrollReveals {
 
   setup() {
     this.observer?.disconnect();
+    // Measure untransformed positions so matching columns share one reveal clock.
+    document.documentElement.classList.remove('motion-ready');
     // Restart all parts of the cue together when fonts or line breaks change.
     const cue = document.querySelector('.scroll-cue');
-    cue?.classList.remove('is-visible');
+    this.elements.filter(element => element.closest('.hero')).forEach(element => element.classList.remove('is-visible', 'is-instant'));
     for (const project of this.scrambles.keys()) this.stopScramble(project);
     // Restore before measuring, so a resized paragraph gets new line breaks.
     this.originals.forEach((text, element) => { element.textContent = text; });
@@ -165,6 +175,17 @@ export class ScrollReveals {
     this.originals.forEach((text, element) => {
       if (element.matches('h1, h2, .project-name, .contacts .contact-label, .contacts .roll-label, .scroll-cue .roll-label')) this.letters(element, text);
       else this.lines(element, text);
+    });
+    const intro = document.querySelector('.intro-layout').getBoundingClientRect();
+    const columnDelay = x => `${Math.max(0, Math.min(1, (x - intro.left) / intro.width)) * 600}ms`;
+    document.querySelectorAll('.hero .reveal-letter').forEach(letter => {
+      letter.style.setProperty('--letter-delay', columnDelay(letter.getBoundingClientRect().left));
+    });
+    cue?.querySelectorAll('.cue-arrow').forEach(arrow => {
+      arrow.style.setProperty('--arrow-delay', columnDelay(arrow.getBoundingClientRect().left));
+    });
+    document.querySelectorAll('.contacts .arrow-link').forEach(link => {
+      link.querySelector('.link-arrow').style.setProperty('--arrow-delay', link.querySelector('.reveal-letter').style.getPropertyValue('--letter-delay'));
     });
     document.documentElement.classList.add('motion-ready');
     if (cue) void cue.offsetWidth;
