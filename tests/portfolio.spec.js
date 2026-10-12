@@ -61,10 +61,13 @@ test('contact arrows, rolling text, email underline and keyboard focus', async (
   expect(pdf.ok()).toBe(true);
   expect(pdf.headers()['content-type']).toContain('application/pdf');
   expect((await pdf.body()).subarray(0, 5).toString()).toBe('%PDF-');
-  await email.focus();
-  await page.keyboard.press('Tab');
+  await cv.focus();
   await expect(cv).toBeFocused();
   await expect(cv.locator('.link-arrow')).toHaveCSS('opacity', '1');
+  for (const name of ['LinkedIn', 'Telegram', 'helenagarm@gmail.com']) {
+    await page.keyboard.press('Tab');
+    await expect(page.getByRole('link', { name, exact: true })).toBeFocused();
+  }
 });
 
 test('case navigation, scroll reveal and project arrows', async ({ page }) => {
