@@ -55,7 +55,7 @@ export class ScrollReveals {
     let index = 0;
     const count = text.replace(/\s/g, '').length;
     const cue = element.closest('.scroll-cue');
-    if (cue) cue.style.setProperty('--cue-letter-stagger', `${count > 1 ? 100 : 0}ms`);
+    if (cue) cue.style.setProperty('--cue-letter-stagger', `${count > 1 ? 70 : 0}ms`);
     text.split(/(\s+)/).forEach(word => {
       if (/^\s+$/.test(word)) { visual.append(document.createTextNode(word)); return; }
       const mask = document.createElement('span');
@@ -67,7 +67,7 @@ export class ScrollReveals {
         // Project captions follow the reference's centre-weighted wave.
         const delay = project
           ? (1 + Math.cos(Math.PI / 2 + index / Math.max(1, count - 1) * Math.PI)) * 62.5
-          : cue ? index * 100 / Math.max(1, count - 1) : index * 1000 / 30;
+          : cue ? index * 70 / Math.max(1, count - 1) : index * 1000 / 30;
         letter.style.setProperty('--letter-delay', `${delay}ms`);
         mask.append(letter);
         index++;
