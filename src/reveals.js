@@ -54,6 +54,8 @@ export class ScrollReveals {
     const project = element.matches('.project-name');
     let index = 0;
     const count = text.replace(/\s/g, '').length;
+    const cue = element.closest('.scroll-cue');
+    if (cue) cue.style.setProperty('--cue-letter-stagger', `${Math.max(0, count - 1) * 1000 / 30}ms`);
     text.split(/(\s+)/).forEach(word => {
       if (/^\s+$/.test(word)) { visual.append(document.createTextNode(word)); return; }
       const mask = document.createElement('span');
@@ -150,6 +152,9 @@ export class ScrollReveals {
 
   setup() {
     this.observer?.disconnect();
+    // Restart all parts of the cue together when fonts or line breaks change.
+    const cue = document.querySelector('.scroll-cue');
+    cue?.classList.remove('is-visible');
     for (const project of this.scrambles.keys()) this.stopScramble(project);
     // Restore before measuring, so a resized paragraph gets new line breaks.
     this.originals.forEach((text, element) => { element.textContent = text; });
@@ -163,6 +168,7 @@ export class ScrollReveals {
       else this.lines(element, text);
     });
     document.documentElement.classList.add('motion-ready');
+    if (cue) void cue.offsetWidth;
     this.observer = new IntersectionObserver(entries => {
       for (const entry of entries) {
         const element = entry.target;
