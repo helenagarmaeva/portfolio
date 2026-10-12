@@ -7,7 +7,7 @@ export class ScrollReveals {
     this.scrambles = new Map();
     this.abort = new AbortController();
     this.elements = [...document.querySelectorAll('[data-reveal]')];
-    document.querySelectorAll('h1, h2, .role, .bio p, .project-name, .project-description, .contacts .contact-label, .contacts .roll-label').forEach(element => {
+    document.querySelectorAll('h1, h2, .role, .bio p, .project-name, .project-description, .contacts .contact-label, .contacts .roll-label, .scroll-cue .roll-label').forEach(element => {
       this.originals.set(element, element.textContent.trim());
     });
     this.width = innerWidth;
@@ -159,7 +159,7 @@ export class ScrollReveals {
       return;
     }
     this.originals.forEach((text, element) => {
-      if (element.matches('h1, h2, .project-name, .contacts .contact-label, .contacts .roll-label')) this.letters(element, text);
+      if (element.matches('h1, h2, .project-name, .contacts .contact-label, .contacts .roll-label, .scroll-cue .roll-label')) this.letters(element, text);
       else this.lines(element, text);
     });
     document.documentElement.classList.add('motion-ready');

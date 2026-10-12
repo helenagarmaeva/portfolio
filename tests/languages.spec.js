@@ -33,7 +33,7 @@ test('language links navigate both ways and English stays English after reload',
   }
   await page.getByRole('link', { name: 'RU', exact: true }).click();
   await expect(page.locator('html')).toHaveAttribute('lang', 'ru');
-  await expect(page.getByRole('heading', { name: 'Гармаева Елена', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Елена Гармаева', exact: true })).toBeVisible();
   await expect(page.getByRole('link', { name: 'CV', exact: true })).toHaveAttribute('href', new URL('./HelenagrmvCV.pdf', page.url()).href);
 });
 

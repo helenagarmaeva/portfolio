@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test('first screen, fixed language switch and default browser cursor', async ({ page }) => {
   await page.goto('./');
-  await expect(page.getByRole('heading', { name: 'Гармаева Елена' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Елена Гармаева' })).toBeVisible();
   await expect(page.locator('.intro-copy > .reveal').first()).toHaveCSS('opacity', '1');
   const hero = await page.locator('.hero').boundingBox();
   expect(hero.height).toBe(1000);
@@ -514,7 +514,7 @@ test('content and hover affordances remain usable without WebGL', async ({ page 
   await page.goto('./');
   await expect(page.locator('.fluid-background')).toHaveAttribute('data-renderer', 'css');
   await expect(page.locator('#portrait')).toHaveCSS('opacity', '1');
-  await expect(page.getByRole('heading', { name: 'Гармаева Елена' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Елена Гармаева' })).toBeVisible();
   const cv = page.getByRole('link', { name: 'CV', exact: true });
   await cv.hover();
   await expect(cv.locator('.link-arrow')).toHaveCSS('opacity', '1');
