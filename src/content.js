@@ -1,7 +1,7 @@
 // Add contact links and case assets when supplied. An empty URL deliberately
 // leaves a button without navigation.
 const russianContent = {
-  portrait: './IMG_1498.JPG',
+  portrait: './photo.png',
   portraitAlt: 'Елена Гармаева',
   contacts: {
     cv: './HelenagrmvCV.pdf',
