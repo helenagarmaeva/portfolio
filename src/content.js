@@ -12,22 +12,22 @@ const russianContent = {
     {
       title: 'ТПК КОСМОСПРЭЙ — корпоративный сайт',
       description: 'Web, В2В, E-com, Graphic design',
-      cover: './космоспрэй.png', url: '',
+      cover: './cosmospray.png', url: '',
     },
     {
       title: 'Сервис ДельтаБезопасность — комплексный B2B-дашборд',
       description: 'Web, В2В, Dashboard',
-      cover: './дельта.png', url: '',
+      cover: './delta.png', url: '',
     },
     {
       title: 'SOLOK COSMETICS — интернет-магазин натуральной косметики',
       description: 'Web, В2С, E-com, Graphic design',
-      cover: './солок.png', url: '',
+      cover: './solok.png', url: '',
     },
     {
       title: 'Приют для собак «Дубовая Роща» — волонтерские проекты',
       description: 'Illustration, Graphic design',
-      cover: './календарь.png', url: '',
+      cover: './dubovaya.png', url: '',
     },
   ],
 };
