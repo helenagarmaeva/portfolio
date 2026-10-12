@@ -1,4 +1,5 @@
-const TRAIL_VISIBILITY = .12;
+const TRAIL_VISIBILITY = .15;
+const TRAIL_SATURATION = 1.25;
 const REFRACTION_STRENGTH = .35;
 
 const vertex = `#version 300 es
@@ -94,6 +95,7 @@ const shaders = {
     uniform vec4 uPortraitUv;
     uniform float uPortraitOpacity;
     uniform float uTrailVisibility;
+    uniform float uTrailSaturation;
     uniform float uRefractionStrength;
     vec3 toSrgb(vec3 linearColor) {
       return mix(12.92*linearColor,1.055*pow(linearColor,vec3(1./2.4))-.055,step(vec3(.0031308),linearColor));
@@ -115,7 +117,10 @@ const shaders = {
       // so the chromatic rim remains visible on the requested dark background.
       vec3 linearColor = max(spectrum*intensity,vec3(0.));
       // Compose the faint brush over the page background without tinting the photo.
-      vec3 trailLinear = toLinear(clamp(toSrgb(linearColor),0.,1.)*uTrailVisibility);
+      vec3 trailColor = clamp(toSrgb(linearColor),0.,1.);
+      float luminance = dot(trailColor,vec3(.2126,.7152,.0722));
+      trailColor = clamp(mix(vec3(luminance),trailColor,uTrailSaturation),0.,1.);
+      vec3 trailLinear = toLinear(trailColor*uTrailVisibility);
       linearColor = trailLinear + toLinear(vec3(4./255.));
       if (uPortraitOpacity > 0.) {
         vec2 local = (vUv*uViewport-uPortraitRect.xy)/uPortraitRect.zw;
@@ -389,7 +394,7 @@ export class CursorPaint {
 
   render() {
     if (this.gl && this.paint) this.draw('display',null,{
-      uPaint:this.paint.read,uPortrait:this.portraitTexture,uViewport:[innerWidth,innerHeight],uTrailVisibility:TRAIL_VISIBILITY,uRefractionStrength:REFRACTION_STRENGTH,...this.portraitUniforms(),
+      uPaint:this.paint.read,uPortrait:this.portraitTexture,uViewport:[innerWidth,innerHeight],uTrailVisibility:TRAIL_VISIBILITY,uTrailSaturation:TRAIL_SATURATION,uRefractionStrength:REFRACTION_STRENGTH,...this.portraitUniforms(),
     });
   }
 
