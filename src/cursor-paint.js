@@ -1,5 +1,5 @@
-const TRAIL_VISIBILITY = .15;
-const TRAIL_SATURATION = 1.25;
+const TRAIL_VISIBILITY = .18;
+const TRAIL_SATURATION = 1.5;
 const REFRACTION_STRENGTH = .35;
 
 const vertex = `#version 300 es
