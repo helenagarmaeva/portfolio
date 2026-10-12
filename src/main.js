@@ -125,7 +125,7 @@ function updatePortraitScroll() {
 }
 function measurePortraitScroll() {
   // Subtract the current translation to measure the original layout gap.
-  portraitMaxShift = Math.max(0, portraitHeading.getBoundingClientRect().top - portraitFrame.getBoundingClientRect().bottom + portraitShift - 16);
+  portraitMaxShift = Math.max(0, portraitHeading.getBoundingClientRect().top - portraitFrame.getBoundingClientRect().bottom + portraitShift - 8);
   updatePortraitScroll();
 }
 window.addEventListener('scroll', updatePortraitScroll, { passive: true, signal: portraitMotionAbort.signal });

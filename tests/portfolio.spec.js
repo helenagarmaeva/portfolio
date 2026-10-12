@@ -165,7 +165,7 @@ test('cases replay scrolling down and return immediately scrolling up', async ({
   expect((await project.locator('.project-description .reveal-line').allTextContents()).join(' ')).toBe('Web, В2В, E-com, Graphic design');
 });
 
-test('portrait scrolls gently toward the heading and stops with a 16px gap', async ({ page }) => {
+test('portrait scrolls gently toward the heading and stops with an 8px gap', async ({ page }) => {
   await page.addInitScript(() => {
     const getContext = HTMLCanvasElement.prototype.getContext;
     HTMLCanvasElement.prototype.getContext = function(type, ...args) {
@@ -180,9 +180,9 @@ test('portrait scrolls gently toward the heading and stops with a 16px gap', asy
     await expect.poll(gap).toBeCloseTo(24, 1);
     await page.evaluate(() => scrollTo({ top: 25, behavior: 'instant' }));
     await expect.poll(gap).toBeCloseTo(21, 1);
-    for (const top of [100, 350]) {
+    for (const top of [200, 350]) {
       await page.evaluate(top => scrollTo({ top, behavior: 'instant' }), top);
-      await expect.poll(gap).toBeCloseTo(16, 1);
+      await expect.poll(gap).toBeCloseTo(8, 1);
     }
     expect(await page.locator('.contacts .reveal-word-mask').evaluateAll(masks => masks.every(mask =>
       new Set([...mask.querySelectorAll('.reveal-letter')].map(letter => letter.offsetTop)).size === 1
