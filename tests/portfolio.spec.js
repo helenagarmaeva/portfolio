@@ -177,10 +177,10 @@ test('portrait scrolls gently toward the heading and stops with a 16px gap', asy
   for (const width of [1440, 390, 320]) {
     await page.setViewportSize({ width, height: 844 });
     await page.evaluate(() => scrollTo({ top: 0, behavior: 'instant' }));
-    await expect.poll(gap).toBeCloseTo(40, 1);
-    await page.evaluate(() => scrollTo({ top: 100, behavior: 'instant' }));
-    await expect.poll(gap).toBeCloseTo(28, 1);
-    for (const top of [200, 350]) {
+    await expect.poll(gap).toBeCloseTo(24, 1);
+    await page.evaluate(() => scrollTo({ top: 25, behavior: 'instant' }));
+    await expect.poll(gap).toBeCloseTo(21, 1);
+    for (const top of [100, 350]) {
       await page.evaluate(top => scrollTo({ top, behavior: 'instant' }), top);
       await expect.poll(gap).toBeCloseTo(16, 1);
     }
@@ -189,7 +189,7 @@ test('portrait scrolls gently toward the heading and stops with a 16px gap', asy
     ))).toBe(true);
   }
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await expect.poll(gap).toBeCloseTo(40, 1);
+  await expect.poll(gap).toBeCloseTo(24, 1);
 });
 
 test('text reveals move through masks and reflow without losing words', async ({ page }) => {

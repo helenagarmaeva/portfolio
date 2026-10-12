@@ -35,8 +35,8 @@ main { position: relative; z-index: 1; }
 .language-button { position: fixed; z-index: 20; right: max(5.5vw, 24px); top: 25px; color: var(--muted); font-size: 18px; line-height: 1.4; padding: 4px 0; transition: color .35s ease; }
 .language-button:is(:hover, :focus-visible) { color: #fff; }
 .hero { min-height: 100svh; position: relative; display: flex; flex-direction: column; padding: 80px 0 48px; }
-.intro-layout { width: min(736px, calc(100% - 48px)); margin: 0 auto; display: flex; flex-direction: column; gap: 40px; }
-.portrait { width: 128px; height: 128px; border-radius: 50%; overflow: hidden; transform: translateY(var(--portrait-shift, 0px)); }
+.intro-layout { width: min(736px, calc(100% - 48px)); margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+.portrait { width: 80px; height: 80px; border-radius: 50%; overflow: hidden; transform: translateY(var(--portrait-shift, 0px)); }
 .portrait img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 62% 50%; transform: scale(1.35); transform-origin: 58% 65%; }
 .portrait.is-distorted img { opacity: 0; }
 .intro-copy { width: 100%; max-width: 640px; padding-top: 0; }
@@ -117,7 +117,6 @@ h2 { font-size: 40px; font-weight: 600; line-height: 1.15; letter-spacing: -1.8p
 .background-fallback .fluid-background { visibility: hidden; }
 
 @media (max-width: 1180px) {
-  .portrait { width: 128px; height: 128px; }
   h1 { font-size: 24px; }
   .role { font-size: 20px; }
   .contacts { gap: 26px; flex-wrap: wrap; justify-content: space-between; }
@@ -127,8 +126,7 @@ h2 { font-size: 40px; font-weight: 600; line-height: 1.15; letter-spacing: -1.8p
 @media (max-width: 760px) {
   .language-button { top: 18px; right: 24px; font-size: 16px; }
   .hero { min-height: 100svh; padding: 80px 24px 48px; }
-  .intro-layout { width: 100%; gap: 40px; }
-  .portrait { width: 112px; height: 112px; }
+  .intro-layout { width: 100%; }
   .intro-copy { padding-top: 0; max-width: 640px; }
   h1 { letter-spacing: -.8px; }
   .role { font-size: 20px; margin: 12px 0 24px; }
