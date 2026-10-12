@@ -32,37 +32,6 @@ document.querySelector('.scroll-cue').addEventListener('click', event => {
   if (smoothScroll) smoothScroll.scrollTo(top, { duration: 1.3 });
   else window.scrollTo({ top, behavior: reducedMotion.matches ? 'instant' : 'smooth' });
 });
-const cursor = document.querySelector('.cursor-ring');
-let cursorX = -100;
-let cursorY = -100;
-let pointerFrame;
-
-function updateCursorMode() {
-  document.documentElement.classList.toggle('has-custom-cursor', finePointer.matches);
-  cursor.classList.remove('is-visible');
-}
-updateCursorMode();
-finePointer.addEventListener('change', updateCursorMode);
-
-// Pointer position is applied once per animation frame, without a slow lerp.
-window.addEventListener('pointermove', (event) => {
-  if (!finePointer.matches || event.pointerType === 'touch') return;
-  cursorX = event.clientX;
-  cursorY = event.clientY;
-  cursor.classList.add('is-visible');
-  if (!pointerFrame) {
-    pointerFrame = requestAnimationFrame(() => {
-      cursor.style.transform = `translate3d(${cursorX - 10}px, ${cursorY - 10}px, 0)`;
-      pointerFrame = null;
-    });
-  }
-}, { passive: true });
-document.documentElement.addEventListener('pointerleave', () => cursor.classList.remove('is-visible'));
-window.addEventListener('blur', () => cursor.classList.remove('is-visible'));
-window.addEventListener('pointerdown', (event) => {
-  if (event.pointerType === 'touch') cursor.classList.remove('is-visible');
-}, { passive: true });
-
 function safeUrl(value) {
   if (!value) return null;
   try {

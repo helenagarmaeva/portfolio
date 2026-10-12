@@ -1,20 +1,16 @@
 import { test, expect } from '@playwright/test';
 
-test('first screen, fixed language switch and exact custom cursor', async ({ page }) => {
+test('first screen, fixed language switch and default browser cursor', async ({ page }) => {
   await page.goto('./');
   await expect(page.getByRole('heading', { name: 'Гармаева Елена' })).toBeVisible();
   await expect(page.locator('.intro-copy > .reveal').first()).toHaveCSS('opacity', '1');
   const hero = await page.locator('.hero').boundingBox();
   expect(hero.height).toBe(1000);
   await page.mouse.move(800, 600);
-  const cursor = page.locator('.cursor-ring');
-  await expect(cursor).toHaveCSS('width', '20px');
-  await expect(cursor).toHaveCSS('height', '20px');
-  await expect(cursor).toHaveCSS('border-top-width', '1px');
-  await expect(cursor).toHaveCSS('border-top-color', 'rgb(231, 231, 231)');
-  await expect(cursor).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
-  await expect(page.locator('body')).toHaveCSS('cursor', 'none');
-  await expect.poll(async () => (await cursor.boundingBox()).x).toBe(790);
+  await expect(page.locator('.cursor-ring')).toHaveCount(0);
+  await expect(page.locator('html')).not.toHaveClass(/has-custom-cursor/);
+  await expect(page.locator('body')).toHaveCSS('cursor', 'auto');
+  await expect(page.getByRole('link', { name: 'CV', exact: true })).toHaveCSS('cursor', 'pointer');
   const language = page.getByRole('link', { name: 'ENG', exact: true });
   const before = await language.boundingBox();
   await page.evaluate(() => window.scrollTo(0, 1200));
@@ -414,7 +410,7 @@ test('mobile layout keeps native touch scrolling and usable contacts', async ({ 
   await expect(page.locator('.portrait')).toHaveCSS('opacity', '1');
   await expect(page.locator('.bio')).toHaveCSS('opacity', '1');
   await expect(page.locator('.contacts')).toHaveCSS('opacity', '1');
-  await expect(page.locator('.cursor-ring')).toHaveCSS('display', 'none');
+  await expect(page.locator('.cursor-ring')).toHaveCount(0);
   const email = page.getByRole('link', { name: 'helenagarm@gmail.com' });
   await expect(email).toHaveCSS('font-size', '18px');
   expect(await email.evaluate(el => new DOMMatrix(getComputedStyle(el, '::after').transform).m11)).toBe(1);

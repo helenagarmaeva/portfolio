@@ -42,7 +42,7 @@ test('English text and case reveals fit narrow touch screens', async ({ browser 
   const page = await context.newPage();
   await page.goto('./en.html');
   await expect(page.locator('.contacts')).toHaveCSS('opacity', '1');
-  await expect(page.locator('.cursor-ring')).toHaveCSS('display', 'none');
+  await expect(page.locator('.cursor-ring')).toHaveCount(0);
   const originalBio = await page.locator('.bio p .sr-only').allTextContents();
   for (const width of [320, 390]) {
     await page.setViewportSize({ width, height: 844 });
