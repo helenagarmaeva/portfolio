@@ -33,6 +33,7 @@ main { position: relative; z-index: 1; }
 .hero { min-height: 100svh; position: relative; display: grid; grid-template-rows: 1fr auto; padding: 80px 0 32px; }
 .intro-layout { width: min(640px, calc(100% - 48px)); margin: 0 auto; align-self: center; display: flex; flex-direction: column; gap: 24px; }
 .portrait { width: 96px; height: 96px; border-radius: 50%; overflow: hidden; transform: translateY(var(--portrait-shift, 0px)); }
+.portrait-visual { width: 100%; height: 100%; border-radius: inherit; overflow: hidden; }
 .portrait img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 50%; }
 .portrait.is-distorted img { opacity: 0; }
 .intro-copy { width: 100%; max-width: 640px; padding-top: 0; }
@@ -124,7 +125,11 @@ h2 { font-size: 40px; font-weight: 600; line-height: 1.15; letter-spacing: -1.8p
 .motion-ready .reveal.is-instant .reveal-letter,
 .motion-ready .reveal.is-instant .reveal-line,
 .motion-ready .reveal.is-instant .project-cover { transition: none; }
-.intro-layout > .portrait { --reveal-delay: 0ms; }
+.motion-ready .portrait { transition: opacity .667s var(--ease); transition-delay: var(--reveal-delay, 0ms); }
+.motion-ready .portrait-visual { transform: scale(.86); transition: transform .667s var(--ease); transition-delay: var(--reveal-delay, 0ms); }
+.motion-ready .portrait.is-visible .portrait-visual { transform: scale(1); }
+.motion-ready .portrait:not(.is-visible) .portrait-visual,
+.motion-ready .portrait.is-instant .portrait-visual { transition: none; }
 .motion-ready .bio .reveal-line { transform: none; transition: none; }
 .background-fallback .fluid-background { visibility: hidden; }
 

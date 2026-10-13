@@ -152,6 +152,7 @@ export class CursorPaint {
     this.reducedMotion = reducedMotion;
     this.portrait = portrait;
     this.portraitFrame = portrait?.closest('.portrait');
+    this.portraitVisualFrame = portrait?.closest('.portrait-visual') || this.portraitFrame;
     this.finePointer = matchMedia('(hover: hover) and (pointer: fine)');
     this.programs = {};
     this.targets = [];
@@ -263,7 +264,7 @@ export class CursorPaint {
   portraitUniforms() {
     const empty = { uPortraitRect:[0,0,1,1],uPortraitUv:[0,0,1,1],uPortraitOpacity:0 };
     if (!this.portraitActive) return empty;
-    const frame = this.portraitFrame.getBoundingClientRect();
+    const frame = this.portraitVisualFrame.getBoundingClientRect();
     if (!frame.width || frame.bottom<=0 || frame.top>=innerHeight) return empty;
     const image = this.portrait.getBoundingClientRect();
     const aspect = this.portrait.naturalWidth/this.portrait.naturalHeight;
