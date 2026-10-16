@@ -30,13 +30,13 @@ main { position: relative; z-index: 1; }
 
 .language-button { position: fixed; z-index: 20; right: max(5.5vw, 24px); top: 25px; color: var(--muted); font-size: 18px; line-height: 1.4; padding: 4px 0; transition: color .35s ease; }
 .language-button:is(:hover, :focus-visible) { color: #fff; }
-.hero { min-height: 100svh; position: relative; display: grid; grid-template-rows: 1fr auto; padding: 80px 0 32px; }
-.intro-layout { width: min(640px, calc(100% - 48px)); margin: 0 auto; align-self: center; display: flex; flex-direction: column; gap: 24px; }
+.hero { min-height: 100svh; position: relative; display: grid; grid-template-rows: 1fr auto; padding: 80px 320px 32px; }
+.intro-layout { width: 100%; margin: 0 auto; align-self: center; display: flex; flex-direction: column; gap: 24px; }
 .portrait { width: 96px; height: 96px; border-radius: 50%; overflow: hidden; transform: translateY(var(--portrait-shift, 0px)); }
 .portrait-visual { width: 100%; height: 100%; border-radius: inherit; overflow: hidden; }
 .portrait img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 50%; }
 .portrait.is-distorted img { opacity: 0; }
-.intro-copy { width: 100%; max-width: 640px; padding-top: 0; }
+.intro-copy { width: 100%; padding-top: 0; }
 h1 { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 600; letter-spacing: -.8px; }
 .role { color: var(--muted); font-size: 20px; line-height: 1.4; letter-spacing: -.65px; margin: 12px 0 24px; }
 .bio { width: 100%; text-align: left; font-size: 18px; line-height: 1.4; letter-spacing: -.35px; color: #efefef; }
@@ -83,7 +83,7 @@ h1 { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 600; letter-spa
 .scroll-cue:is(:hover, :focus-visible) svg { transform: translateY(7px); }
 .scroll-cue:is(:hover, :focus-visible) .roll-label, .scroll-cue:is(:hover, :focus-visible) .roll-copy { transform: translateY(-100%); }
 
-.cases { width: min(1040px, 72.5%); min-height: 100svh; margin: 0 auto; padding: 64px 0 140px; scroll-margin-top: 0; }
+.cases { min-height: 100svh; margin: 0 auto; padding: 64px 240px 140px; scroll-margin-top: 0; }
 h2 { font-size: 40px; font-weight: 600; line-height: 1.15; letter-spacing: -1.8px; margin: 0 0 52px; }
 .project-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 48px 32px; }
 .project:nth-child(even) { --reveal-delay: 90ms; }
@@ -129,18 +129,21 @@ h2 { font-size: 40px; font-weight: 600; line-height: 1.15; letter-spacing: -1.8p
 .motion-ready .bio .reveal-line { transform: none; transition: none; }
 .background-fallback .fluid-background { visibility: hidden; }
 
+@media (max-width: 1279px) {
+  .hero { padding-inline: clamp(24px, calc((100vw - 640px) / 2), 320px); }
+  .cases { padding-inline: clamp(24px, calc((100vw - 800px) / 2), 240px); }
+}
 @media (max-width: 1180px) {
   h1 { font-size: 24px; }
   .role { font-size: 20px; }
   .contacts { gap: 26px; flex-wrap: wrap; justify-content: space-between; }
   .email-link { margin-right: 12px; }
-  .cases { width: 80%; }
 }
 @media (max-width: 760px) {
   .language-button { top: 18px; right: 24px; font-size: 16px; }
   .hero { min-height: 100svh; padding: 80px 24px 32px; }
   .intro-layout { width: 100%; }
-  .intro-copy { padding-top: 0; max-width: 640px; }
+  .intro-copy { padding-top: 0; }
   h1 { letter-spacing: -.8px; }
   .role { font-size: 20px; margin: 12px 0 24px; }
   .bio { line-height: 1.5; letter-spacing: -.25px; }
