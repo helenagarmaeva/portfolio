@@ -125,6 +125,7 @@ h2 { font-size: 40px; font-weight: 600; line-height: 1.15; letter-spacing: -1.8p
 .motion-ready .reveal.is-instant .reveal-letter,
 .motion-ready .reveal.is-instant .reveal-line,
 .motion-ready .reveal.is-instant .project-cover { transition: none; }
+.motion-ready .portrait { transition: opacity .667s var(--ease); transition-delay: var(--reveal-delay, 0ms); }
 .motion-ready .bio .reveal-line { transform: none; transition: none; }
 .background-fallback .fluid-background { visibility: hidden; }
 

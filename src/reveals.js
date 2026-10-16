@@ -8,7 +8,7 @@ export class ScrollReveals {
     this.abort = new AbortController();
     this.elements = [...document.querySelectorAll('[data-reveal]')];
     document.querySelectorAll('h1, h2, .role, .bio p, .project-name, .project-description, .contacts .contact-label, .contacts .roll-label, .scroll-cue .roll-label').forEach(element => {
-      if (element.closest('[data-reveal]')) this.originals.set(element, element.textContent.trim());
+      this.originals.set(element, element.textContent.trim());
     });
     this.width = innerWidth;
     this.scrollPosition = scrollY;
