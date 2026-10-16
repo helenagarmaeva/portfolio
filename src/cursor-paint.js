@@ -1,3 +1,5 @@
+import { MediaDistortion } from './media-distortion.js';
+
 const TRAIL_VISIBILITY = .18;
 const TRAIL_SATURATION = 1.5;
 const REFRACTION_STRENGTH = .35;
@@ -185,7 +187,7 @@ export class CursorPaint {
     window.addEventListener('scroll', () => {
       // The shared canvas is fixed; the portrait must follow its DOM frame,
       // including while the cursor is idle and during reveal transitions.
-      if (!this.gl || !this.portraitReady) return;
+      if (!this.gl) return;
       this.lastMovement = performance.now();
       this.start();
     }, options);
@@ -201,7 +203,9 @@ export class CursorPaint {
       this.portraitReady = false; this.syncPortrait(); this.render();
     }, { signal: this.abort.signal });
     canvas.addEventListener('webglcontextlost', event => {
-      event.preventDefault(); this.pause(); this.gl = null; this.fallback();
+      event.preventDefault(); this.pause();
+      this.media?.destroy({ releaseTextures:false }); this.media = null;
+      this.gl = null; this.fallback();
     }, { signal: this.abort.signal });
     canvas.addEventListener('webglcontextrestored', () => {
       try {
@@ -228,6 +232,8 @@ export class CursorPaint {
     gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
     gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([0,0,0,255]));
+    this.media?.destroy();
+    this.media = new MediaDistortion(this);
     this.canvas.dataset.renderer = 'webgl';
     document.documentElement.classList.remove('background-fallback');
     this.resize();
@@ -332,6 +338,7 @@ export class CursorPaint {
     const height = Math.round(innerHeight*dpr);
     if (width===this.canvas.width && height===this.canvas.height && this.paint) return;
     this.canvas.width=width; this.canvas.height=height;
+    this.media?.invalidate();
     this.releaseTargets();
     // Render the portrait at Retina resolution while retaining the brush's
     // original simulation resolution and movement characteristics.
@@ -404,9 +411,11 @@ export class CursorPaint {
   }
 
   render() {
-    if (this.gl && this.paint) this.draw('display',null,{
+    if (!this.gl || !this.paint) return;
+    this.draw('display',null,{
       uPaint:this.paint.read,uPortrait:this.portraitTexture,uViewport:[innerWidth,innerHeight],uTrailVisibility:TRAIL_VISIBILITY,uTrailSaturation:TRAIL_SATURATION,uRefractionStrength:REFRACTION_STRENGTH,...this.portraitUniforms(),
     });
+    this.media?.render({ uPaint:this.paint.read,uViewport:[innerWidth,innerHeight],uRefractionStrength:REFRACTION_STRENGTH });
   }
 
   tick(timestamp) {
@@ -414,7 +423,7 @@ export class CursorPaint {
     if (this.destroyed || !this.gl || document.hidden) return;
     const dt=Math.min(.033,Math.max(.001,(timestamp-this.previousTime)/1000));
     this.previousTime=timestamp;
-    if (timestamp-this.lastMovement>4000) { this.clear(); this.render(); return; }
+    if (timestamp-this.lastMovement>4000 && !this.media?.playing()) { this.clear(); this.render(); return; }
     this.update(dt); this.render();
     this.frame=requestAnimationFrame(time=>this.tick(time));
   }
@@ -443,6 +452,7 @@ export class CursorPaint {
 
   release() {
     if (!this.gl) return;
+    this.media?.destroy();
     this.releaseTargets();
     for (const {program} of Object.values(this.programs)) this.gl.deleteProgram(program);
     this.gl.deleteTexture(this.portraitTexture?.texture);
@@ -450,6 +460,7 @@ export class CursorPaint {
   }
 
   fallback() {
+    this.media?.fallback();
     this.portraitReady = false; this.syncPortrait();
     this.canvas.dataset.renderer='css'; document.documentElement.classList.add('background-fallback');
   }

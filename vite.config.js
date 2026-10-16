@@ -8,6 +8,8 @@ export default defineConfig({
       input: {
         ru: fileURLToPath(new URL('./index.html', import.meta.url)),
         en: fileURLToPath(new URL('./en.html', import.meta.url)),
+        delta: fileURLToPath(new URL('./delta.html', import.meta.url)),
+        deltaEn: fileURLToPath(new URL('./delta-en.html', import.meta.url)),
       },
     },
   },

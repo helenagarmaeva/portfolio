@@ -439,12 +439,13 @@ test('mobile text animates scrolling down, returns instantly scrolling up and re
   const context = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
   const page = await context.newPage();
   await page.goto('./');
+  await page.evaluate(() => document.fonts.ready);
   const originalBio = await page.locator('.bio p .sr-only').allTextContents();
   expect(originalBio).toHaveLength(2);
   const project = page.locator('.project').first();
   const headingLetter = page.locator('#cases-title .reveal-letter').first();
   const projectLetter = project.locator('.reveal-letter').first();
-  const bioLine = page.locator('.bio .reveal-line').first();
+  const bioLetter = page.locator('.bio .reveal-letter').first();
   const sampleMotion = locator => locator.evaluate(el => new Promise(resolve => {
     const values = [];
     const started = performance.now();
@@ -464,13 +465,14 @@ test('mobile text animates scrolling down, returns instantly scrolling up and re
     const [headingMotion, projectMotion] = await Promise.all([sampleMotion(headingLetter), sampleMotion(projectLetter)]);
     expect(headingMotion.some(value => value > 1 && value < 40)).toBe(true);
     expect(projectMotion.some(value => value < -1)).toBe(true);
-    expect(Math.abs(headingMotion.at(-1))).toBeLessThan(.01);
-    expect(Math.abs(projectMotion.at(-1))).toBeLessThan(.01);
+    await expect.poll(() => headingLetter.evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m42)).toBeCloseTo(0,2);
+    await expect.poll(() => projectLetter.evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m42)).toBeCloseTo(0,2);
     await expect(page.locator('.bio')).not.toHaveClass(/is-visible/);
-    expect(await bioLine.evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m42)).toBeGreaterThan(20);
+    const bioFontSize = await bioLetter.evaluate(el => parseFloat(getComputedStyle(el).fontSize));
+    expect(await bioLetter.evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m42)).toBeGreaterThan(bioFontSize);
     await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
     await expect(page.locator('.bio')).toHaveClass(/is-visible/);
-    const bioMotion = await sampleMotion(bioLine);
+    const bioMotion = await sampleMotion(bioLetter);
     expect(bioMotion.every(value => Math.abs(value) < .01)).toBe(true);
     expect(Math.abs(bioMotion.at(-1))).toBeLessThan(.01);
   }
@@ -528,7 +530,13 @@ test('touch devices keep all four supplied covers intact', async ({ browser }) =
   for (const cover of await page.locator('.project-cover').all()) {
     await cover.scrollIntoViewIfNeeded();
     await expect.poll(() => cover.locator('img').evaluate(img => img.complete && img.naturalWidth > 0)).toBe(true);
+    const destination = await cover.evaluate(el => el.closest('[data-project]').getAttribute('href'));
     await cover.tap();
+    if (destination) {
+      await expect(page).toHaveURL(destination);
+      await expect(page.getByRole('heading',{ name:'ДельтаБезопасность',exact:true })).toBeVisible();
+      await page.goBack();
+    }
     await expect(cover).toHaveCSS('border-top-width', '0px');
     await expect(cover.locator('img')).toHaveCSS('transform', 'none');
     await expect(cover.locator('img')).toHaveCSS('filter', 'brightness(0.75)');

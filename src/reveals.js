@@ -7,7 +7,7 @@ export class ScrollReveals {
     this.scrambles = new Map();
     this.abort = new AbortController();
     this.elements = [...document.querySelectorAll('[data-reveal]')];
-    document.querySelectorAll('h1, h2, .role, .bio p, .project-name, .project-description, .contacts .contact-label, .contacts .roll-label, .scroll-cue .roll-label').forEach(element => {
+    document.querySelectorAll('h1, h2, .role, .bio p, .project-name, .project-description, .contacts .contact-label, .contacts .roll-label, .scroll-cue .roll-label, [data-reveal-letters], [data-reveal-lines]').forEach(element => {
       this.originals.set(element, element.textContent.trim());
     });
     this.width = innerWidth;
@@ -163,7 +163,7 @@ export class ScrollReveals {
     document.documentElement.classList.remove('motion-ready');
     // Restart all parts of the cue together when fonts or line breaks change.
     const cue = document.querySelector('.scroll-cue');
-    this.elements.filter(element => element.closest('.hero')).forEach(element => element.classList.remove('is-visible', 'is-instant'));
+    this.elements.filter(element => element.closest('.hero, .case-hero')).forEach(element => element.classList.remove('is-visible', 'is-instant'));
     for (const project of this.scrambles.keys()) this.stopScramble(project);
     // Restore before measuring, so a resized paragraph gets new line breaks.
     this.originals.forEach((text, element) => { element.textContent = text; });
@@ -173,12 +173,12 @@ export class ScrollReveals {
       return;
     }
     this.originals.forEach((text, element) => {
-      if (element.matches('h1, h2, .role, .project-name, .contacts .contact-label, .contacts .roll-label, .scroll-cue .roll-label')) this.letters(element, text);
+      if (element.matches('h1, h2, .role, .project-name, .contacts .contact-label, .contacts .roll-label, .scroll-cue .roll-label, [data-reveal-letters]')) this.letters(element, text);
       else this.lines(element, text);
     });
     const intro = document.querySelector('.intro-layout').getBoundingClientRect();
     const columnDelay = x => `${Math.max(0, Math.min(1, (x - intro.left) / intro.width)) * 600}ms`;
-    document.querySelectorAll('.hero .reveal-letter').forEach(letter => {
+    document.querySelectorAll('.hero .reveal-letter, .case-hero .reveal-letter').forEach(letter => {
       letter.style.setProperty('--letter-delay', columnDelay(letter.getBoundingClientRect().left));
     });
     cue?.querySelectorAll('.cue-arrow').forEach(arrow => {

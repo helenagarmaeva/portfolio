@@ -17,7 +17,7 @@ const russianContent = {
     {
       title: 'Сервис ДельтаБезопасность — комплексный B2B-дашборд',
       description: 'Web, В2В, Dashboard',
-      cover: './delta.png', url: '',
+      cover: './delta.png', url: './delta.html',
     },
     {
       title: 'SOLOK COSMETICS — интернет-магазин натуральной косметики',
@@ -34,7 +34,7 @@ const russianContent = {
 
 const englishProjects = [
   { title: 'TPK COSMOSPRAY — corporate website', description: 'Web, B2B, E-com, Graphic design' },
-  { title: 'Delta Security — comprehensive B2B dashboard', description: 'Web, B2B, Dashboard' },
+  { title: 'Delta Security — comprehensive B2B dashboard', description: 'Web, B2B, Dashboard', url: './delta-en.html' },
   { title: 'SOLOK COSMETICS — natural cosmetics online store', description: 'Web, B2C, E-com, Graphic design' },
   { title: 'Dubovaya Roshcha dog shelter — volunteer projects', description: 'Illustration, Graphic design' },
 ];

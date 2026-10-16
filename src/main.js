@@ -40,7 +40,7 @@ function safeUrl(value) {
   } catch { return null; }
 }
 
-function linkButton(button, value) {
+function linkButton(button, value, { external = true } = {}) {
   const url = safeUrl(value);
   if (!url) return;
   const link = document.createElement('a');
@@ -48,8 +48,10 @@ function linkButton(button, value) {
     if (attribute.name !== 'type') link.setAttribute(attribute.name, attribute.value);
   });
   link.href = url;
-  link.target = '_blank';
-  link.rel = 'noopener noreferrer';
+  if (external) {
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+  }
   link.append(...button.childNodes);
   button.replaceWith(link);
 }
@@ -78,7 +80,7 @@ document.querySelectorAll('[data-project]').forEach((button, index) => {
     image.decoding = 'async';
     cover.replaceChildren(image);
   }
-  linkButton(button, project.url);
+  linkButton(button, project.url, { external: false });
 });
 
 const reveals = new ScrollReveals(reducedMotion);
