@@ -12,6 +12,7 @@ uniform vec4 uUv;
 uniform float uRadius;
 uniform float uOpacity;
 uniform float uRefractionStrength;
+uniform float uMipBias;
 void main() {
   vec2 pixel = vUv*uViewport;
   vec2 local = pixel-uRect.xy;
@@ -27,8 +28,18 @@ void main() {
   vec2 displacement = clamp(direction*180.,vec2(-14.),vec2(14.))*uRefractionStrength;
   vec2 uv = uUv.xy+((local+displacement)/uRect.zw)*uUv.zw;
   vec2 fringe = direction*3./uRect.zw*uUv.zw*uRefractionStrength;
-  vec4 center = texture(uMedia,uv);
-  vec3 color = vec3(texture(uMedia,uv+fringe).r,center.g,texture(uMedia,uv-fringe).b);
+  vec4 center = texture(uMedia,uv,uMipBias);
+  vec3 color = vec3(texture(uMedia,uv+fringe,uMipBias).r,center.g,texture(uMedia,uv-fringe,uMipBias).b);
+  if (uMipBias<0.) {
+    // Recover edge contrast for small UI text, including on Retina screens.
+    // Uniform backgrounds and the source diagram's labels stay unchanged.
+    vec2 pixelSize = 1./vec2(textureSize(uMedia,0));
+    vec3 neighbors = (texture(uMedia,uv+vec2(pixelSize.x,0.),uMipBias).rgb
+      +texture(uMedia,uv-vec2(pixelSize.x,0.),uMipBias).rgb
+      +texture(uMedia,uv+vec2(0.,pixelSize.y),uMipBias).rgb
+      +texture(uMedia,uv-vec2(0.,pixelSize.y),uMipBias).rgb)*.25;
+    color = clamp(color+(center.rgb-neighbors)*.35,0.,1.);
+  }
   fragColor = vec4(color,center.a*mask*uOpacity);
 }`;
 
@@ -161,6 +172,9 @@ export class MediaDistortion {
       uUv:uv,
       uRadius:parseFloat(getComputedStyle(item.frame).borderTopLeftRadius)||0,
       uOpacity:opacity,
+      // Fine UI labels need more of the full-resolution level when reduced.
+      // Video keeps its antialiasing to avoid bringing back GIF moire.
+      uMipBias:item.element.hasAttribute('data-distort-detail') ? -.75 : 0,
     };
   }
 
