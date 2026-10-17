@@ -104,7 +104,7 @@ test('real case video refracts, restores, pauses and survives WebGL context loss
   await expect(canvas).toHaveAttribute('data-renderer','webgl');
   await expect(video).toHaveClass(/is-distorted-media/);
   await expect.poll(() => video.evaluate(el => el.paused)).toBe(false);
-  await page.locator('.case-hero-media .video-toggle').click();
+  await page.locator('.case-hero-media .video-toggle').click({position:{x:12,y:12}});
   await expect.poll(() => video.evaluate(el => el.paused)).toBe(true);
   await video.evaluate(el => { el.currentTime=2; });
   await expect.poll(() => video.evaluate(el => !el.seeking && el.readyState>=2)).toBe(true);
@@ -167,9 +167,12 @@ test('GIF recordings follow the new section order and play independently only wh
     await expect.poll(() => video.evaluate(el => !el.paused && el.currentTime>0 && el.readyState>=2)).toBe(true);
     await expect(video).not.toHaveClass(/is-distorted-media/);
   }
-  const positions = await frames.evaluateAll(elements => elements.map(el => {const r=el.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width};}));
-  expect(Math.abs(positions[0].y-positions[2].y)).toBeLessThan(1);
+  const positions = await frames.evaluateAll(elements => elements.map(el => {const r=el.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};}));
+  expect(Math.abs(positions[0].y-positions[1].y)).toBeLessThan(1);
   expect(positions[0].x+positions[0].width).toBeLessThan(positions[1].x);
+  expect(positions[2].y).toBeGreaterThan(positions[0].y+positions[0].height);
+  expect(positions[2].width).toBeCloseTo(positions[0].width,1);
+  expect(positions[2].x+positions[2].width/2).toBeCloseTo((positions[0].x+positions[1].x+positions[1].width)/2,1);
   await frames.nth(1).locator('.video-toggle').click();
   await expect.poll(() => frames.nth(1).locator('video').evaluate(el => el.paused)).toBe(true);
   await expect.poll(() => frames.nth(0).locator('video').evaluate(el => el.paused)).toBe(false);
@@ -198,6 +201,13 @@ test('updated English content and mobile animation fallbacks keep the new layout
     const page = await context.newPage();
     await page.goto(`./${path}`);
     await page.evaluate(() => document.fonts.ready);
+    const heroToggle = page.locator('.case-hero-media .video-toggle');
+    const heroVideo = page.locator('.case-hero-media video');
+    await expect.poll(() => heroVideo.evaluate(el => el.paused)).toBe(false);
+    await heroToggle.tap();
+    await expect.poll(() => heroVideo.evaluate(el => el.paused)).toBe(true);
+    await heroToggle.tap();
+    await expect.poll(() => heroVideo.evaluate(el => el.paused)).toBe(false);
     const frames = page.locator('.case-screen-item');
     await expect(frames.locator('figcaption .sr-only')).toHaveText(captions);
     for (const frame of await frames.all()) {
@@ -205,6 +215,11 @@ test('updated English content and mobile animation fallbacks keep the new layout
       const video = frame.locator('video');
       await expect.poll(() => video.evaluate(el => !el.paused && el.readyState>=2)).toBe(true);
       await expect(video).not.toHaveClass(/is-distorted-media/);
+      expect(await video.evaluate(el => el.controls)).toBe(false);
+      await frame.locator('.video-toggle').tap();
+      await expect.poll(() => video.evaluate(el => el.paused)).toBe(true);
+      await frame.locator('.video-toggle').tap();
+      await expect.poll(() => video.evaluate(el => el.paused)).toBe(false);
       expect(await video.evaluate(el => el.videoWidth)).toBeGreaterThan(1800);
       expect(await frame.locator('figcaption').evaluate(el => el.getBoundingClientRect().top)).toBeLessThan(844);
     }
