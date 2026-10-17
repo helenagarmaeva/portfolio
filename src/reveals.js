@@ -5,6 +5,8 @@ export class ScrollReveals {
     this.reducedMotion = reducedMotion;
     this.originals = new Map();
     this.scrambles = new Map();
+    this.revealed = new Set();
+    this.readyToReveal = false;
     this.abort = new AbortController();
     this.elements = [...document.querySelectorAll('[data-reveal]')];
     document.querySelectorAll('h1, h2, .role, .bio p, .project-name, .project-description, .contacts .contact-label, .contacts .roll-label, .scroll-cue .roll-label, [data-reveal-letters], [data-reveal-lines]').forEach(element => {
@@ -35,7 +37,18 @@ export class ScrollReveals {
       this.resizeFrame = requestAnimationFrame(() => this.setup());
     }, options);
     this.setup();
-    document.fonts?.ready.then(() => { if (!this.abort.signal.aborted) this.setup(); });
+    const start = () => {
+      if (this.abort.signal.aborted) return;
+      this.readyToReveal = true;
+      this.setup();
+    };
+    // Give local fonts a moment to settle without hiding content on a slow
+    // connection. A late font reflow still keeps previously revealed items.
+    this.fontTimer = setTimeout(start,300);
+    (document.fonts?.ready || Promise.resolve()).then(() => {
+      clearTimeout(this.fontTimer);
+      start();
+    });
   }
 
   accessibleVisual(element, text) {
@@ -161,15 +174,22 @@ export class ScrollReveals {
     this.observer?.disconnect();
     // Measure untransformed positions so matching columns share one reveal clock.
     document.documentElement.classList.remove('motion-ready');
-    // Restart all parts of the cue together when fonts or line breaks change.
+    // Reflow without replaying elements that have already appeared.
     const cue = document.querySelector('.scroll-cue');
-    this.elements.filter(element => element.closest('.hero, .case-hero')).forEach(element => element.classList.remove('is-visible', 'is-instant'));
+    this.elements.forEach(element => {
+      const revealed = this.revealed.has(element);
+      element.classList.toggle('is-visible',revealed);
+      element.classList.toggle('is-instant',revealed);
+    });
     for (const project of this.scrambles.keys()) this.stopScramble(project);
     // Restore before measuring, so a resized paragraph gets new line breaks.
     this.originals.forEach((text, element) => { element.textContent = text; });
     if (this.reducedMotion.matches || !('IntersectionObserver' in window)) {
       document.documentElement.classList.remove('motion-ready');
-      this.elements.forEach(element => element.classList.add('is-visible'));
+      this.elements.forEach(element => {
+        this.revealed.add(element);
+        element.classList.add('is-visible','is-instant');
+      });
       return;
     }
     this.originals.forEach((text, element) => {
@@ -189,30 +209,26 @@ export class ScrollReveals {
     });
     document.documentElement.classList.add('motion-ready');
     if (cue) void cue.offsetWidth;
+    if (!this.readyToReveal) return;
     this.observer = new IntersectionObserver(entries => {
       for (const entry of entries) {
         const element = entry.target;
-        if (entry.isIntersecting) {
-          const firstAppearance = !element.classList.contains('is-visible');
-          if (firstAppearance) element.classList.toggle('is-instant', this.direction < 0);
-          element.classList.add('is-visible');
-          if (firstAppearance && element.matches('.project') && this.direction > 0) this.scramble(element);
-        } else {
-          // Reset at the observer boundary, including its bottom inset.
-          // There is no second callback when an already non-intersecting
-          // card subsequently passes the physical viewport boundary.
-          element.classList.remove('is-visible', 'is-instant');
-          if (element.matches('.project')) this.stopScramble(element);
-        }
+        if (!entry.isIntersecting || this.revealed.has(element)) continue;
+        this.revealed.add(element);
+        element.classList.toggle('is-instant',this.direction<0);
+        element.classList.add('is-visible');
+        if (element.matches('.project') && this.direction>0) this.scramble(element);
+        this.observer.unobserve(element);
       }
     }, { threshold: [0, .12], rootMargin: '0px 0px -20px 0px' });
-    this.elements.forEach(element => this.observer.observe(element));
+    this.elements.filter(element => !this.revealed.has(element)).forEach(element => this.observer.observe(element));
   }
 
   destroy() {
     this.abort.abort();
     this.observer?.disconnect();
     cancelAnimationFrame(this.resizeFrame);
+    clearTimeout(this.fontTimer);
     for (const project of this.scrambles.keys()) this.stopScramble(project);
     this.originals.forEach((text, element) => { element.textContent = text; });
     this.elements.forEach(element => element.classList.remove('is-instant'));

@@ -202,6 +202,12 @@ export class CursorPaint {
     portrait?.addEventListener('error', () => {
       this.portraitReady = false; this.syncPortrait(); this.render();
     }, { signal: this.abort.signal });
+    document.fonts?.ready.then(() => {
+      if (this.destroyed || !this.gl) return;
+      // Follow the first reveal even if a slow font load outlasts the trail.
+      this.lastMovement = performance.now();
+      this.start();
+    });
     canvas.addEventListener('webglcontextlost', event => {
       event.preventDefault(); this.pause();
       this.media?.destroy({ releaseTextures:false }); this.media = null;

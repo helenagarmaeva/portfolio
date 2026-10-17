@@ -110,7 +110,7 @@ test('wheel scroll progresses smoothly instead of jumping', async ({ page }) => 
   expect(intermediate.size).toBeGreaterThan(3);
 });
 
-test('cases replay scrolling down and return immediately scrolling up', async ({ page }) => {
+test('cases reveal once and remain visible across scroll boundaries and resizing', async ({ page }) => {
   await page.addInitScript(() => {
     const getContext = HTMLCanvasElement.prototype.getContext;
     HTMLCanvasElement.prototype.getContext = function(type, ...args) {
@@ -118,50 +118,48 @@ test('cases replay scrolling down and return immediately scrolling up', async ({
     };
   });
   await page.goto('./');
+  await page.evaluate(() => document.fonts.ready);
   const project = page.locator('.project').first();
   const letter = project.locator('.reveal-letter').first();
-  await page.mouse.wheel(0, 1400);
-  await expect(project).toHaveClass(/is-visible/);
-  await expect.poll(() => letter.evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m42)).toBe(0);
-  for (let repeat = 0; repeat < 3; repeat++) {
-    await page.mouse.wheel(0, -2000);
-    await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
-    // Leave only 15px of the card visible below the observer's 20px inset.
-    // Previously this exit never reset the card, even after a later return.
-    await page.evaluate(() => {
-      const top = document.querySelector('.project').getBoundingClientRect().top + scrollY;
-      window.scrollTo({ top: top - innerHeight + 15, behavior: 'instant' });
-    });
-    await expect(project).not.toHaveClass(/is-visible/);
-    await expect.poll(() => letter.evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m42)).toBeLessThan(-100);
-    await page.mouse.wheel(0, 1200);
-    await expect(project).toHaveClass(/is-visible/);
-    const positions = await letter.evaluate(el => new Promise(resolve => {
-      const values = [];
-      const started = performance.now();
-      const sample = now => {
-        values.push(new DOMMatrix(getComputedStyle(el).transform).m42);
-        if (now - started >= 1450) resolve(values);
-        else requestAnimationFrame(sample);
-      };
-      requestAnimationFrame(sample);
-    }));
-    expect(positions.some(value => value < -1)).toBe(true);
-    expect(Math.abs(positions.at(-1))).toBeLessThan(.01);
-  }
-  // Use a shorter viewport so the first card can leave above the screen.
-  await page.setViewportSize({ width: 1440, height: 500 });
-  await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' }));
+  const sampleMotion = () => letter.evaluate(el => new Promise(resolve => {
+    const values = [];
+    const started = performance.now();
+    const sample = now => {
+      values.push(new DOMMatrix(getComputedStyle(el).transform).m42);
+      if (now-started>=1500) resolve(values);
+      else requestAnimationFrame(sample);
+    };
+    requestAnimationFrame(sample);
+  }));
   await expect(project).not.toHaveClass(/is-visible/);
-  await page.evaluate(() => window.scrollTo({ top: document.querySelector('#cases').offsetTop, behavior: 'instant' }));
+  await page.mouse.wheel(0,1400);
+  await expect(project).toHaveClass(/is-visible/);
+  expect((await sampleMotion()).some(value => value < -1)).toBe(true);
+  await expect.poll(() => letter.evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m42)).toBe(0);
+  for (let repeat=0; repeat<2; repeat++) {
+    await page.mouse.wheel(0,-2000);
+    await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
+    await page.evaluate(() => {
+      const top=document.querySelector('.project').getBoundingClientRect().top+scrollY;
+      window.scrollTo({top:top-innerHeight+15,behavior:'instant'});
+    });
+    await expect(project).toHaveClass(/is-visible/);
+    expect(await letter.evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m42)).toBe(0);
+    await page.mouse.wheel(0,1200);
+    expect((await sampleMotion()).every(value => Math.abs(value)<.01)).toBe(true);
+    expect((await project.locator('.project-description .reveal-line').allTextContents()).join(' ')).toBe('Web, В2В, E-com, Graphic design');
+  }
+  await page.setViewportSize({width:1280,height:500});
+  await page.evaluate(() => window.scrollTo({top:document.documentElement.scrollHeight,behavior:'instant'}));
+  await expect(project).toHaveClass(/is-visible/);
+  await page.evaluate(() => window.scrollTo({top:document.querySelector('#cases').offsetTop,behavior:'instant'}));
   await expect(project).toHaveClass(/is-instant/);
-  await expect(project).toHaveCSS('opacity', '1');
-  await expect(letter).toHaveCSS('transition-duration', '0s');
+  await expect(project).toHaveCSS('opacity','1');
+  await expect(letter).toHaveCSS('transition-duration','0s');
   expect(await letter.evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m42)).toBe(0);
-  await expect(project.locator('.project-cover')).toHaveCSS('clip-path', 'inset(0px round 16px)');
-  await expect(project.locator('.project-cover')).toHaveCSS('transform', 'none');
-  await expect(project.locator('.project-cover')).toHaveCSS('transition-duration', '0s');
-  expect((await project.locator('.project-description .reveal-line').allTextContents()).join(' ')).toBe('Web, В2В, E-com, Graphic design');
+  await expect(project.locator('.project-cover')).toHaveCSS('clip-path','inset(0px round 16px)');
+  await expect(project.locator('.project-cover')).toHaveCSS('transform','none');
+  await expect(project.locator('.project-cover')).toHaveCSS('transition-duration','0s');
 });
 
 test('portrait scrolls gently toward the heading and stops with an 8px gap', async ({ page }) => {
@@ -435,7 +433,7 @@ test('mobile layout keeps native touch scrolling and usable contacts', async ({ 
   await context.close();
 });
 
-test('mobile text animates scrolling down, returns instantly scrolling up and reflows', async ({ browser }) => {
+test('mobile text reveals once, stays visible and reflows without replay', async ({ browser }) => {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
   const page = await context.newPage();
   await page.goto('./');
@@ -456,26 +454,23 @@ test('mobile text animates scrolling down, returns instantly scrolling up and re
     };
     requestAnimationFrame(sample);
   }));
-  for (let repeat = 0; repeat < 2; repeat++) {
-    await expect(project).not.toHaveClass(/is-visible/);
-    expect(await headingLetter.evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m42)).toBeGreaterThan(20);
-    expect(await projectLetter.evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m42)).toBeLessThan(-100);
-    await page.evaluate(() => window.scrollTo({ top: document.querySelector('#cases').offsetTop, behavior: 'instant' }));
-    await expect(project).toHaveClass(/is-visible/);
-    const [headingMotion, projectMotion] = await Promise.all([sampleMotion(headingLetter), sampleMotion(projectLetter)]);
-    expect(headingMotion.some(value => value > 1 && value < 40)).toBe(true);
-    expect(projectMotion.some(value => value < -1)).toBe(true);
-    await expect.poll(() => headingLetter.evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m42)).toBeCloseTo(0,2);
-    await expect.poll(() => projectLetter.evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m42)).toBeCloseTo(0,2);
-    await expect(page.locator('.bio')).not.toHaveClass(/is-visible/);
-    const bioFontSize = await bioLetter.evaluate(el => parseFloat(getComputedStyle(el).fontSize));
-    expect(await bioLetter.evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m42)).toBeGreaterThan(bioFontSize);
-    await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
-    await expect(page.locator('.bio')).toHaveClass(/is-visible/);
-    const bioMotion = await sampleMotion(bioLetter);
-    expect(bioMotion.every(value => Math.abs(value) < .01)).toBe(true);
-    expect(Math.abs(bioMotion.at(-1))).toBeLessThan(.01);
-  }
+  await expect(project).not.toHaveClass(/is-visible/);
+  expect(await headingLetter.evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m42)).toBeGreaterThan(20);
+  expect(await projectLetter.evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m42)).toBeLessThan(-100);
+  await page.evaluate(() => window.scrollTo({top:document.querySelector('#cases').offsetTop,behavior:'instant'}));
+  await expect(project).toHaveClass(/is-visible/);
+  const [headingMotion,projectMotion]=await Promise.all([sampleMotion(headingLetter),sampleMotion(projectLetter)]);
+  expect(headingMotion.some(value => value>1 && value<40)).toBe(true);
+  expect(projectMotion.some(value => value < -1)).toBe(true);
+  await expect.poll(() => headingLetter.evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m42)).toBeCloseTo(0,2);
+  await expect.poll(() => projectLetter.evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m42)).toBeCloseTo(0,2);
+  await expect(page.locator('.bio')).toHaveClass(/is-visible/);
+  await page.evaluate(() => window.scrollTo({top:0,behavior:'instant'}));
+  expect((await sampleMotion(bioLetter)).every(value => Math.abs(value)<.01)).toBe(true);
+  await page.evaluate(() => window.scrollTo({top:document.querySelector('#cases').offsetTop,behavior:'instant'}));
+  await expect(project).toHaveClass(/is-visible/);
+  expect((await sampleMotion(projectLetter)).every(value => Math.abs(value)<.01)).toBe(true);
+  await page.evaluate(() => window.scrollTo({top:0,behavior:'instant'}));
   await page.setViewportSize({ width: 320, height: 844 });
   await expect.poll(() => page.locator('.bio p').evaluateAll(elements => elements.map(element =>
     [...element.querySelectorAll('.reveal-line')].map(line => line.textContent).join(' ')

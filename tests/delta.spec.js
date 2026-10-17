@@ -238,3 +238,26 @@ test('updated English content and mobile animation fallbacks keep the new layout
     await context.close();
   }
 });
+
+test('case text and media reveal only once, including after returning and reflowing', async ({ page }) => {
+  await withoutGpu(page);
+  for (const path of ['delta.html','delta-en.html']) {
+    await page.goto(`./${path}`);
+    await page.evaluate(() => document.fonts.ready);
+    const elements = page.locator('[data-reveal]');
+    const redesign = page.locator('#redesign-title').locator('..');
+    await expect(redesign).not.toHaveClass(/is-visible/);
+    for (const element of await elements.all()) {
+      await element.scrollIntoViewIfNeeded();
+      await expect(element).toHaveClass(/is-visible/);
+    }
+    await page.evaluate(() => scrollTo({top:0,behavior:'instant'}));
+    await expect.poll(() => elements.evaluateAll(els => els.every(el => el.classList.contains('is-visible')))).toBe(true);
+    await page.setViewportSize({width:1280,height:720});
+    await expect.poll(() => elements.evaluateAll(els => els.every(el => el.classList.contains('is-instant')))).toBe(true);
+    await page.evaluate(() => scrollTo({top:document.documentElement.scrollHeight,behavior:'instant'}));
+    expect(await elements.evaluateAll(els => els.every(el => getComputedStyle(el).opacity==='1'))).toBe(true);
+    expect(await page.locator('.reveal-letter,.reveal-line').evaluateAll(els => els.every(el => new DOMMatrix(getComputedStyle(el).transform).m42===0))).toBe(true);
+    await page.setViewportSize({width:1440,height:1000});
+  }
+});

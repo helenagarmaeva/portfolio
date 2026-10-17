@@ -55,15 +55,16 @@ test('English text and case reveals fit narrow touch screens', async ({ browser 
     )).toBe(true);
   }
   const project = page.locator('.project').first();
+  await expect(project).not.toHaveClass(/is-visible/);
   for (let repeat = 0; repeat < 2; repeat++) {
-    await expect(project).not.toHaveClass(/is-visible/);
     await page.getByRole('link', { name: 'Go to case studies' }).tap();
     await expect(project).toHaveClass(/is-visible/);
     await expect.poll(() => project.locator('.reveal-letter').first().evaluate(el =>
       new DOMMatrix(getComputedStyle(el).transform).m42
     )).toBe(0);
     await page.evaluate(() => scrollTo({ top: 0, behavior: 'instant' }));
-    await expect(project).not.toHaveClass(/is-visible/);
+    await expect(project).toHaveClass(/is-visible/);
+    expect(await project.locator('.reveal-letter').first().evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m42)).toBe(0);
   }
   await page.getByRole('link', { name: 'RU', exact: true }).tap();
   await expect(page.locator('html')).toHaveAttribute('lang', 'ru');
