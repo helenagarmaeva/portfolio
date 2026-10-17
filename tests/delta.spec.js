@@ -92,6 +92,7 @@ test('all original screenshots load, crop from the top and remain eligible for r
   await page.locator('.case-screens-grid').scrollIntoViewIfNeeded();
   for (const video of await page.locator('.case-screens-grid video').all()) {
     await expect(video).toHaveClass(/is-distorted-media/);
+    await video.locator('..').locator('..').hover();
     await expect.poll(() => video.evaluate(el => !el.paused && el.readyState>=2)).toBe(true);
   }
   expect(await page.locator('canvas').evaluate(el => el.getContext('webgl2').getError())).toBe(0);
@@ -152,7 +153,7 @@ test('real case video refracts, restores, pauses and survives WebGL context loss
   await expect(video).toHaveClass(/is-distorted-media/);
 });
 
-test('GIF recordings follow the new section order and play independently only while visible', async ({ page }) => {
+test('screen demos play on desktop hover, pause on exit and resume without restarting', async ({ page }) => {
   await withoutGpu(page);
   await page.goto('./delta.html');
   await page.evaluate(() => document.fonts.ready);
@@ -169,10 +170,21 @@ test('GIF recordings follow the new section order and play independently only wh
   await expect.poll(() => frames.locator('video').evaluateAll(elements => elements.every(el => el.paused))).toBe(true);
   await frames.first().scrollIntoViewIfNeeded();
   await expect.poll(() => hero.evaluate(el => el.paused)).toBe(true);
+  await expect.poll(() => frames.locator('video').evaluateAll(elements => elements.every(el => el.paused && el.currentTime===0))).toBe(true);
   for (const frame of await frames.all()) {
     const video = frame.locator('video');
+    await frame.locator('.case-screen-media').hover();
     await expect.poll(() => video.evaluate(el => !el.paused && el.currentTime>0 && el.readyState>=2)).toBe(true);
     await expect(video).not.toHaveClass(/is-distorted-media/);
+    await expect.poll(() => frames.locator('video').evaluateAll(elements => elements.filter(el => !el.paused).length)).toBe(1);
+    await page.mouse.move(20,200);
+    await expect.poll(() => video.evaluate(el => el.paused)).toBe(true);
+    const stoppedAt = await video.evaluate(el => el.currentTime);
+    await page.waitForTimeout(150);
+    expect(await video.evaluate(el => el.currentTime)).toBe(stoppedAt);
+    await frame.locator('.case-screen-media').hover();
+    await expect.poll(() => video.evaluate(el => !el.paused && el.currentTime)).toBeGreaterThan(stoppedAt);
+    await page.mouse.move(20,200);
   }
   const positions = await frames.evaluateAll(elements => elements.map(el => {const r=el.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};}));
   expect(Math.abs(positions[0].y-positions[1].y)).toBeLessThan(1);
@@ -180,16 +192,21 @@ test('GIF recordings follow the new section order and play independently only wh
   expect(positions[2].y).toBeGreaterThan(positions[0].y+positions[0].height);
   expect(positions[2].width).toBeCloseTo(positions[0].width,1);
   expect(positions[2].x+positions[2].width/2).toBeCloseTo((positions[0].x+positions[1].x+positions[1].width)/2,1);
-  await frames.nth(1).locator('.video-toggle').click();
-  await expect.poll(() => frames.nth(1).locator('video').evaluate(el => el.paused)).toBe(true);
-  await expect.poll(() => frames.nth(0).locator('video').evaluate(el => el.paused)).toBe(false);
-  await expect.poll(() => frames.nth(2).locator('video').evaluate(el => el.paused)).toBe(false);
+  const keyboardToggle = frames.first().locator('.video-toggle');
+  await keyboardToggle.focus();
+  await keyboardToggle.press('Enter');
+  await expect.poll(() => frames.first().locator('video').evaluate(el => el.paused)).toBe(false);
+  await keyboardToggle.press('Tab');
+  await expect.poll(() => frames.first().locator('video').evaluate(el => el.paused)).toBe(true);
+  await frames.first().locator('.case-screen-media').hover();
+  await expect.poll(() => frames.first().locator('video').evaluate(el => el.paused)).toBe(false);
   await page.locator('.case-system-media').scrollIntoViewIfNeeded();
   await expect.poll(() => page.locator('video').evaluateAll(elements => elements.every(el => el.paused))).toBe(true);
+  await page.mouse.move(20,200);
   await frames.first().scrollIntoViewIfNeeded();
-  await expect.poll(() => frames.nth(1).locator('video').evaluate(el => el.paused)).toBe(true);
-  await expect.poll(() => frames.nth(0).locator('video').evaluate(el => el.paused)).toBe(false);
+  await expect.poll(() => frames.locator('video').evaluateAll(elements => elements.every(el => el.paused))).toBe(true);
   await page.emulateMedia({reducedMotion:'reduce'});
+  await frames.first().locator('.case-screen-media').hover();
   await expect.poll(() => page.locator('video').evaluateAll(elements => elements.every(el => el.paused))).toBe(true);
   await expect(frames.locator('.is-distorted-media')).toHaveCount(0);
   const firstVideo = frames.first().locator('video');
@@ -197,6 +214,16 @@ test('GIF recordings follow the new section order and play independently only wh
   await expect.poll(() => firstVideo.evaluate(el => !el.seeking)).toBe(true);
   await frames.first().locator('.video-toggle').click();
   await expect.poll(() => firstVideo.evaluate(el => !el.paused && el.currentTime)).toBeGreaterThan(.3);
+  await page.mouse.move(20,200);
+  await expect.poll(() => firstVideo.evaluate(el => el.paused)).toBe(true);
+  await page.emulateMedia({reducedMotion:'no-preference'});
+  await page.goto('./delta-en.html');
+  await frames.first().scrollIntoViewIfNeeded();
+  await expect.poll(() => frames.locator('video').evaluateAll(elements => elements.every(el => el.paused))).toBe(true);
+  await frames.first().locator('.case-screen-media').hover();
+  await expect.poll(() => firstVideo.evaluate(el => !el.paused && el.currentTime>0)).toBe(true);
+  await page.mouse.move(20,200);
+  await expect.poll(() => firstVideo.evaluate(el => el.paused)).toBe(true);
 });
 
 test('updated English content and mobile animation fallbacks keep the new layout readable', async ({ browser }) => {

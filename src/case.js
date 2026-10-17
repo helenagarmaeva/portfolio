@@ -46,21 +46,29 @@ window.addEventListener('resize',fitHeroMedia,{ signal:abort.signal });
 document.fonts.ready.then(fitHeroMedia);
 fitHeroMedia();
 
-// Each animation plays only while on screen. GIF recordings are served as
-// lightweight video loops so their moving frames can share cursor refraction.
+// Screen demos play on hover with a mouse; touch devices keep tap controls.
+// All recordings pause off screen and share the existing cursor refraction.
 const animations = [...document.querySelectorAll('[data-animated-media]')].map(frame => ({
   frame, video:frame.querySelector('video'), toggle:frame.querySelector('.video-toggle'),
+  hoverOnly:frame.classList.contains('case-screen-media'), hovered:false,
   userPaused:false, manualPlayback:false, visible:false,
 }));
 function updateToggle(item) {
   item.toggle.setAttribute('aria-pressed',String(item.video.paused));
   item.toggle.setAttribute('aria-label',item.video.paused ? item.toggle.dataset.playLabel : item.toggle.dataset.pauseLabel);
 }
-function updatePlayback(item) {
-  item.manualPlayback = false;
-  if (item.visible && !document.hidden && !reducedMotion.matches && !item.userPaused) item.video.play().catch(() => updateToggle(item));
+const hoverControlled = item => item.hoverOnly && finePointer.matches;
+const canPlay = item => item.visible && !document.hidden && !item.userPaused
+  && (!reducedMotion.matches || item.manualPlayback)
+  && (!hoverControlled(item) || item.hovered || item.manualPlayback);
+function applyPlayback(item) {
+  if (canPlay(item)) item.video.play().catch(() => updateToggle(item));
   else item.video.pause();
   updateToggle(item);
+}
+function updatePlayback(item) {
+  item.manualPlayback = false;
+  applyPlayback(item);
 }
 const mediaObserver = new IntersectionObserver(entries => {
   for (const entry of entries) {
@@ -75,21 +83,33 @@ for (const item of animations) {
   item.toggle.addEventListener('click',() => {
     item.manualPlayback = item.video.paused;
     item.userPaused = !item.video.paused;
-    if (item.video.paused) item.video.play().catch(() => updateToggle(item));
-    else item.video.pause();
-    updateToggle(item);
+    applyPlayback(item);
+  },{ signal:abort.signal });
+  for (const event of ['pointerenter','pointerleave']) item.frame.addEventListener(event,event => {
+    if (event.pointerType==='touch') return;
+    item.hovered = event.type==='pointerenter';
+    if (!hoverControlled(item)) return;
+    item.userPaused = false;
+    updatePlayback(item);
+  },{ signal:abort.signal });
+  item.toggle.addEventListener('blur',() => {
+    if (hoverControlled(item)) updatePlayback(item);
   },{ signal:abort.signal });
   for (const event of ['play','pause']) item.video.addEventListener(event,() => updateToggle(item),{ signal:abort.signal });
   item.video.addEventListener('timeupdate',() => {
     // A media-query change can arrive while decoded frames are still queued.
     // Enforce automatic playback policy, while allowing an explicit Play.
-    if (!item.video.paused && (!item.visible || document.hidden || item.userPaused || (reducedMotion.matches && !item.manualPlayback))) item.video.pause();
+    if (!item.video.paused && !canPlay(item)) item.video.pause();
   },{ signal:abort.signal });
   mediaObserver.observe(item.frame);
 }
 const updateAllPlayback = () => animations.forEach(updatePlayback);
 document.addEventListener('visibilitychange',updateAllPlayback,{ signal:abort.signal });
 reducedMotion.addEventListener('change',updateAllPlayback,{ signal:abort.signal });
+finePointer.addEventListener('change',() => {
+  for (const item of animations) item.hovered = item.frame.matches(':hover');
+  updateAllPlayback();
+},{ signal:abort.signal });
 window.addEventListener('pagehide',() => { animations.forEach(item => item.video.pause()); fluid.pause(); },{ signal:abort.signal });
 window.addEventListener('pageshow',() => { updateAllPlayback(); fluid.start(); },{ signal:abort.signal });
 
