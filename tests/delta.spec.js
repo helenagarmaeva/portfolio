@@ -46,10 +46,10 @@ test('case header and video fit the viewport, with aligned fixed navigation', as
     const fixed = await page.evaluate(() => {
       const language = document.querySelector('.language-button').getBoundingClientRect();
       const top = document.querySelector('.back-to-top').getBoundingClientRect();
-      return { centerDifference:(language.left+language.right-top.left-top.right)/2,edgeDifference:language.top-(innerHeight-top.bottom) };
+      return { centerDifference:(language.left+language.right-top.left-top.right)/2,bottomGap:innerHeight-top.bottom };
     });
     expect(Math.abs(fixed.centerDifference)).toBeLessThan(1);
-    expect(Math.abs(fixed.edgeDifference)).toBeLessThan(1);
+    expect(fixed.bottomGap).toBe(width <= 760 ? 36 : 48);
     await context.close();
   }
 });
