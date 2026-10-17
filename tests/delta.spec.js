@@ -33,8 +33,8 @@ test('Delta case is linked from both home pages and switches language in place',
 });
 
 test('case header and video fit the viewport, with aligned fixed navigation', async ({ browser }) => {
-  for (const path of ['delta.html','delta-en.html']) for (const [width,height] of [[1440,900],[1280,720],[320,640]]) {
-    const context = await browser.newContext({ viewport:{width,height},isMobile:width===320,hasTouch:width===320 });
+  for (const path of ['delta.html','delta-en.html']) for (const [width,height] of [[1440,900],[1280,720],[320,640],[390,844]]) {
+    const context = await browser.newContext({ viewport:{width,height},isMobile:width<=390,hasTouch:width<=390 });
     const page = await context.newPage();
     await withoutGpu(page);
     await page.goto(`./${path}`);
@@ -50,6 +50,11 @@ test('case header and video fit the viewport, with aligned fixed navigation', as
     });
     expect(Math.abs(fixed.centerDifference)).toBeLessThan(1);
     expect(fixed.bottomGap).toBe(width <= 760 ? 36 : 48);
+    if (width<=760) {
+      const gap = await page.evaluate(() => document.querySelector('.case-summary').getBoundingClientRect().top
+        -document.querySelector('.case-hero-media').getBoundingClientRect().bottom);
+      expect(gap).toBeCloseTo(40,1);
+    }
     await context.close();
   }
 });
@@ -158,7 +163,7 @@ test('screen demos play on desktop hover, pause on exit and resume without resta
   await page.goto('./delta.html');
   await page.evaluate(() => document.fonts.ready);
   const hero = page.locator('.case-hero-media video');
-  await expect(hero.locator('source')).toHaveAttribute('src','./delta/DeltaMain-smooth.mp4');
+  await expect(hero.locator('source')).toHaveAttribute('src','./delta/DeltaMain-120.mp4');
   const sections = page.locator('.case-body > .case-section > .reveal > h2 > .sr-only');
   await expect(sections).toHaveText(['Редизайн','Экраны','Дизайн-система']);
   const frames = page.locator('.case-screen-item');

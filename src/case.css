@@ -60,7 +60,8 @@
 }
 @media (max-width: 760px) {
   .case-container { padding-inline: 24px; }
-  .case-hero { padding-top: 80px; padding-bottom: 32px; }
+  .case-hero { min-height: 0; padding-top: 80px; padding-bottom: 0; }
+  .case-hero-media { width: 100%; }
   .case-back { margin-bottom: 20px; }
   .case-heading { margin-bottom: 24px; }
   .case-body { padding-top: 40px; padding-bottom: 100px; }

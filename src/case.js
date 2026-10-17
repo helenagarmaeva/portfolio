@@ -33,6 +33,12 @@ fluid.start();
 const hero = document.querySelector('.case-hero');
 const heroMedia = document.querySelector('.case-hero-media');
 function fitHeroMedia() {
+  // A narrow viewport uses the media's natural ratio instead of reserving a
+  // full screen below it. Keep the desktop height constraint independent.
+  if (innerWidth<=760) {
+    heroMedia.style.removeProperty('--hero-media-height');
+    return;
+  }
   const height = parseFloat(getComputedStyle(hero).minHeight);
   const top = heroMedia.getBoundingClientRect().top-hero.getBoundingClientRect().top;
   const available = Math.max(96,Math.floor(height-top-parseFloat(getComputedStyle(hero).paddingBottom)));
