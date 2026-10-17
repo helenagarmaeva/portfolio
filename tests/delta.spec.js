@@ -88,7 +88,7 @@ test('all original screenshots load, crop from the top and remain eligible for r
   const uiKit = page.locator('.case-system-media img');
   await uiKit.scrollIntoViewIfNeeded();
   await expect(uiKit).toHaveClass(/is-distorted-media/);
-  expect(await uiKit.evaluate(el => { const r=el.getBoundingClientRect(); return r.width/r.height; })).toBeCloseTo(960/685,2);
+  expect(await uiKit.evaluate(el => { const r=el.getBoundingClientRect(); return r.width/r.height; })).toBeCloseTo(794/566,2);
   await page.locator('.case-screens-grid').scrollIntoViewIfNeeded();
   for (const video of await page.locator('.case-screens-grid video').all()) {
     await expect(video).toHaveClass(/is-distorted-media/);
@@ -106,9 +106,15 @@ test('real case video refracts, restores, pauses and survives WebGL context loss
   await expect.poll(() => video.evaluate(el => el.paused)).toBe(false);
   await page.locator('.case-hero-media .video-toggle').click({position:{x:12,y:12}});
   await expect.poll(() => video.evaluate(el => el.paused)).toBe(true);
-  await video.evaluate(el => { el.currentTime=2; });
+  await expect(page.locator('.case-hero-media')).toHaveCSS('opacity','1');
+  // Wait for the sought frame to be presented and uploaded, not just decoded.
+  await video.evaluate(el => new Promise(resolve => {
+    const presented = () => requestAnimationFrame(() => requestAnimationFrame(resolve));
+    if (el.requestVideoFrameCallback) el.requestVideoFrameCallback(presented);
+    else el.addEventListener('seeked',presented,{once:true});
+    el.currentTime=2;
+  }));
   await expect.poll(() => video.evaluate(el => !el.seeking && el.readyState>=2)).toBe(true);
-  await page.waitForTimeout(150);
   const sample = () => page.evaluate(() => {
     const canvas = document.querySelector('canvas'), gl = canvas.getContext('webgl2');
     const rect = document.querySelector('.case-hero-media').getBoundingClientRect();
@@ -130,7 +136,8 @@ test('real case video refracts, restores, pauses and survives WebGL context loss
   for (let i=0; i<original.length; i+=4) if (original[i]+original[i+1]+original[i+2]-distorted[i]-distorted[i+1]-distorted[i+2]>25) darker++;
   expect(darker).toBeGreaterThan(10);
   await page.waitForTimeout(4300);
-  expect(await sample()).toEqual(original);
+  const restored = await sample();
+  expect(restored.reduce((sum,value,index) => sum+Math.abs(value-original[index]),0)).toBe(0);
   await page.emulateMedia({reducedMotion:'reduce'});
   await expect(video).not.toHaveClass(/is-distorted-media/);
   await expect.poll(() => video.evaluate(el => el.paused)).toBe(true);
@@ -150,13 +157,13 @@ test('GIF recordings follow the new section order and play independently only wh
   await page.goto('./delta.html');
   await page.evaluate(() => document.fonts.ready);
   const hero = page.locator('.case-hero-media video');
-  await expect(hero.locator('source')).toHaveAttribute('src','./delta/DeltaMain.mp4');
+  await expect(hero.locator('source')).toHaveAttribute('src','./delta/DeltaMain-smooth.mp4');
   const sections = page.locator('.case-body > .case-section > .reveal > h2 > .sr-only');
   await expect(sections).toHaveText(['Редизайн','Экраны','Дизайн-система']);
   const frames = page.locator('.case-screen-item');
   await expect(frames.locator('figcaption .sr-only')).toHaveText(['Гибкая визуализация','Модальные окна','Карточка физ.лиц']);
   for (const [i,name] of ['DeltaData','DeltaModal','DeltaToggle'].entries()) {
-    await expect(frames.nth(i).locator('source')).toHaveAttribute('src',`./delta/${name}.mp4`);
+    await expect(frames.nth(i).locator('source')).toHaveAttribute('src',`./delta/${name}-smooth.mp4`);
   }
   await expect.poll(() => hero.evaluate(el => el.paused)).toBe(false);
   await expect.poll(() => frames.locator('video').evaluateAll(elements => elements.every(el => el.paused))).toBe(true);
@@ -220,7 +227,7 @@ test('updated English content and mobile animation fallbacks keep the new layout
       await expect.poll(() => video.evaluate(el => el.paused)).toBe(true);
       await frame.locator('.video-toggle').tap();
       await expect.poll(() => video.evaluate(el => el.paused)).toBe(false);
-      expect(await video.evaluate(el => el.videoWidth)).toBeGreaterThan(1800);
+      expect(await video.evaluate(el => el.videoWidth)).toBeGreaterThan(900);
       expect(await frame.locator('figcaption').evaluate(el => el.getBoundingClientRect().top)).toBeLessThan(844);
     }
     const positions = await frames.evaluateAll(elements => elements.map(el => {const r=el.getBoundingClientRect();return {x:r.x,y:r.y,height:r.height};}));

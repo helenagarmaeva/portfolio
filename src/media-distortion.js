@@ -47,7 +47,7 @@ export class MediaDistortion {
       const gl = this.gl;
       item.texture = { texture: gl.createTexture() };
       gl.bindTexture(gl.TEXTURE_2D,item.texture.texture);
-      gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,item.video ? gl.LINEAR : gl.LINEAR_MIPMAP_LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);
       gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
       gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
       gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
@@ -119,7 +119,9 @@ export class MediaDistortion {
       this.gl.bindTexture(this.gl.TEXTURE_2D,item.texture.texture);
       this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL,true);
       this.gl.texImage2D(this.gl.TEXTURE_2D,0,this.gl.RGBA,this.gl.RGBA,this.gl.UNSIGNED_BYTE,source);
-      if (!video) this.gl.generateMipmap(this.gl.TEXTURE_2D);
+      // Moving UI recordings need the same antialiasing as still images;
+      // bilinear minification alone aliases GIF dithering into a checkerboard.
+      this.gl.generateMipmap(this.gl.TEXTURE_2D);
       item.ready = this.gl.getError()===this.gl.NO_ERROR;
       item.dirty = false;
       item.time = video ? element.currentTime : 0;

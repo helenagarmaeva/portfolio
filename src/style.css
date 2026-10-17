@@ -1,5 +1,5 @@
 @import '@fontsource/ibm-plex-mono/400.css';
-@import '@fontsource/ibm-plex-mono/600.css';
+@import '@fontsource/ibm-plex-mono/500.css';
 
 :root {
   color-scheme: dark;
@@ -38,7 +38,7 @@ main { position: relative; z-index: 1; }
 .portrait.is-distorted img { opacity: 0; }
 [data-distort].is-distorted-media { visibility: hidden; }
 .intro-copy { width: 100%; padding-top: 0; }
-h1 { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 600; letter-spacing: -.8px; }
+h1 { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 500; letter-spacing: -.8px; }
 .role { color: var(--muted); font-size: 20px; line-height: 1.4; letter-spacing: -.65px; margin: 12px 0 24px; }
 .bio { width: 100%; text-align: left; font-size: 18px; line-height: 1.4; letter-spacing: -.35px; color: #efefef; }
 .bio p { margin: 0; }
@@ -85,7 +85,7 @@ h1 { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 600; letter-spa
 .scroll-cue:is(:hover, :focus-visible) .roll-label, .scroll-cue:is(:hover, :focus-visible) .roll-copy { transform: translateY(-100%); }
 
 .cases { min-height: 100svh; margin: 0 auto; padding: 64px 240px 140px; scroll-margin-top: 0; }
-h2 { font-size: 40px; font-weight: 600; line-height: 1.15; letter-spacing: -1.8px; margin: 0 0 52px; }
+h2 { font-size: 40px; font-weight: 500; line-height: 1.15; letter-spacing: -1.8px; margin: 0 0 52px; }
 .project-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 48px 32px; }
 .project:nth-child(even) { --reveal-delay: 90ms; }
 .project-button { display: block; width: 100%; text-align: left; }
@@ -96,7 +96,7 @@ h2 { font-size: 40px; font-weight: 600; line-height: 1.15; letter-spacing: -1.8p
   .project-button:is(:hover, :focus-visible) .project-cover img { transform: scale(1.05); }
 }
 .project-title { display: block; position: relative; font-size: 20px; line-height: 1.25; letter-spacing: -.8px; margin-top: 30px; }
-.project-name { display: inline-block; max-width: calc(100% - 36px); overflow-wrap: anywhere; transition: transform .55s var(--ease); }
+.project-name { display: inline-block; max-width: calc(100% - 36px); font-weight: 500; overflow-wrap: anywhere; transition: transform .55s var(--ease); }
 .project-title .link-arrow { left: 0; width: 28px; height: 28px; }
 .project-description { display: block; color: var(--muted); font-size: 18px; line-height: 1.4; letter-spacing: -.8px; margin-top: 8px; }
 .project-button:is(:hover, :focus-visible) .project-name { transform: translateX(36px); }
