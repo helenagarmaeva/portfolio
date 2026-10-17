@@ -93,6 +93,8 @@ test('all original screenshots load, crop from the top and remain eligible for r
   const uiKit = page.locator('.case-system-media img');
   await uiKit.scrollIntoViewIfNeeded();
   await expect(uiKit).toHaveClass(/is-distorted-media/);
+  await expect(uiKit).toHaveJSProperty('naturalWidth',1920);
+  await expect(uiKit).toHaveJSProperty('naturalHeight',1370);
   expect(await uiKit.evaluate(el => { const r=el.getBoundingClientRect(); return r.width/r.height; })).toBeCloseTo(794/566,2);
   await page.locator('.case-screens-grid').scrollIntoViewIfNeeded();
   for (const video of await page.locator('.case-screens-grid video').all()) {
