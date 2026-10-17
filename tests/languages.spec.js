@@ -1,10 +1,10 @@
 import { test, expect } from '@playwright/test';
 
 const englishTitles = [
-  'TPK COSMOSPRAY — corporate website',
-  'Delta Security — comprehensive B2B dashboard',
-  'SOLOK COSMETICS — natural cosmetics online store',
-  'Dubovaya Roshcha dog shelter — volunteer projects',
+  'TPK COSMOSPRAY',
+  'Delta Security',
+  'Solok Cosmetics',
+  'Dubovaya Roshcha dog shelter',
 ];
 
 test('language links navigate both ways and English stays English after reload', async ({ page }) => {

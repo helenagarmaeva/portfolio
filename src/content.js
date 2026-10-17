@@ -10,22 +10,22 @@ const russianContent = {
   },
   projects: [
     {
-      title: 'ТПК КОСМОСПРЭЙ — корпоративный сайт',
+      title: 'ТПК КОСМОСПРЭЙ',
       description: 'Web, В2В, E-com, Graphic design',
       cover: './cosmospray.png', url: '',
     },
     {
-      title: 'Сервис ДельтаБезопасность — комплексный B2B-дашборд',
+      title: 'ДельтаБезопасность',
       description: 'Web, В2В, Dashboard',
       cover: './delta.png', url: './delta.html',
     },
     {
-      title: 'SOLOK COSMETICS — интернет-магазин натуральной косметики',
+      title: 'Solok Cosmetics',
       description: 'Web, В2С, E-com, Graphic design',
       cover: './solok.png', url: '',
     },
     {
-      title: 'Приют для собак «Дубовая Роща» — волонтерские проекты',
+      title: 'Приют для собак «Дубовая Роща»',
       description: 'Illustration, Graphic design',
       cover: './dubovaya.png', url: '',
     },
@@ -33,10 +33,10 @@ const russianContent = {
 };
 
 const englishProjects = [
-  { title: 'TPK COSMOSPRAY — corporate website', description: 'Web, B2B, E-com, Graphic design' },
-  { title: 'Delta Security — comprehensive B2B dashboard', description: 'Web, B2B, Dashboard', url: './delta-en.html' },
-  { title: 'SOLOK COSMETICS — natural cosmetics online store', description: 'Web, B2C, E-com, Graphic design' },
-  { title: 'Dubovaya Roshcha dog shelter — volunteer projects', description: 'Illustration, Graphic design' },
+  { title: 'TPK COSMOSPRAY', description: 'Web, B2B, E-com, Graphic design' },
+  { title: 'Delta Security', description: 'Web, B2B, Dashboard', url: './delta-en.html' },
+  { title: 'Solok Cosmetics', description: 'Web, B2C, E-com, Graphic design' },
+  { title: 'Dubovaya Roshcha dog shelter', description: 'Illustration, Graphic design' },
 ];
 
 export const content = document.documentElement.lang === 'en' ? {
