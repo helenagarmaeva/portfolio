@@ -164,6 +164,9 @@ test('real case video refracts, restores, pauses and survives WebGL context loss
   await expect(video).not.toHaveClass(/is-distorted-media/);
   await page.evaluate(() => window.caseLoss.restoreContext());
   await expect(video).toHaveClass(/is-distorted-media/);
+  await page.locator('.case-hero-media .video-toggle').press('Enter');
+  await expect.poll(() => video.evaluate(el => el.paused)).toBe(false);
+  await expect(video).not.toHaveClass(/is-distorted-media/);
 });
 
 test('screen demos play on desktop hover, pause on exit and resume without restarting', async ({ page }) => {
@@ -171,15 +174,16 @@ test('screen demos play on desktop hover, pause on exit and resume without resta
   await page.goto('./delta.html');
   await page.evaluate(() => document.fonts.ready);
   const hero = page.locator('.case-hero-media video');
-  await expect(hero.locator('source:not([media])')).toHaveAttribute('src','./delta/DeltaMain-hq-120.mp4');
+  await expect(hero.locator('source:not([media])')).toHaveAttribute('src','./delta/DeltaMain-original-120.mp4');
   const sections = page.locator('.case-body > .case-section > .reveal > h2 > .sr-only');
   await expect(sections).toHaveText(['Редизайн','Экраны','Дизайн-система']);
   const frames = page.locator('.case-screen-item');
   await expect(frames.locator('figcaption .sr-only')).toHaveText(['Гибкая визуализация','Модальные окна','Карточка физ.лиц']);
   for (const [i,name] of ['DeltaData','DeltaModal','DeltaToggle'].entries()) {
-    await expect(frames.nth(i).locator('source')).toHaveAttribute('src',`./delta/${name}-smooth.mp4`);
+    await expect(frames.nth(i).locator('source')).toHaveAttribute('src',`./delta/${name}-original-60.mp4`);
   }
   await expect.poll(() => hero.evaluate(el => el.paused)).toBe(false);
+  expect(await hero.evaluate(el => el.videoWidth)).toBe(1600);
   await expect.poll(() => frames.locator('video').evaluateAll(elements => elements.every(el => el.paused))).toBe(true);
   await frames.first().scrollIntoViewIfNeeded();
   await expect.poll(() => hero.evaluate(el => el.paused)).toBe(true);
@@ -251,7 +255,7 @@ test('updated English content and mobile animation fallbacks keep the new layout
     const heroToggle = page.locator('.case-hero-media .video-toggle');
     const heroVideo = page.locator('.case-hero-media video');
     await expect.poll(() => heroVideo.evaluate(el => el.paused)).toBe(false);
-    await expect.poll(() => heroVideo.evaluate(el => el.currentSrc.endsWith('/delta/DeltaMain-mobile-60.mp4') && el.videoWidth>1000)).toBe(true);
+    await expect.poll(() => heroVideo.evaluate(el => el.currentSrc.endsWith('/delta/DeltaMain-original-mobile-60.mp4') && el.videoWidth>1000)).toBe(true);
     await heroToggle.tap();
     await expect.poll(() => heroVideo.evaluate(el => el.paused)).toBe(true);
     await heroToggle.tap();

@@ -97,7 +97,13 @@ export class MediaDistortion {
   }
 
   wake(item) {
-    if (!this.eligible() || !this.visible(item) || this.nativePlayback(item)) return;
+    if (!this.eligible() || !this.visible(item)) return;
+    if (this.nativePlayback(item)) {
+      // Keyboard playback can start after the paint loop has gone idle.
+      // Reveal the native video once; decoded frames then stay off WebGL.
+      if (item.element.classList.contains('is-distorted-media')) this.paint.render();
+      return;
+    }
     this.paint.lastMovement = performance.now();
     this.paint.start();
   }
