@@ -91,8 +91,13 @@ export class MediaDistortion {
     return rect.width>0 && rect.height>0 && rect.bottom>0 && rect.top<innerHeight && rect.right>0 && rect.left<innerWidth;
   }
 
+  nativePlayback(item) {
+    return item.video && item.element.hasAttribute('data-distort-native-idle')
+      && !item.element.paused && performance.now()-this.paint.lastPointerMovement>4000;
+  }
+
   wake(item) {
-    if (!this.eligible() || !this.visible(item)) return;
+    if (!this.eligible() || !this.visible(item) || this.nativePlayback(item)) return;
     this.paint.lastMovement = performance.now();
     this.paint.start();
   }
@@ -187,8 +192,9 @@ export class MediaDistortion {
     this.paint.programs.caseMedia = this.program;
     try {
       for (const item of this.items) {
-        if (!eligible || !this.visible(item)) {
+        if (!eligible || !this.visible(item) || this.nativePlayback(item)) {
           item.element.classList.remove('is-distorted-media');
+          item.dirty = true;
           continue;
         }
         if (item.dirty || (item.video && !item.element.requestVideoFrameCallback && item.element.currentTime!==item.time)) this.upload(item);
@@ -201,7 +207,7 @@ export class MediaDistortion {
   }
 
   playing() {
-    return this.eligible() && this.items.some(item => item.video && !item.element.paused && !item.element.ended && this.visible(item));
+    return this.eligible() && this.items.some(item => item.video && !item.element.paused && !item.element.ended && !this.nativePlayback(item) && this.visible(item));
   }
 
   invalidate() {

@@ -108,7 +108,15 @@ test('real case video refracts, restores, pauses and survives WebGL context loss
   const canvas = page.locator('.fluid-background');
   const video = page.locator('.case-hero-media video');
   await expect(canvas).toHaveAttribute('data-renderer','webgl');
+  await expect(video).not.toHaveClass(/is-distorted-media/);
+  await expect.poll(() => video.evaluate(el => el.paused)).toBe(false);
+  // Idle playback stays in the browser's compositor, without copying every
+  // decoded frame into WebGL. Cursor input re-enables the shared refraction.
+  const nativeTime = await video.evaluate(el => el.currentTime);
+  await expect.poll(() => video.evaluate(el => el.currentTime)).toBeGreaterThan(nativeTime+.15);
+  await page.mouse.move(10,10);
   await expect(video).toHaveClass(/is-distorted-media/);
+  await expect.poll(() => video.evaluate(el => el.classList.contains('is-distorted-media')), {timeout:7000}).toBe(false);
   await expect.poll(() => video.evaluate(el => el.paused)).toBe(false);
   await page.locator('.case-hero-media .video-toggle').click({position:{x:12,y:12}});
   await expect.poll(() => video.evaluate(el => el.paused)).toBe(true);
@@ -163,7 +171,7 @@ test('screen demos play on desktop hover, pause on exit and resume without resta
   await page.goto('./delta.html');
   await page.evaluate(() => document.fonts.ready);
   const hero = page.locator('.case-hero-media video');
-  await expect(hero.locator('source')).toHaveAttribute('src','./delta/DeltaMain-120.mp4');
+  await expect(hero.locator('source:not([media])')).toHaveAttribute('src','./delta/DeltaMain-hq-120.mp4');
   const sections = page.locator('.case-body > .case-section > .reveal > h2 > .sr-only');
   await expect(sections).toHaveText(['Редизайн','Экраны','Дизайн-система']);
   const frames = page.locator('.case-screen-item');
@@ -243,6 +251,7 @@ test('updated English content and mobile animation fallbacks keep the new layout
     const heroToggle = page.locator('.case-hero-media .video-toggle');
     const heroVideo = page.locator('.case-hero-media video');
     await expect.poll(() => heroVideo.evaluate(el => el.paused)).toBe(false);
+    await expect.poll(() => heroVideo.evaluate(el => el.currentSrc.endsWith('/delta/DeltaMain-mobile-60.mp4') && el.videoWidth>1000)).toBe(true);
     await heroToggle.tap();
     await expect.poll(() => heroVideo.evaluate(el => el.paused)).toBe(true);
     await heroToggle.tap();
@@ -252,9 +261,11 @@ test('updated English content and mobile animation fallbacks keep the new layout
     for (const frame of await frames.all()) {
       await frame.scrollIntoViewIfNeeded();
       const video = frame.locator('video');
-      await expect.poll(() => video.evaluate(el => !el.paused && el.readyState>=2)).toBe(true);
+      await expect.poll(() => video.evaluate(el => el.paused && el.currentTime===0)).toBe(true);
       await expect(video).not.toHaveClass(/is-distorted-media/);
       expect(await video.evaluate(el => el.controls)).toBe(false);
+      await frame.locator('.video-toggle').tap();
+      await expect.poll(() => video.evaluate(el => !el.paused && el.currentTime>0 && el.readyState>=2)).toBe(true);
       await frame.locator('.video-toggle').tap();
       await expect.poll(() => video.evaluate(el => el.paused)).toBe(true);
       await frame.locator('.video-toggle').tap();
@@ -262,6 +273,14 @@ test('updated English content and mobile animation fallbacks keep the new layout
       expect(await video.evaluate(el => el.videoWidth)).toBeGreaterThan(900);
       expect(await frame.locator('figcaption').evaluate(el => el.getBoundingClientRect().top)).toBeLessThan(844);
     }
+    await page.evaluate(() => scrollTo({top:0,behavior:'instant'}));
+    await expect.poll(() => frames.locator('video').evaluateAll(els => els.every(el => el.paused))).toBe(true);
+    await frames.first().scrollIntoViewIfNeeded();
+    const firstVideo = frames.first().locator('video');
+    await expect.poll(() => firstVideo.evaluate(el => el.paused)).toBe(true);
+    const stoppedAt = await firstVideo.evaluate(el => el.currentTime);
+    await frames.first().locator('.video-toggle').tap();
+    await expect.poll(() => firstVideo.evaluate(el => !el.paused && el.currentTime)).toBeGreaterThan(stoppedAt);
     const positions = await frames.evaluateAll(elements => elements.map(el => {const r=el.getBoundingClientRect();return {x:r.x,y:r.y,height:r.height};}));
     expect(positions[0].x).toBe(positions[2].x);
     expect(positions[0].y+positions[0].height).toBeLessThan(positions[1].y);

@@ -52,7 +52,7 @@ window.addEventListener('resize',fitHeroMedia,{ signal:abort.signal });
 document.fonts.ready.then(fitHeroMedia);
 fitHeroMedia();
 
-// Screen demos play on hover with a mouse; touch devices keep tap controls.
+// Screen demos wait for mouse hover or an explicit tap / keyboard activation.
 // All recordings pause off screen and share the existing cursor refraction.
 const animations = [...document.querySelectorAll('[data-animated-media]')].map(frame => ({
   frame, video:frame.querySelector('video'), toggle:frame.querySelector('.video-toggle'),
@@ -66,7 +66,7 @@ function updateToggle(item) {
 const hoverControlled = item => item.hoverOnly && finePointer.matches;
 const canPlay = item => item.visible && !document.hidden && !item.userPaused
   && (!reducedMotion.matches || item.manualPlayback)
-  && (!hoverControlled(item) || item.hovered || item.manualPlayback);
+  && (!item.hoverOnly || (finePointer.matches && item.hovered) || item.manualPlayback);
 function applyPlayback(item) {
   if (canPlay(item)) item.video.play().catch(() => updateToggle(item));
   else item.video.pause();

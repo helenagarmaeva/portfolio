@@ -164,6 +164,7 @@ export class CursorPaint {
     this.previousRadius = 0;
     this.momentum = [0, 0];
     this.lastMovement = performance.now();
+    this.lastPointerMovement = -Infinity;
     this.destroyed = false;
     this.abort = new AbortController();
 
@@ -179,6 +180,7 @@ export class CursorPaint {
       this.pointer = { x: event.clientX / innerWidth, y: 1-event.clientY / innerHeight };
       if (!this.previousPointer) this.previousPointer = { ...this.pointer };
       this.lastMovement = performance.now();
+      this.lastPointerMovement = this.lastMovement;
       this.start();
     }, options);
     document.documentElement.addEventListener('pointerleave', () => this.resetPointer(), options);
