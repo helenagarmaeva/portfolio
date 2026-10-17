@@ -89,17 +89,22 @@ test('all original screenshots load, crop from the top and remain eligible for r
   await uiKit.scrollIntoViewIfNeeded();
   await expect(uiKit).toHaveClass(/is-distorted-media/);
   expect(await uiKit.evaluate(el => { const r=el.getBoundingClientRect(); return r.width/r.height; })).toBeCloseTo(960/685,2);
+  await page.locator('.case-screens-grid').scrollIntoViewIfNeeded();
+  for (const video of await page.locator('.case-screens-grid video').all()) {
+    await expect(video).toHaveClass(/is-distorted-media/);
+    await expect.poll(() => video.evaluate(el => !el.paused && el.readyState>=2)).toBe(true);
+  }
   expect(await page.locator('canvas').evaluate(el => el.getContext('webgl2').getError())).toBe(0);
 });
 
 test('real case video refracts, restores, pauses and survives WebGL context loss', async ({ page }) => {
   await page.goto('./delta.html');
   const canvas = page.locator('.fluid-background');
-  const video = page.locator('video');
+  const video = page.locator('.case-hero-media video');
   await expect(canvas).toHaveAttribute('data-renderer','webgl');
   await expect(video).toHaveClass(/is-distorted-media/);
   await expect.poll(() => video.evaluate(el => el.paused)).toBe(false);
-  await page.locator('.video-toggle').click();
+  await page.locator('.case-hero-media .video-toggle').click();
   await expect.poll(() => video.evaluate(el => el.paused)).toBe(true);
   await video.evaluate(el => { el.currentTime=2; });
   await expect.poll(() => video.evaluate(el => !el.seeking && el.readyState>=2)).toBe(true);
@@ -138,4 +143,76 @@ test('real case video refracts, restores, pauses and survives WebGL context loss
   await expect(video).not.toHaveClass(/is-distorted-media/);
   await page.evaluate(() => window.caseLoss.restoreContext());
   await expect(video).toHaveClass(/is-distorted-media/);
+});
+
+test('GIF recordings follow the new section order and play independently only while visible', async ({ page }) => {
+  await withoutGpu(page);
+  await page.goto('./delta.html');
+  await page.evaluate(() => document.fonts.ready);
+  const hero = page.locator('.case-hero-media video');
+  await expect(hero.locator('source')).toHaveAttribute('src','./delta/DeltaMain.mp4');
+  const sections = page.locator('.case-body > .case-section > .reveal > h2 > .sr-only');
+  await expect(sections).toHaveText(['Редизайн','Экраны','Дизайн-система']);
+  const frames = page.locator('.case-screen-item');
+  await expect(frames.locator('figcaption .sr-only')).toHaveText(['Гибкая визуализация','Модальные окна','Карточка физ.лиц']);
+  for (const [i,name] of ['DeltaData','DeltaModal','DeltaToggle'].entries()) {
+    await expect(frames.nth(i).locator('source')).toHaveAttribute('src',`./delta/${name}.mp4`);
+  }
+  await expect.poll(() => hero.evaluate(el => el.paused)).toBe(false);
+  await expect.poll(() => frames.locator('video').evaluateAll(elements => elements.every(el => el.paused))).toBe(true);
+  await frames.first().scrollIntoViewIfNeeded();
+  await expect.poll(() => hero.evaluate(el => el.paused)).toBe(true);
+  for (const frame of await frames.all()) {
+    const video = frame.locator('video');
+    await expect.poll(() => video.evaluate(el => !el.paused && el.currentTime>0 && el.readyState>=2)).toBe(true);
+    await expect(video).not.toHaveClass(/is-distorted-media/);
+  }
+  const positions = await frames.evaluateAll(elements => elements.map(el => {const r=el.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width};}));
+  expect(Math.abs(positions[0].y-positions[2].y)).toBeLessThan(1);
+  expect(positions[0].x+positions[0].width).toBeLessThan(positions[1].x);
+  await frames.nth(1).locator('.video-toggle').click();
+  await expect.poll(() => frames.nth(1).locator('video').evaluate(el => el.paused)).toBe(true);
+  await expect.poll(() => frames.nth(0).locator('video').evaluate(el => el.paused)).toBe(false);
+  await expect.poll(() => frames.nth(2).locator('video').evaluate(el => el.paused)).toBe(false);
+  await page.locator('.case-system-media').scrollIntoViewIfNeeded();
+  await expect.poll(() => page.locator('video').evaluateAll(elements => elements.every(el => el.paused))).toBe(true);
+  await frames.first().scrollIntoViewIfNeeded();
+  await expect.poll(() => frames.nth(1).locator('video').evaluate(el => el.paused)).toBe(true);
+  await expect.poll(() => frames.nth(0).locator('video').evaluate(el => el.paused)).toBe(false);
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await expect.poll(() => page.locator('video').evaluateAll(elements => elements.every(el => el.paused))).toBe(true);
+  await expect(frames.locator('.is-distorted-media')).toHaveCount(0);
+  const firstVideo = frames.first().locator('video');
+  await firstVideo.evaluate(el => { el.currentTime=0; });
+  await expect.poll(() => firstVideo.evaluate(el => !el.seeking)).toBe(true);
+  await frames.first().locator('.video-toggle').click();
+  await expect.poll(() => firstVideo.evaluate(el => !el.paused && el.currentTime)).toBeGreaterThan(.3);
+});
+
+test('updated English content and mobile animation fallbacks keep the new layout readable', async ({ browser }) => {
+  for (const [path,captions] of [
+    ['delta.html',['Гибкая визуализация','Модальные окна','Карточка физ.лиц']],
+    ['delta-en.html',['Flexible visualization','Modal dialogs','Individual profile']],
+  ]) {
+    const context = await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+    const page = await context.newPage();
+    await page.goto(`./${path}`);
+    await page.evaluate(() => document.fonts.ready);
+    const frames = page.locator('.case-screen-item');
+    await expect(frames.locator('figcaption .sr-only')).toHaveText(captions);
+    for (const frame of await frames.all()) {
+      await frame.scrollIntoViewIfNeeded();
+      const video = frame.locator('video');
+      await expect.poll(() => video.evaluate(el => !el.paused && el.readyState>=2)).toBe(true);
+      await expect(video).not.toHaveClass(/is-distorted-media/);
+      expect(await video.evaluate(el => el.videoWidth)).toBeGreaterThan(1800);
+      expect(await frame.locator('figcaption').evaluate(el => el.getBoundingClientRect().top)).toBeLessThan(844);
+    }
+    const positions = await frames.evaluateAll(elements => elements.map(el => {const r=el.getBoundingClientRect();return {x:r.x,y:r.y,height:r.height};}));
+    expect(positions[0].x).toBe(positions[2].x);
+    expect(positions[0].y+positions[0].height).toBeLessThan(positions[1].y);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
+    if (path==='delta-en.html') expect(await page.locator('body').innerText()).not.toMatch(/[А-Яа-яЁё]/);
+    await context.close();
+  }
 });

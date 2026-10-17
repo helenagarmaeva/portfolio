@@ -28,57 +28,73 @@ const reveals = new ScrollReveals(reducedMotion);
 const fluid = new CursorPaint(document.querySelector('.fluid-background'),{ reducedMotion });
 fluid.start();
 
-// Preserve the recording's aspect ratio and fit the complete header and video
+// Preserve the animation's aspect ratio and fit the complete header and media
 // into the first viewport, including after a font load or orientation change.
 const hero = document.querySelector('.case-hero');
-const videoFrame = document.querySelector('.case-hero-media');
-function fitHeroVideo() {
+const heroMedia = document.querySelector('.case-hero-media');
+function fitHeroMedia() {
   const height = parseFloat(getComputedStyle(hero).minHeight);
-  const top = videoFrame.getBoundingClientRect().top-hero.getBoundingClientRect().top;
+  const top = heroMedia.getBoundingClientRect().top-hero.getBoundingClientRect().top;
   const available = Math.max(96,Math.floor(height-top-parseFloat(getComputedStyle(hero).paddingBottom)));
   const value = `${available}px`;
-  if (videoFrame.style.getPropertyValue('--hero-video-height')!==value) videoFrame.style.setProperty('--hero-video-height',value);
+  if (heroMedia.style.getPropertyValue('--hero-media-height')!==value) heroMedia.style.setProperty('--hero-media-height',value);
 }
-const heroObserver = new ResizeObserver(fitHeroVideo);
+const heroObserver = new ResizeObserver(fitHeroMedia);
 heroObserver.observe(document.querySelector('.case-heading'));
 heroObserver.observe(document.querySelector('.case-back'));
-window.addEventListener('resize',fitHeroVideo,{ signal:abort.signal });
-document.fonts.ready.then(fitHeroVideo);
-fitHeroVideo();
+window.addEventListener('resize',fitHeroMedia,{ signal:abort.signal });
+document.fonts.ready.then(fitHeroMedia);
+fitHeroMedia();
 
-const video = document.querySelector('video');
-const toggle = document.querySelector('.video-toggle');
-let userPaused = false;
-let visible = false;
-video.controls = false;
-toggle.hidden = false;
-function updateToggle() {
-  toggle.setAttribute('aria-pressed',String(video.paused));
-  toggle.setAttribute('aria-label',video.paused ? toggle.dataset.playLabel : toggle.dataset.pauseLabel);
+// Each animation plays only while on screen. GIF recordings are served as
+// lightweight video loops so their moving frames can share cursor refraction.
+const animations = [...document.querySelectorAll('[data-animated-media]')].map(frame => ({
+  frame, video:frame.querySelector('video'), toggle:frame.querySelector('.video-toggle'),
+  userPaused:false, manualPlayback:false, visible:false,
+}));
+function updateToggle(item) {
+  item.toggle.setAttribute('aria-pressed',String(item.video.paused));
+  item.toggle.setAttribute('aria-label',item.video.paused ? item.toggle.dataset.playLabel : item.toggle.dataset.pauseLabel);
 }
-function updatePlayback() {
-  if (visible && !document.hidden && !reducedMotion.matches && !userPaused) video.play().catch(updateToggle);
-  else video.pause();
-  updateToggle();
+function updatePlayback(item) {
+  item.manualPlayback = false;
+  if (item.visible && !document.hidden && !reducedMotion.matches && !item.userPaused) item.video.play().catch(() => updateToggle(item));
+  else item.video.pause();
+  updateToggle(item);
 }
-toggle.addEventListener('click',() => {
-  userPaused = !video.paused;
-  if (video.paused) video.play().catch(updateToggle);
-  else video.pause();
-  updateToggle();
-},{ signal:abort.signal });
-for (const event of ['play','pause']) video.addEventListener(event,updateToggle,{ signal:abort.signal });
-const videoObserver = new IntersectionObserver(entries => {
-  visible = entries[0].isIntersecting;
-  updatePlayback();
+const mediaObserver = new IntersectionObserver(entries => {
+  for (const entry of entries) {
+    const item = animations.find(item => item.frame===entry.target);
+    item.visible = entry.isIntersecting;
+    updatePlayback(item);
+  }
 });
-videoObserver.observe(videoFrame);
-document.addEventListener('visibilitychange',updatePlayback,{ signal:abort.signal });
-reducedMotion.addEventListener('change',updatePlayback,{ signal:abort.signal });
-window.addEventListener('pagehide',() => { video.pause(); fluid.pause(); },{ signal:abort.signal });
-window.addEventListener('pageshow',() => { updatePlayback(); fluid.start(); },{ signal:abort.signal });
+for (const item of animations) {
+  item.video.controls = false;
+  item.toggle.hidden = false;
+  item.toggle.addEventListener('click',() => {
+    item.manualPlayback = item.video.paused;
+    item.userPaused = !item.video.paused;
+    if (item.video.paused) item.video.play().catch(() => updateToggle(item));
+    else item.video.pause();
+    updateToggle(item);
+  },{ signal:abort.signal });
+  for (const event of ['play','pause']) item.video.addEventListener(event,() => updateToggle(item),{ signal:abort.signal });
+  item.video.addEventListener('timeupdate',() => {
+    // A media-query change can arrive while decoded frames are still queued.
+    // Enforce automatic playback policy, while allowing an explicit Play.
+    if (!item.video.paused && (!item.visible || document.hidden || item.userPaused || (reducedMotion.matches && !item.manualPlayback))) item.video.pause();
+  },{ signal:abort.signal });
+  mediaObserver.observe(item.frame);
+}
+const updateAllPlayback = () => animations.forEach(updatePlayback);
+document.addEventListener('visibilitychange',updateAllPlayback,{ signal:abort.signal });
+reducedMotion.addEventListener('change',updateAllPlayback,{ signal:abort.signal });
+window.addEventListener('pagehide',() => { animations.forEach(item => item.video.pause()); fluid.pause(); },{ signal:abort.signal });
+window.addEventListener('pageshow',() => { updateAllPlayback(); fluid.start(); },{ signal:abort.signal });
 
 if (import.meta.hot) import.meta.hot.dispose(() => {
-  abort.abort(); heroObserver.disconnect(); videoObserver.disconnect();
-  video.pause(); fluid.destroy(); reveals.destroy(); smoothScroll?.destroy();
+  abort.abort(); heroObserver.disconnect(); mediaObserver.disconnect();
+  animations.forEach(item => item.video.pause());
+  fluid.destroy(); reveals.destroy(); smoothScroll?.destroy();
 });
