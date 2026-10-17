@@ -267,9 +267,12 @@ test('long project captions wrap without clipping or duplicated subtitle lines o
   const descriptions = ['Web, В2В, E-com, Graphic design', 'Web, В2В, Dashboard', 'Web, В2С, E-com, Graphic design', 'Illustration, Graphic design'];
   const firstDescription = page.locator('.project-description').first();
   await expect.poll(() => firstDescription.locator('.reveal-line').allTextContents().then(lines => lines.join(' '))).toBe(descriptions[0]);
-  expect(await page.locator('.project-name').first().evaluate(el =>
+  expect(await page.locator('.project-name').nth(3).evaluate(el =>
     el.clientHeight > parseFloat(getComputedStyle(el).lineHeight)
   )).toBe(true);
+  expect(await page.locator('#project-2-title .reveal-letter').evaluateAll(letters =>
+    new Set(letters.map(el => el.offsetTop)).size
+  )).toBe(1);
   for (const width of [320, 390]) {
     await page.setViewportSize({ width, height: 844 });
     await expect.poll(() => page.locator('.project-description').evaluateAll(elements => elements.map(el =>
@@ -529,7 +532,8 @@ test('touch devices keep all four supplied covers intact', async ({ browser }) =
     await cover.tap();
     if (destination) {
       await expect(page).toHaveURL(destination);
-      await expect(page.getByRole('heading',{ name:'ДельтаБезопасность',exact:true })).toBeVisible();
+      const title = destination.endsWith('solok.html') ? 'Solok Cosmetics' : 'ДельтаБезопасность';
+      await expect(page.getByRole('heading',{ name:title,exact:true })).toBeVisible();
       await page.goBack();
     }
     await expect(cover).toHaveCSS('border-top-width', '0px');

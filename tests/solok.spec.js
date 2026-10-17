@@ -69,3 +69,51 @@ test('Solok reuses one-time reveals when scrolling back or resizing', async ({ p
   await expect(research).toHaveClass(/is-visible/);
   await expect(research).toHaveCSS('opacity', '1');
 });
+
+test('Solok materials load and all four desktop demos play only on interaction', async ({ page }) => {
+  const failures = [];
+  page.on('response', response => {
+    if (response.status() >= 400) failures.push(response.url());
+  });
+  await page.goto('./solok.html');
+  await expect(page.locator('[data-solok-slot], .solok-draft-note')).toHaveCount(0);
+  await expect(page.locator('.solok-prototype-note')).toContainText('локальном прототипе');
+  const hero = page.locator('.case-hero-media video');
+  await expect.poll(() => hero.evaluate(el => !el.paused && el.videoWidth === 1600)).toBe(true);
+  for (const image of await page.locator('.solok-image-item img').all()) {
+    await image.scrollIntoViewIfNeeded();
+    await expect.poll(() => image.evaluate(el => el.complete && el.naturalWidth >= 780)).toBe(true);
+  }
+  const demos = page.locator('.case-screen-media');
+  for (const demo of await demos.all()) {
+    await demo.scrollIntoViewIfNeeded();
+    const video = demo.locator('video');
+    await expect.poll(() => video.evaluate(el => el.paused)).toBe(true);
+    await demo.hover();
+    await expect.poll(() => video.evaluate(el => !el.paused && el.videoWidth === 1280)).toBe(true);
+    await page.mouse.move(0, 0);
+    await expect.poll(() => video.evaluate(el => el.paused)).toBe(true);
+  }
+  expect(failures).toEqual([]);
+});
+
+test('Solok mobile demos start paused and toggle by tapping in both languages', async ({ browser }) => {
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+  const page = await context.newPage();
+  for (const path of ['solok.html', 'solok-en.html']) {
+    await page.goto(`./${path}`);
+    const hero = page.locator('.case-hero-media video');
+    await expect.poll(() => hero.evaluate(el => el.currentSrc.endsWith('/SolokMain-mobile-60.mp4') && el.videoWidth === 960)).toBe(true);
+    const demos = page.locator('.case-screen-media');
+    for (const demo of await demos.all()) {
+      await demo.scrollIntoViewIfNeeded();
+      const video = demo.locator('video');
+      await expect.poll(() => video.evaluate(el => el.paused)).toBe(true);
+      await demo.locator('.video-toggle').tap();
+      await expect.poll(() => video.evaluate(el => !el.paused)).toBe(true);
+      await demo.locator('.video-toggle').tap();
+      await expect.poll(() => video.evaluate(el => el.paused)).toBe(true);
+    }
+  }
+  await context.close();
+});

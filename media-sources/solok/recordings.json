@@ -1,0 +1,43 @@
+{
+  "SolokMain": {
+    "duration": 34.877,
+    "path": "/",
+    "source_url": "https://solokcosmetics.ru/",
+    "capture_fps": 25,
+    "delivery_fps": 60,
+    "selection": "Last duration seconds of the captured source, excluding preparation and page loading."
+  },
+  "SolokBuilder": {
+    "duration": 12.072,
+    "path": "/konstruktor/",
+    "source_url": "https://solokcosmetics.ru/konstruktor/",
+    "capture_fps": 25,
+    "delivery_fps": 60,
+    "selection": "Last duration seconds of the captured source, excluding preparation and page loading."
+  },
+  "SolokQuiz": {
+    "duration": 19.169,
+    "path": "/test/",
+    "source_url": "https://solokcosmetics.ru/test/",
+    "capture_fps": 25,
+    "delivery_fps": 60,
+    "selection": "Last duration seconds of the captured source, excluding preparation and page loading."
+  },
+  "SolokProduct": {
+    "duration": 12.337,
+    "path": "/katalog-kosmetiki/dlya-ruk/kremy-dlya-ruk/krem-maslo-shi-vitamin-e/",
+    "source_url": "https://solokcosmetics.ru/katalog-kosmetiki/dlya-ruk/kremy-dlya-ruk/krem-maslo-shi-vitamin-e/",
+    "capture_fps": 25,
+    "delivery_fps": 60,
+    "selection": "Last duration seconds of the captured source, excluding preparation and page loading."
+  },
+  "SolokCart": {
+    "duration": 6.944,
+    "path": "/katalog-kosmetiki/",
+    "prototype": true,
+    "source_url": "https://solokcosmetics.ru/katalog-kosmetiki/",
+    "capture_fps": 25,
+    "delivery_fps": 60,
+    "selection": "Last duration seconds of the captured source, excluding preparation and page loading."
+  }
+}
