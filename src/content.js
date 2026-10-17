@@ -22,7 +22,7 @@ const russianContent = {
     {
       title: 'Solok Cosmetics',
       description: 'Web, В2С, E-com, Graphic design',
-      cover: './solok.png', url: '',
+      cover: './solok.png', url: './solok.html',
     },
     {
       title: 'Приют для собак «Дубовая Роща»',
@@ -35,7 +35,7 @@ const russianContent = {
 const englishProjects = [
   { title: 'TPK COSMOSPRAY', description: 'Web, B2B, E-com, Graphic design' },
   { title: 'Delta Security', description: 'Web, B2B, Dashboard', url: './delta-en.html' },
-  { title: 'Solok Cosmetics', description: 'Web, B2C, E-com, Graphic design' },
+  { title: 'Solok Cosmetics', description: 'Web, B2C, E-com, Graphic design', url: './solok-en.html' },
   { title: 'Dubovaya Roshcha dog shelter', description: 'Illustration, Graphic design' },
 ];
 

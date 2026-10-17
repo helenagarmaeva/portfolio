@@ -1,0 +1,27 @@
+.solok-page .case-hero-media { width: min(100%, calc(var(--hero-media-height) * 16 / 10)); aspect-ratio: 16 / 10; }
+.solok-page .case-screens-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.solok-page .case-screen-item, .solok-page .case-screen-item:last-child { grid-column: auto; }
+.solok-page .case-screen-media .case-media { aspect-ratio: 16 / 10; }
+.solok-research-grid, .solok-branding-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; margin-top: 40px; }
+.solok-mobile-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; margin-top: 40px; align-items: start; }
+.solok-mobile-grid .case-media { aspect-ratio: 390 / 844; }
+.solok-mobile-grid .case-media img { object-position: top; }
+/* Draft-only slots keep the layout reviewable without inventing project assets. */
+.solok-draft-note { margin: 0 0 40px; color: var(--muted); font-size: 14px; line-height: 1.5; }
+.solok-pending-item { min-width: 0; margin: 0; }
+.solok-pending-media { display: grid; place-items: center; aspect-ratio: 16 / 10; padding: 24px; border-radius: 12px; background: #101010; color: var(--muted); text-align: center; font-size: 14px; line-height: 1.5; }
+.solok-research-grid .solok-pending-media, .solok-branding-grid .solok-pending-media { aspect-ratio: 4 / 3; }
+.solok-mobile-grid .solok-pending-media { aspect-ratio: 390 / 844; }
+.solok-pending-item figcaption { margin-top: 16px; font-size: 18px; line-height: 1.4; font-weight: 500; text-align: center; }
+@media (max-width: 1279px) {
+  .solok-research-grid, .solok-branding-grid, .solok-mobile-grid { column-gap: 24px; }
+}
+@media (max-width: 760px) {
+  .solok-page .case-hero-media { width: 100%; }
+  .solok-page .case-screens-grid, .solok-research-grid, .solok-branding-grid, .solok-mobile-grid { grid-template-columns: 1fr; gap: 32px; margin-top: 24px; }
+  .solok-mobile-grid > figure { width: min(100%, 300px); justify-self: center; }
+  .solok-page .case-pagination { flex-direction: column; }
+  .solok-page .case-pagination > div { max-width: 100%; }
+  .solok-page .case-pagination > div:last-child { align-self: flex-end; }
+  .solok-pending-item figcaption { margin-top: 12px; }
+}
