@@ -97,6 +97,7 @@ h2 { font-size: 40px; font-weight: 500; line-height: 1.15; letter-spacing: -1.8p
 }
 .project-title { display: block; position: relative; font-size: 20px; line-height: 1.25; letter-spacing: -.8px; margin-top: 30px; }
 .project-name { display: inline-block; max-width: calc(100% - 36px); font-weight: 500; overflow-wrap: anywhere; transition: transform .55s var(--ease); }
+.project-name .reveal-word-mask { max-width: none; white-space: nowrap; }
 .project-title .link-arrow { left: 0; width: 28px; height: 28px; }
 .project-description { display: block; color: var(--muted); font-size: 18px; line-height: 1.4; letter-spacing: -.8px; margin-top: 8px; }
 .project-button:is(:hover, :focus-visible) .project-name { transform: translateX(36px); }
