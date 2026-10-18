@@ -31,6 +31,7 @@ for (const [width,height] of [[1440,900],[1280,720]]) {
       await page.goto(`./${path}`);
       await page.evaluate(()=>document.fonts.ready);
       await expect(page.locator('html')).toHaveClass(/motion-ready/);
+      await expect.poll(()=>page.evaluate(()=>window.heroSamples.length)).toBeGreaterThan(8);
       const samples=await page.evaluate(()=>{
         cancelAnimationFrame(window.heroSampleFrame);
         return window.heroSamples;

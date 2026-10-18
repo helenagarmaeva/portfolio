@@ -1,4 +1,4 @@
-.shelter-page .case-hero-media { --hero-media-ratio: calc(1920 / 1281); }
+.shelter-page .case-hero-media { --hero-media-ratio: calc(16 / 9); width: 100cqw; }
 .shelter-page .case-hero-media img { object-position: center; }
 /* Keep the photographed artwork intact; native rendering gets a light edge
    enhancement, while WebGL uses its existing detail-preserving media shader. */
@@ -23,7 +23,7 @@
 .shelter-card { margin: 0; min-width: 0; }
 .shelter-card .case-media { aspect-ratio: 1110 / 638; border-radius: 8px; }
 @media (max-width: 760px) {
-  .shelter-page .case-hero-media { width: 100%; }
+  .shelter-page .case-hero-media { --hero-media-ratio: calc(1920 / 1281); width: 100%; }
   .shelter-page .case-summary { grid-template-columns: 1fr; }
   .shelter-calendar, .shelter-cards { margin-top: 32px; }
   .calendar-track { --slide-width: 82vw; gap: 12px; }
