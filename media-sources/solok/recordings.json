@@ -1,43 +1,86 @@
 {
   "SolokMain": {
-    "duration": 34.877,
     "path": "/",
     "source_url": "https://solokcosmetics.ru/",
-    "capture_fps": 25,
+    "capture_fps": 60,
     "delivery_fps": 60,
-    "selection": "Last duration seconds of the captured source, excluding preparation and page loading."
+    "recorded_seconds": 21.139,
+    "cursor": "Visible pointer with violet expanding click rings",
+    "selection": "Full capture, excluding browser loading and preparation.",
+    "source_file": "SolokMain.mp4",
+    "source_encoding": "H.264 CRF 12, 60 fps capture",
+    "published_file": "SolokMain-cursor-60.mp4",
+    "published": {
+      "width": 1600,
+      "height": 1000,
+      "avg_frame_rate": "60/1",
+      "duration": "20.183333",
+      "nb_frames": "1211"
+    },
+    "trim_start_seconds": 0.48,
+    "trim_end_seconds": 0.5
   },
   "SolokBuilder": {
-    "duration": 12.072,
     "path": "/konstruktor/",
     "source_url": "https://solokcosmetics.ru/konstruktor/",
-    "capture_fps": 25,
+    "capture_fps": 60,
     "delivery_fps": 60,
-    "selection": "Last duration seconds of the captured source, excluding preparation and page loading."
+    "recorded_seconds": 14.166,
+    "cursor": "Visible pointer with violet expanding click rings",
+    "selection": "Full capture, excluding browser loading and preparation.",
+    "source_file": "SolokBuilder.mp4",
+    "source_encoding": "H.264 CRF 12, 60 fps capture",
+    "published_file": "SolokBuilder-cursor-60.mp4",
+    "published": {
+      "width": 1280,
+      "height": 800,
+      "avg_frame_rate": "60/1",
+      "duration": "14.550000",
+      "nb_frames": "873"
+    },
+    "trim_start_seconds": 0,
+    "trim_end_seconds": 0
   },
   "SolokQuiz": {
-    "duration": 19.169,
     "path": "/test/",
     "source_url": "https://solokcosmetics.ru/test/",
-    "capture_fps": 25,
+    "capture_fps": 60,
     "delivery_fps": 60,
-    "selection": "Last duration seconds of the captured source, excluding preparation and page loading."
+    "recorded_seconds": 21.196,
+    "cursor": "Visible pointer with violet expanding click rings",
+    "selection": "Full capture, excluding browser loading and preparation.",
+    "source_file": "SolokQuiz.mp4",
+    "source_encoding": "H.264 CRF 12, 60 fps capture",
+    "published_file": "SolokQuiz-cursor-60.mp4",
+    "published": {
+      "width": 1280,
+      "height": 800,
+      "avg_frame_rate": "60/1",
+      "duration": "21.566667",
+      "nb_frames": "1294"
+    },
+    "trim_start_seconds": 0,
+    "trim_end_seconds": 0
   },
   "SolokProduct": {
-    "duration": 12.337,
     "path": "/katalog-kosmetiki/dlya-ruk/kremy-dlya-ruk/krem-maslo-shi-vitamin-e/",
     "source_url": "https://solokcosmetics.ru/katalog-kosmetiki/dlya-ruk/kremy-dlya-ruk/krem-maslo-shi-vitamin-e/",
-    "capture_fps": 25,
+    "capture_fps": 60,
     "delivery_fps": 60,
-    "selection": "Last duration seconds of the captured source, excluding preparation and page loading."
-  },
-  "SolokCart": {
-    "duration": 6.944,
-    "path": "/katalog-kosmetiki/",
-    "prototype": true,
-    "source_url": "https://solokcosmetics.ru/katalog-kosmetiki/",
-    "capture_fps": 25,
-    "delivery_fps": 60,
-    "selection": "Last duration seconds of the captured source, excluding preparation and page loading."
+    "recorded_seconds": 11.839,
+    "cursor": "Visible pointer with violet expanding click rings",
+    "selection": "Full capture, excluding browser loading and preparation.",
+    "source_file": "SolokProduct.mp4",
+    "source_encoding": "H.264 CRF 12, 60 fps capture",
+    "published_file": "SolokProduct-cursor-60.mp4",
+    "published": {
+      "width": 1280,
+      "height": 800,
+      "avg_frame_rate": "60/1",
+      "duration": "12.200000",
+      "nb_frames": "732"
+    },
+    "trim_start_seconds": 0,
+    "trim_end_seconds": 0
   }
 }
