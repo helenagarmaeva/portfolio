@@ -55,6 +55,23 @@ test('case header and video fit the viewport, with aligned fixed navigation', as
         -document.querySelector('.case-hero-media').getBoundingClientRect().bottom);
       expect(gap).toBeCloseTo(40,1);
     }
+    const highlights = page.locator('.case-redesign-highlight');
+    await expect(highlights).toHaveCount(3);
+    const positions = await highlights.evaluateAll(elements => elements.map(el => {
+      const { x, y, width } = el.getBoundingClientRect();
+      return { x, y, width };
+    }));
+    if (width > 760) {
+      expect(new Set(positions.map(r => r.y)).size).toBe(1);
+      expect(positions[0].x + positions[0].width).toBeLessThan(positions[1].x);
+      expect(positions[1].x + positions[1].width).toBeLessThan(positions[2].x);
+    } else {
+      expect(new Set(positions.map(r => r.x)).size).toBe(1);
+      expect(positions[0].y).toBeLessThan(positions[1].y);
+      expect(positions[1].y).toBeLessThan(positions[2].y);
+    }
+    const flow = page.locator('.case-flow-media');
+    expect(await flow.evaluate(el => el.getBoundingClientRect().width)).toBeLessThanOrEqual(Math.min(794, width - 48));
     await context.close();
   }
 });
@@ -90,6 +107,12 @@ test('all original screenshots load, crop from the top and remain eligible for r
     expect(ratio).toBeCloseTo(1200/760,2);
   }
   expect(await images.first().evaluate(el => el.naturalHeight)).toBe(15174);
+  const flow = page.locator('.case-flow-media img');
+  await flow.scrollIntoViewIfNeeded();
+  await expect(flow).toHaveJSProperty('naturalWidth',1672);
+  await expect(flow).toHaveJSProperty('naturalHeight',941);
+  await expect(flow).toHaveClass(/is-distorted-media/);
+  expect(await flow.evaluate(el => { const r=el.getBoundingClientRect(); return r.width/r.height; })).toBeCloseTo(1672/941,2);
   const uiKit = page.locator('.case-system-media img');
   await uiKit.scrollIntoViewIfNeeded();
   await expect(uiKit).toHaveClass(/is-distorted-media/);
@@ -178,10 +201,10 @@ test('screen demos play on desktop hover, pause on exit and resume without resta
   const hero = page.locator('.case-hero-media video');
   await expect(hero.locator('source:not([media])')).toHaveAttribute('src','./delta/DeltaMain-original-120.mp4');
   const sections = page.locator('.case-body > .case-section > .reveal > h2 > .sr-only');
-  await expect(sections).toHaveText(['Редизайн','Экраны','Дизайн-система']);
+  await expect(sections).toHaveText(['UX-исследования','Редизайн','Экраны','Дизайн-система','Итоги']);
   const frames = page.locator('.case-screen-item');
-  await expect(frames.locator('figcaption .sr-only')).toHaveText(['Гибкая визуализация','Модальные окна','Карточка физ.лиц']);
-  for (const [i,name] of ['DeltaData','DeltaModal','DeltaToggle'].entries()) {
+  await expect(frames.locator('figcaption .sr-only')).toHaveText(['Гибкая визуализация','Карточка физ.лиц','Модальные окна']);
+  for (const [i,name] of ['DeltaData','DeltaToggle','DeltaModal'].entries()) {
     await expect(frames.nth(i).locator('source')).toHaveAttribute('src',`./delta/${name}-original-60.mp4`);
   }
   await expect.poll(() => hero.evaluate(el => el.paused)).toBe(false);
@@ -247,8 +270,8 @@ test('screen demos play on desktop hover, pause on exit and resume without resta
 
 test('updated English content and mobile animation fallbacks keep the new layout readable', async ({ browser }) => {
   for (const [path,captions] of [
-    ['delta.html',['Гибкая визуализация','Модальные окна','Карточка физ.лиц']],
-    ['delta-en.html',['Flexible visualization','Modal dialogs','Individual profile']],
+    ['delta.html',['Гибкая визуализация','Карточка физ.лиц','Модальные окна']],
+    ['delta-en.html',['Flexible visualization','Individual profile','Modal dialogs']],
   ]) {
     const context = await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
     const page = await context.newPage();

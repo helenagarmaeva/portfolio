@@ -19,6 +19,11 @@
 .case-summary h2 { font-size: 24px; margin-bottom: 16px; }
 .case-summary p, .case-copy { font-size: 18px; line-height: 1.4; letter-spacing: -.35px; margin: 0; }
 .case-section { margin-top: 96px; }
+.case-flow-media { width: min(100%, 794px); margin: 32px auto 0; }
+.case-flow-media img { height: auto; }
+.case-redesign-highlights { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 48px; margin-top: 32px; }
+.case-redesign-highlight { min-width: 0; }
+.case-redesign-highlight h3 { font-size: 24px; line-height: 1.4; font-weight: 500; letter-spacing: -.65px; margin: 0 0 16px; }
 .case-comparison { margin-top: 40px; }
 .case-comparison h3 { font-size: 24px; line-height: 1.4; font-weight: 500; letter-spacing: -.65px; margin: 0 0 24px; }
 .case-comparison-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; }
@@ -55,6 +60,7 @@
 @media (max-width: 1279px) {
   .case-container { padding-inline: clamp(24px, calc((100vw - 800px) / 2), 240px); }
   .case-summary { gap: 32px; }
+  .case-redesign-highlights { gap: 32px; }
   .case-comparison-grid { gap: 24px; }
   .case-screens-grid { column-gap: 24px; }
 }
@@ -69,6 +75,8 @@
   .case-page h2 { font-size: 28px; margin-bottom: 24px; }
   .case-summary h2, .case-comparison h3 { font-size: 20px; margin-bottom: 16px; }
   .case-section { margin-top: 64px; }
+  .case-redesign-highlights { grid-template-columns: 1fr; }
+  .case-redesign-highlight h3 { font-size: 20px; }
   .case-comparison-grid { grid-template-columns: 1fr; gap: 24px; }
   .case-screens-grid { grid-template-columns: 1fr; gap: 32px; margin-top: 24px; }
   .case-screen-item, .case-screen-item:last-child { grid-column: auto; }
