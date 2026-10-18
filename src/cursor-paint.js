@@ -187,12 +187,12 @@ export class CursorPaint {
     window.addEventListener('blur', () => this.resetPointer(), options);
     window.addEventListener('resize', () => this.resize(), options);
     window.addEventListener('scroll', () => {
-      // The shared canvas is fixed; the portrait must follow its DOM frame,
+      // The shared canvas is fixed; media must follow its DOM frame,
       // including while the cursor is idle and during reveal transitions.
       if (!this.gl) return;
       this.lastMovement = performance.now();
       this.start();
-    }, options);
+    }, { ...options, capture:true });
     document.addEventListener('visibilitychange', () => document.hidden ? this.pause() : this.start(), { signal: this.abort.signal });
     reducedMotion.addEventListener('change', () => {
       this.pause(); this.clear(); this.syncPortrait(); this.start();

@@ -11,6 +11,8 @@ export default defineConfig({
         delta: fileURLToPath(new URL('./delta.html', import.meta.url)),
         deltaEn: fileURLToPath(new URL('./delta-en.html', import.meta.url)),
         solok: fileURLToPath(new URL('./solok.html', import.meta.url)),
+        shelter: fileURLToPath(new URL('./shelter.html', import.meta.url)),
+        shelterEn: fileURLToPath(new URL('./shelter-en.html', import.meta.url)),
         solokEn: fileURLToPath(new URL('./solok-en.html', import.meta.url)),
       },
     },

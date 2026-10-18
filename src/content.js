@@ -27,7 +27,7 @@ const russianContent = {
     {
       title: 'Приют для собак «Дубовая Роща»',
       description: 'Illustration, Graphic design',
-      cover: './dubovaya.png', url: '',
+      cover: './dubovaya.png', url: './shelter.html',
     },
   ],
 };
@@ -36,7 +36,7 @@ const englishProjects = [
   { title: 'TPK COSMOSPRAY', description: 'Web, B2B, E-com, Graphic design' },
   { title: 'Delta Security', description: 'Web, B2B, Dashboard', url: './delta-en.html' },
   { title: 'Solok Cosmetics', description: 'Web, B2C, E-com, Graphic design', url: './solok-en.html' },
-  { title: 'Dubovaya Roshcha dog shelter', description: 'Illustration, Graphic design' },
+  { title: 'Dubovaya Roshcha dog shelter', description: 'Illustration, Graphic design', url: './shelter-en.html' },
 ];
 
 export const content = document.documentElement.lang === 'en' ? {
