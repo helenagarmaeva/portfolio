@@ -55,7 +55,7 @@ TEST_BASE_URL=http://127.0.0.1:4173 npm test
 
 ## Публикация
 
-Workflow `.github/workflows/deploy-pages.yml` публикует `dist/` в GitHub Pages при каждом обновлении `main`. В настройках Pages должен быть выбран источник **GitHub Actions**. Адрес: https://lenputka.github.io/portfolio/ . Относительные пути ассетов поддерживают размещение в `/portfolio/`.
+Workflow `.github/workflows/deploy-pages.yml` публикует `dist/` в GitHub Pages при каждом обновлении `main`. В настройках Pages должен быть выбран источник **GitHub Actions**. Адрес: https://helenagarmaeva.github.io/portfolio/ . Репозиторий — `helenagarmaeva/portfolio`. Относительные пути страниц и ассетов поддерживают размещение в `/portfolio/`.
 
 
 ## Кейс ДельтаБезопасность
