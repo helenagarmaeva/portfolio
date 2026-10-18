@@ -1,4 +1,4 @@
-.solok-page .case-hero-media { width: min(100%, calc(var(--hero-media-height) * 16 / 10)); aspect-ratio: 16 / 10; }
+.solok-page .case-hero-media { --hero-media-ratio: calc(16 / 10); }
 .solok-page .case-screen-media .case-media { aspect-ratio: 16 / 10; }
 .solok-research-grid, .solok-branding-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; margin-top: 40px; align-items: start; }
 .solok-mobile-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; margin-top: 40px; align-items: start; }

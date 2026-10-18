@@ -1,4 +1,4 @@
-.shelter-page .case-hero-media { width: min(100%, calc(var(--hero-media-height) * 16 / 9)); aspect-ratio: 16 / 9; }
+.shelter-page .case-hero-media { --hero-media-ratio: calc(1920 / 1281); }
 .shelter-page .case-hero-media img { object-position: center; }
 /* Keep the photographed artwork intact; native rendering gets a light edge
    enhancement, while WebGL uses its existing detail-preserving media shader. */

@@ -28,30 +28,6 @@ const reveals = new ScrollReveals(reducedMotion);
 const fluid = new CursorPaint(document.querySelector('.fluid-background'),{ reducedMotion });
 fluid.start();
 
-// Preserve the animation's aspect ratio and fit the complete header and media
-// into the first viewport, including after a font load or orientation change.
-const hero = document.querySelector('.case-hero');
-const heroMedia = document.querySelector('.case-hero-media');
-function fitHeroMedia() {
-  // A narrow viewport uses the media's natural ratio instead of reserving a
-  // full screen below it. Keep the desktop height constraint independent.
-  if (innerWidth<=760) {
-    heroMedia.style.removeProperty('--hero-media-height');
-    return;
-  }
-  const height = parseFloat(getComputedStyle(hero).minHeight);
-  const top = heroMedia.getBoundingClientRect().top-hero.getBoundingClientRect().top;
-  const available = Math.max(96,Math.floor(height-top-parseFloat(getComputedStyle(hero).paddingBottom)));
-  const value = `${available}px`;
-  if (heroMedia.style.getPropertyValue('--hero-media-height')!==value) heroMedia.style.setProperty('--hero-media-height',value);
-}
-const heroObserver = new ResizeObserver(fitHeroMedia);
-heroObserver.observe(document.querySelector('.case-heading'));
-heroObserver.observe(document.querySelector('.case-back'));
-window.addEventListener('resize',fitHeroMedia,{ signal:abort.signal });
-document.fonts.ready.then(fitHeroMedia);
-fitHeroMedia();
-
 // Screen demos wait for mouse hover or an explicit tap / keyboard activation.
 // All recordings pause off screen and share the existing cursor refraction.
 const animations = [...document.querySelectorAll('[data-animated-media]')].map(frame => ({
@@ -120,7 +96,7 @@ window.addEventListener('pagehide',() => { animations.forEach(item => item.video
 window.addEventListener('pageshow',() => { updateAllPlayback(); fluid.start(); },{ signal:abort.signal });
 
 if (import.meta.hot) import.meta.hot.dispose(() => {
-  abort.abort(); heroObserver.disconnect(); mediaObserver.disconnect();
+  abort.abort(); mediaObserver.disconnect();
   animations.forEach(item => item.video.pause());
   fluid.destroy(); reveals.destroy(); smoothScroll?.destroy();
 });
