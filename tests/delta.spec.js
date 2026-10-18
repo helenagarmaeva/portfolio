@@ -201,7 +201,7 @@ test('screen demos play on desktop hover, pause on exit and resume without resta
   const hero = page.locator('.case-hero-media video');
   await expect(hero.locator('source:not([media])')).toHaveAttribute('src','./delta/DeltaMain-original-120.mp4');
   const sections = page.locator('.case-body > .case-section > .reveal > h2 > .sr-only');
-  await expect(sections).toHaveText(['UX-исследования','Редизайн','Экраны','Дизайн-система','Итоги']);
+  await expect(sections).toHaveText(['UX-исследования','Редизайн','Экраны','Дизайн-система','Результат']);
   const frames = page.locator('.case-screen-item');
   await expect(frames.locator('figcaption .sr-only')).toHaveText(['Гибкая визуализация','Карточка физ.лиц','Модальные окна']);
   for (const [i,name] of ['DeltaData','DeltaToggle','DeltaModal'].entries()) {
