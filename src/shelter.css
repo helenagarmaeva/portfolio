@@ -1,5 +1,8 @@
 .shelter-page .case-hero-media { width: min(100%, calc(var(--hero-media-height) * 16 / 9)); aspect-ratio: 16 / 9; }
 .shelter-page .case-hero-media img { object-position: center; }
+/* Keep the photographed artwork intact; native rendering gets a light edge
+   enhancement, while WebGL uses its existing detail-preserving media shader. */
+.shelter-page .case-hero-media img:not(.is-distorted-media) { filter: url(#calendar-clarity); }
 .shelter-page .case-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .shelter-calendar { margin-top: 48px; }
 .calendar-track { --slide-width: clamp(280px, 44vw, 720px); position: relative; display: flex; gap: 32px; width: 100vw; margin-left: calc(50% - 50vw); padding: 0 calc((100vw - var(--slide-width)) / 2); overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; cursor: grab; user-select: none; }
