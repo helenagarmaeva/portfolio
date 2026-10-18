@@ -48,6 +48,10 @@ test('Solok has two desktop columns, three demos, and a single column on mobile'
       }));
       expect(charts[0].width).toBe(charts[1].width);
       expect(charts[0].height).toBe(charts[1].height);
+      const diagram = await page.locator('.solok-use-case-frame img').boundingBox();
+      expect(diagram.width / diagram.height).toBeCloseTo(2048 / 1334, 2);
+      expect(diagram.width).toBeLessThanOrEqual(charts[0].width);
+      expect(diagram.height).toBeCloseTo(charts[0].height, 0);
       const geometry = await page.locator('.case-screen-item').evaluateAll(elements => elements.map(el => {
         const { left, top, width } = el.getBoundingClientRect();
         return { left, top, width };
@@ -88,6 +92,8 @@ test('Solok materials load and all three desktop demos play only on interaction'
   expect(await page.locator('body').innerText()).not.toMatch(/прототип|корзин/i);
   await expect(page.locator('.solok-mobile-grid img').nth(1)).toHaveAttribute('src', './solok/mobile-builder.png');
   await expect(page.locator('.solok-mobile-grid figcaption').nth(1).locator('.reveal-text')).toHaveText('Конструктор скраба');
+  await expect(page.locator('.solok-research-grid img').first()).toHaveAttribute('src', './solok/research-use-case.png');
+  await expect(page.locator('.solok-research-grid figcaption').first().locator('.reveal-text')).toHaveText('Use Case');
   const hero = page.locator('.case-hero-media video');
   await expect.poll(() => hero.evaluate(el => !el.paused && el.videoWidth === 1600)).toBe(true);
   await hero.evaluate(el => { el.currentTime = el.duration - .15; });
