@@ -4,10 +4,14 @@
 .solok-mobile-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; margin-top: 40px; align-items: start; }
 .solok-image-item { min-width: 0; margin: 0; }
 .solok-image-item .case-media img { height: auto; }
-.solok-research-grid .case-media { aspect-ratio: 1680 / 864; }
+.solok-research-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.solok-research-grid > figure { grid-column: span 2; }
+.solok-research-grid > figure:last-child:nth-child(odd) { grid-column: 2 / span 2; }
+.solok-research-grid .case-media { aspect-ratio: 2048 / 1334; display: flex; align-items: center; justify-content: center; }
 .solok-research-grid .case-media img { height: 100%; object-position: 50% 50%; }
-.solok-use-case-media { display: flex; justify-content: center; }
-.solok-use-case-frame { height: 100%; aspect-ratio: 2048 / 1334; max-width: 100%; overflow: hidden; border-radius: inherit; }
+.solok-use-case-frame { width: 100%; aspect-ratio: 2048 / 1334; overflow: hidden; border-radius: inherit; }
+.solok-chart-frame { width: 100%; aspect-ratio: 2048 / 1334; overflow: hidden; border-radius: inherit; }
+.solok-finding-copy { margin: 12px 0 0; color: var(--muted); font-size: 16px; line-height: 1.5; text-align: center; }
 .solok-image-item figcaption { margin-top: 16px; font-size: 18px; line-height: 1.4; font-weight: 500; text-align: center; }
 .solok-branding-grid > figure:first-child { grid-row: span 2; }
 .solok-branding-grid > figure:last-child { grid-column: 1 / -1; }
@@ -19,6 +23,7 @@
 @media (max-width: 760px) {
   .solok-page .case-hero-media { width: 100%; }
   .solok-page .case-screens-grid, .solok-research-grid, .solok-branding-grid, .solok-mobile-grid { grid-template-columns: 1fr; gap: 32px; margin-top: 24px; }
+  .solok-research-grid > figure, .solok-research-grid > figure:last-child:nth-child(odd) { grid-column: auto; }
   .solok-branding-grid > figure:first-child, .solok-branding-grid > figure:last-child { grid-row: auto; grid-column: auto; }
   .solok-mobile-grid > figure { width: min(100%, 300px); justify-self: center; }
   .solok-page .case-pagination { flex-direction: column; }

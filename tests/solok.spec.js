@@ -46,11 +46,14 @@ test('Solok has two desktop columns, three demos, and a single column on mobile'
         const { width, height } = el.getBoundingClientRect();
         return { width, height };
       }));
-      expect(charts[0].width).toBe(charts[1].width);
-      expect(charts[0].height).toBe(charts[1].height);
+      expect(charts).toHaveLength(3);
+      for (const chart of charts) {
+        expect(chart.width).toBe(charts[0].width);
+        expect(chart.height).toBe(charts[0].height);
+      }
       const diagram = await page.locator('.solok-use-case-frame img').boundingBox();
       expect(diagram.width / diagram.height).toBeCloseTo(2048 / 1334, 2);
-      expect(diagram.width).toBeLessThanOrEqual(charts[0].width);
+      expect(diagram.width).toBeCloseTo(charts[0].width, 0);
       expect(diagram.height).toBeCloseTo(charts[0].height, 0);
       const geometry = await page.locator('.case-screen-item').evaluateAll(elements => elements.map(el => {
         const { left, top, width } = el.getBoundingClientRect();
