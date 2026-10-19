@@ -52,7 +52,7 @@ test('contact arrows, rolling text, email underline and keyboard focus', async (
   await email.hover();
   await expect.poll(() => email.evaluate(el => new DOMMatrix(getComputedStyle(el, '::after').transform).m11)).toBe(1);
   const cv = page.getByRole('link', { name: 'CV', exact: true });
-  await expect(cv).toHaveAttribute('href', new URL('./HelenagrmvCV.pdf', page.url()).href);
+  await expect(cv).toHaveAttribute('href', new URL('./HGarmaevaCV.pdf', page.url()).href);
   const pdf = await page.request.get(await cv.getAttribute('href'));
   expect(pdf.ok()).toBe(true);
   expect(pdf.headers()['content-type']).toContain('application/pdf');

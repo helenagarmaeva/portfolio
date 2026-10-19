@@ -4,7 +4,7 @@ const russianContent = {
   portrait: './photo-enhanced.webp',
   portraitAlt: 'Елена Гармаева',
   contacts: {
-    cv: './HelenagrmvCV.pdf',
+    cv: './HGarmaevaCV.pdf',
     telegram: 'https://t.me/hgrmv',
     linkedin: 'https://www.linkedin.com/in/helena-garmaeva/',
   },
@@ -41,7 +41,7 @@ const englishProjects = [
 
 export const content = document.documentElement.lang === 'en' ? {
   ...russianContent,
-  contacts: { ...russianContent.contacts, cv: './HelenagrmvCVEng.pdf' },
+  contacts: { ...russianContent.contacts, cv: './HGarmaevaCVEng.pdf' },
   portraitAlt: 'Helena Garmaeva',
   projects: russianContent.projects.map((project, index) => ({ ...project, ...englishProjects[index] })),
 } : russianContent;

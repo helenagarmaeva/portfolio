@@ -23,7 +23,7 @@ test('language links navigate both ways and English stays English after reload',
     elements.map(el => el.getAttribute('aria-label') || el.getAttribute('alt')).join(' ')
   )).not.toMatch(/[А-Яа-яЁё]/);
   const cv = page.getByRole('link', { name: 'CV', exact: true });
-  await expect(cv).toHaveAttribute('href', new URL('./HelenagrmvCVEng.pdf', page.url()).href);
+  await expect(cv).toHaveAttribute('href', new URL('./HGarmaevaCVEng.pdf', page.url()).href);
   expect((await page.request.get(await cv.getAttribute('href'))).ok()).toBe(true);
   await page.getByRole('link', { name: 'Go to case studies' }).click();
   await expect.poll(() => page.locator('#cases').evaluate(el => el.getBoundingClientRect().top)).toBeCloseTo(0, 0);
@@ -34,7 +34,7 @@ test('language links navigate both ways and English stays English after reload',
   await page.getByRole('link', { name: 'RU', exact: true }).click();
   await expect(page.locator('html')).toHaveAttribute('lang', 'ru');
   await expect(page.getByRole('heading', { name: 'Елена Гармаева', exact: true })).toBeVisible();
-  await expect(page.getByRole('link', { name: 'CV', exact: true })).toHaveAttribute('href', new URL('./HelenagrmvCV.pdf', page.url()).href);
+  await expect(page.getByRole('link', { name: 'CV', exact: true })).toHaveAttribute('href', new URL('./HGarmaevaCV.pdf', page.url()).href);
 });
 
 test('English text and case reveals fit narrow touch screens', async ({ browser }) => {
