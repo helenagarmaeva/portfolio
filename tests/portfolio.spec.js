@@ -147,7 +147,7 @@ test('cases reveal once and remain visible across scroll boundaries and resizing
     expect(await letter.evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m42)).toBe(0);
     await page.mouse.wheel(0,1200);
     expect((await sampleMotion()).every(value => Math.abs(value)<.01)).toBe(true);
-    expect((await project.locator('.project-description .reveal-line').allTextContents()).join(' ')).toBe('Web, В2В, E-com, Graphic design');
+    expect((await project.locator('.project-description .reveal-line').allTextContents()).join(' ')).toBe('Product Design / B2B / E-commerce / Design System');
   }
   await page.setViewportSize({width:1280,height:500});
   await page.evaluate(() => window.scrollTo({top:document.documentElement.scrollHeight,behavior:'instant'}));
@@ -216,7 +216,7 @@ test('text reveals move through masks and reflow without losing words', async ({
   // Image/font readiness and smooth scrolling can shift the reveal start.
   // Check completion separately from the captured intermediate movement.
   await expect.poll(() => headingLetter.evaluate(el => Math.abs(new DOMMatrix(getComputedStyle(el).transform).m42))).toBeLessThan(.01);
-  await expect.poll(() => page.locator('.project-description').first().locator('.reveal-line').allTextContents()).toEqual(['Web, В2В, E-com, Graphic design']);
+  await expect.poll(() => page.locator('.project-description').first().locator('.reveal-line').allTextContents().then(lines => lines.join(' '))).toBe('Product Design / B2B / E-commerce / Design System');
   // Finish the cue's programmatic scroll before resizing and testing wheel input.
   await expect(page.locator('html')).not.toHaveClass(/lenis-scrolling/);
   await page.setViewportSize({ width: 840, height: 1000 });
@@ -264,10 +264,10 @@ test('long project captions wrap without clipping or duplicated subtitle lines o
   const page = await context.newPage();
   await page.goto('./');
   await page.getByRole('link', { name: 'Перейти к кейсам' }).tap();
-  const descriptions = ['Web, В2В, E-com, Graphic design', 'Web, В2В, Dashboard', 'Web, В2С, E-com, Graphic design', 'Illustration, Graphic design'];
+  const descriptions = ['Product Design / B2B / E-commerce / Design System', 'Product Design / B2B / Risk Analytics / Data-heavy UI', 'Product Design / B2C / E-commerce / Brand Identity', 'Illustration / Graphic Design / Print / Social Impact'];
   const firstDescription = page.locator('.project-description').first();
   await expect.poll(() => firstDescription.locator('.reveal-line').allTextContents().then(lines => lines.join(' '))).toBe(descriptions[0]);
-  expect(await page.locator('.project-name').nth(3).evaluate(el =>
+  expect(await firstDescription.evaluate(el =>
     el.clientHeight > parseFloat(getComputedStyle(el).lineHeight)
   )).toBe(true);
   expect(await page.locator('#project-2-title .reveal-letter').evaluateAll(letters =>

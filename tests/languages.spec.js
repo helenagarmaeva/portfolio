@@ -4,7 +4,7 @@ const englishTitles = [
   'TPK COSMOSPRAY',
   'Delta Security',
   'Solok Cosmetics',
-  'Dubovaya Roshcha dog shelter',
+  'Dubovaya Roshcha',
 ];
 
 test('language links navigate both ways and English stays English after reload', async ({ page }) => {

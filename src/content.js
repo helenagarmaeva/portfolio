@@ -11,32 +11,32 @@ const russianContent = {
   projects: [
     {
       title: 'ТПК КОСМОСПРЭЙ',
-      description: 'Web, В2В, E-com, Graphic design',
+      description: 'Product Design / B2B / E-commerce / Design System',
       cover: './cosmospray.png', url: './cosmospray.html',
     },
     {
       title: 'ДельтаБезопасность',
-      description: 'Web, В2В, Dashboard',
+      description: 'Product Design / B2B / Risk Analytics / Data-heavy UI',
       cover: './delta.png', url: './delta.html',
     },
     {
       title: 'Solok Cosmetics',
-      description: 'Web, В2С, E-com, Graphic design',
+      description: 'Product Design / B2C / E-commerce / Brand Identity',
       cover: './solok.png', url: './solok.html',
     },
     {
-      title: 'Приют для собак «Дубовая Роща»',
-      description: 'Illustration, Graphic design',
+      title: 'Дубовая Роща',
+      description: 'Illustration / Graphic Design / Print / Social Impact',
       cover: './dubovaya.png', url: './shelter.html',
     },
   ],
 };
 
 const englishProjects = [
-  { title: 'TPK COSMOSPRAY', description: 'Web, B2B, E-com, Graphic design', url: './cosmospray-en.html' },
-  { title: 'Delta Security', description: 'Web, B2B, Dashboard', url: './delta-en.html' },
-  { title: 'Solok Cosmetics', description: 'Web, B2C, E-com, Graphic design', url: './solok-en.html' },
-  { title: 'Dubovaya Roshcha dog shelter', description: 'Illustration, Graphic design', url: './shelter-en.html' },
+  { title: 'TPK COSMOSPRAY', description: 'Product Design / B2B / E-commerce / Design System', url: './cosmospray-en.html' },
+  { title: 'Delta Security', description: 'Product Design / B2B / Risk Analytics / Data-heavy UI', url: './delta-en.html' },
+  { title: 'Solok Cosmetics', description: 'Product Design / B2C / E-commerce / Brand Identity', url: './solok-en.html' },
+  { title: 'Dubovaya Roshcha', description: 'Illustration / Graphic Design / Print / Social Impact', url: './shelter-en.html' },
 ];
 
 export const content = document.documentElement.lang === 'en' ? {
