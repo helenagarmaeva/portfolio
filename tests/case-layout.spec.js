@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 for (const [width,height] of [[1440,900],[1280,720]]) {
   test(`case hero frames keep their size throughout a cold load at ${width}px`,async ({ browser }) => {
-    for (const path of ['delta.html','delta-en.html','solok.html','solok-en.html','shelter.html','shelter-en.html']) {
+    for (const path of ['cosmospray.html','cosmospray-en.html','delta.html','delta-en.html','solok.html','solok-en.html','shelter.html','shelter-en.html']) {
       const context=await browser.newContext({ viewport:{width,height} });
       const page=await context.newPage();
       // Hold the scripts and fonts long enough to observe the CSS-only frame,

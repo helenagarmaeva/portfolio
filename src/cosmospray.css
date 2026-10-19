@@ -1,0 +1,11 @@
+.cosmospray-page .case-hero-media { --hero-media-ratio: calc(16 / 10); }
+.cosmospray-page .case-screen-media .case-media { aspect-ratio: 16 / 10; }
+.cosmospray-page .case-flow-media { width: 100%; }
+.cosmospray-page .case-system-media { aspect-ratio: 2406 / 1982; }
+/* Show enough of the long pages to compare hierarchy and the product grid. */
+.cosmospray-comparison .case-media { aspect-ratio: 3 / 4; }
+@media (max-width: 760px) {
+  .cosmospray-page .case-pagination { flex-direction: column; }
+  .cosmospray-page .case-pagination > div { max-width: 100%; }
+  .cosmospray-page .case-pagination > div:last-child { align-self: flex-end; }
+}

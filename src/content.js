@@ -12,7 +12,7 @@ const russianContent = {
     {
       title: 'ТПК КОСМОСПРЭЙ',
       description: 'Web, В2В, E-com, Graphic design',
-      cover: './cosmospray.png', url: '',
+      cover: './cosmospray.png', url: './cosmospray.html',
     },
     {
       title: 'ДельтаБезопасность',
@@ -33,7 +33,7 @@ const russianContent = {
 };
 
 const englishProjects = [
-  { title: 'TPK COSMOSPRAY', description: 'Web, B2B, E-com, Graphic design' },
+  { title: 'TPK COSMOSPRAY', description: 'Web, B2B, E-com, Graphic design', url: './cosmospray-en.html' },
   { title: 'Delta Security', description: 'Web, B2B, Dashboard', url: './delta-en.html' },
   { title: 'Solok Cosmetics', description: 'Web, B2C, E-com, Graphic design', url: './solok-en.html' },
   { title: 'Dubovaya Roshcha dog shelter', description: 'Illustration, Graphic design', url: './shelter-en.html' },
