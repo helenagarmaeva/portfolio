@@ -127,33 +127,45 @@
     "trim_end_seconds": 0.15,
     "poster_timestamp_seconds": 7
   },
-  "CosmosprayBlog": {
-    "source_url": "https://cosmospray.com/news",
+  "CosmosprayOrder": {
+    "source_url": "https://cosmospray.com/catalog",
     "capture_fps": 60,
-    "recorded_seconds": 14.814,
+    "recorded_seconds": 9.337,
     "cursor": "Visible white pointer and violet click rings",
     "method": "Original public website rendered through a TLS-verified local asset mirror. Only origin URLs and recording cursor are changed. No order or contact form is submitted.",
     "observed": {
-      "section": "/news",
-      "articles": [
-        "/news/sales_october",
-        "/news/flakon-10-ml"
+      "cart_price_tiers": [
+        {
+          "quantity": 4000,
+          "total": 116000,
+          "unit_price": 29
+        },
+        {
+          "quantity": 10000,
+          "total": 270000,
+          "unit_price": 27
+        },
+        {
+          "quantity": 3000,
+          "total": 96000,
+          "unit_price": 32
+        }
       ],
-      "final_title": "Новинка на складе — флаконы 10 мл с горлом FEA15 по низкой цене!"
+      "order_request_submitted": false
     },
-    "source_file": "CosmosprayBlog.mp4",
+    "source_file": "CosmosprayOrder.mp4",
     "source_encoding": "Native 60 fps X11 capture, H.264 CRF 12",
-    "published_file": "CosmosprayBlog-cursor-60.mp4",
+    "published_file": "CosmosprayOrder-cursor-60.mp4",
+    "trim_start_seconds": 0.2,
+    "trim_end_seconds": 0.15,
     "published": {
       "codec_name": "h264",
       "width": 1280,
       "height": 800,
       "pix_fmt": "yuv420p",
       "avg_frame_rate": "60/1",
-      "duration": "14.733333",
-      "nb_frames": "884"
-    },
-    "trim_start_seconds": 0.2,
-    "trim_end_seconds": 0.15
+      "duration": "9.250000",
+      "nb_frames": "555"
+    }
   }
 }
