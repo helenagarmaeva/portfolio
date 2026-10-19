@@ -5,7 +5,7 @@
 .case-back { display: flex; width: fit-content; margin-bottom: 24px; }
 .case-heading { margin-bottom: 32px; }
 .case-title-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px 32px; }
-.case-website-link { color: var(--muted); font-size: 16px; line-height: 1.5; padding-right: 28px; }
+.case-website-link { color: #d8d8d8; font-size: 18px; font-weight: 400; line-height: 1.35; letter-spacing: -.35px; padding-right: 28px; }
 .case-heading h1 { font-size: clamp(24px, 2.5vw, 36px); line-height: 1.2; font-weight: 500; letter-spacing: -.8px; overflow-wrap: anywhere; }
 .case-subtitle { margin: 12px 0 0; color: var(--muted); font-size: 16px; line-height: 1.5; }
 /* Reserve the final media area before scripts, fonts or images load. The
@@ -25,6 +25,8 @@
   .has-played > .video-toggle::before, .has-played > .video-toggle::after { opacity: 0; }
 }
 .case-body { padding-top: 64px; padding-bottom: 144px; }
+.case-project-meta { margin: 0 0 32px; color: var(--muted); font-size: 16px; font-weight: 400; line-height: 1.5; }
+.case-project-meta p { margin: 0; }
 .case-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 48px; }
 .case-page h2 { font-size: 36px; line-height: 1.25; font-weight: 500; letter-spacing: -.8px; margin: 0 0 40px; }
 .case-summary h2 { font-size: 24px; margin-bottom: 16px; }

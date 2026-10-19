@@ -51,7 +51,7 @@ test('case header and video fit the viewport, with aligned fixed navigation', as
     expect(Math.abs(fixed.centerDifference)).toBeLessThan(1);
     expect(fixed.bottomGap).toBe(width <= 760 ? 36 : 48);
     if (width<=760) {
-      const gap = await page.evaluate(() => document.querySelector('.case-summary').getBoundingClientRect().top
+      const gap = await page.evaluate(() => document.querySelector('.case-project-meta').getBoundingClientRect().top
         -document.querySelector('.case-hero-media').getBoundingClientRect().bottom);
       expect(gap).toBeCloseTo(40,1);
     }
