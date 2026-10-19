@@ -2,13 +2,31 @@
   "CosmosprayMain": {
     "source_url": "https://cosmospray.com/",
     "capture_fps": 60,
-    "recorded_seconds": 21.456,
+    "recorded_seconds": 16.351,
     "cursor": "Visible white pointer and violet click rings",
     "method": "Original public website rendered through a TLS-verified local asset mirror. Only origin URLs and recording cursor are changed. No order or contact form is submitted.",
     "observed": {
       "final_scroll": 4035,
       "max_scroll": 4035,
-      "sections": "Hero, categories, popular products, company, news, contacts and footer"
+      "sections": "Hero, categories, popular products, company, news, contacts and footer",
+      "hovers": [
+        {
+          "label": "Hero: в каталог",
+          "active": true,
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "label": "Popular products: в каталог",
+          "active": true,
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "label": "В корзину",
+          "active": true,
+          "background": "rgb(151, 32, 255)"
+        }
+      ],
+      "individual_product_image_stops": false
     },
     "source_file": "CosmosprayMain.mp4",
     "source_encoding": "Native 60 fps X11 capture, H.264 CRF 12",
@@ -19,8 +37,8 @@
       "height": 1000,
       "pix_fmt": "yuv420p",
       "avg_frame_rate": "60/1",
-      "duration": "19.100000",
-      "nb_frames": "1146"
+      "duration": "16.116667",
+      "nb_frames": "967"
     },
     "trim_start_seconds": 0.2,
     "trim_end_seconds": 0.15

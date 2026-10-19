@@ -34,16 +34,17 @@ test('case sections, comparison frames and original diagrams fit desktop and mob
     await page.setViewportSize({width,height:900});await page.goto(`./${file}`);await page.evaluate(()=>document.fonts.ready);
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
     expect(await page.locator('.case-hero-media').evaluate(e=>e.getBoundingClientRect().bottom)).toBeLessThanOrEqual(900);
-    await expect(page.locator('.case-body > .case-section')).toHaveCount(5);
+    await expect(page.locator('.case-body > .case-section')).toHaveCount(6);
     await expect(page.locator('.case-comparison-item')).toHaveCount(4);
-    await expect(page.locator('.case-screen-item')).toHaveCount(3);
+    await expect(page.locator('.case-screens-grid > .case-screen-item')).toHaveCount(3);
+    await expect(page.locator('.cosmospray-mobile-grid > figure')).toHaveCount(4);
     const columns=await page.locator('.case-summary').evaluate(e=>getComputedStyle(e).gridTemplateColumns.split(' ').length);
     expect(columns).toBe(width>760?3:1);
     const frames=await page.locator('.case-comparison-item .case-media').evaluateAll(es=>es.map(e=>{const r=e.getBoundingClientRect();return r.width/r.height;}));
-    for(const ratio of frames)expect(ratio).toBeCloseTo(3/4,2);
+    for(const ratio of frames)expect(ratio).toBeCloseTo(1,2);
   }
   for(const [selector,width,height] of [
-    ['img[src="./UserFlowCosmospray.png"]',2750,1517],
+    ['img[src="./UFCosmospray.png"]',2750,1517],
     ['img[src="./UIKitCosmospray.png"]',2406,1982],
   ]){
     const image=page.locator(selector);await image.scrollIntoViewIfNeeded();

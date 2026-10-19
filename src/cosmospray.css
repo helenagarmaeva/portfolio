@@ -1,11 +1,27 @@
 .cosmospray-page .case-hero-media { --hero-media-ratio: calc(16 / 10); }
 .cosmospray-page .case-screen-media .case-media { aspect-ratio: 16 / 10; }
-.cosmospray-page .case-flow-media { width: 100%; }
+.cosmospray-page .case-flow-media { width: min(85%, 794px); }
 .cosmospray-page .case-system-media { aspect-ratio: 2406 / 1982; }
-/* Show enough of the long pages to compare hierarchy and the product grid. */
-.cosmospray-comparison .case-media { aspect-ratio: 3 / 4; }
+/* Crop the long pages from the top in shorter, matching comparison frames. */
+.cosmospray-comparison .case-media { aspect-ratio: 1 / 1; }
 @media (max-width: 760px) {
   .cosmospray-page .case-pagination { flex-direction: column; }
   .cosmospray-page .case-pagination > div { max-width: 100%; }
   .cosmospray-page .case-pagination > div:last-child { align-self: flex-end; }
+}
+
+.cosmospray-mobile-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; margin-top: 40px; align-items: start; }
+.cosmospray-mobile-grid > .case-screen-item, .cosmospray-mobile-grid > .case-screen-item:last-child { grid-column: auto; }
+.cosmospray-mobile-grid .case-media { aspect-ratio: 390 / 844; }
+.cosmospray-mobile-grid img { object-position: top; }
+@media (max-width: 1100px) {
+  .cosmospray-mobile-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  .cosmospray-page .case-flow-media { width: 100%; }
+  .cosmospray-mobile-grid { margin-top: 24px; }
+}
+@media (max-width: 520px) {
+  .cosmospray-mobile-grid { grid-template-columns: 1fr; gap: 32px; }
+  .cosmospray-mobile-grid > figure { width: min(100%, 300px); justify-self: center; }
 }
