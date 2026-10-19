@@ -41,7 +41,7 @@ test('case sections, comparison frames and original diagrams fit desktop and mob
     const columns=await page.locator('.case-summary').evaluate(e=>getComputedStyle(e).gridTemplateColumns.split(' ').length);
     expect(columns).toBe(width>760?3:1);
     const frames=await page.locator('.case-comparison-item .case-media').evaluateAll(es=>es.map(e=>{const r=e.getBoundingClientRect();return r.width/r.height;}));
-    for(const ratio of frames)expect(ratio).toBeCloseTo(1,2);
+    for(const ratio of frames)expect(ratio).toBeCloseTo(1440/1000,2);
   }
   for(const [selector,width,height] of [
     ['img[src="./UFCosmospray.png"]',2750,1517],

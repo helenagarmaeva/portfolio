@@ -2,8 +2,8 @@
 .cosmospray-page .case-screen-media .case-media { aspect-ratio: 16 / 10; }
 .cosmospray-page .case-flow-media { width: min(85%, 794px); }
 .cosmospray-page .case-system-media { aspect-ratio: 2406 / 1982; }
-/* Crop the long pages from the top in shorter, matching comparison frames. */
-.cosmospray-comparison .case-media { aspect-ratio: 1 / 1; }
+/* One desktop viewport (1440 × 1000) per before/after image. */
+.cosmospray-comparison .case-media { aspect-ratio: 1440 / 1000; }
 @media (max-width: 760px) {
   .cosmospray-page .case-pagination { flex-direction: column; }
   .cosmospray-page .case-pagination > div { max-width: 100%; }

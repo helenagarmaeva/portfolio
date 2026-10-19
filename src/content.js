@@ -11,12 +11,12 @@ const russianContent = {
   projects: [
     {
       title: 'ТПК КОСМОСПРЭЙ',
-      description: 'Product Design / B2B / E-commerce / Design System',
+      description: 'Product Design / B2B / E-commerce / Brand Identity',
       cover: './cosmospray.png', url: './cosmospray.html',
     },
     {
       title: 'ДельтаБезопасность',
-      description: 'Product Design / B2B / Risk Analytics / Data-heavy UI',
+      description: 'Product Design / B2B / Dashboard',
       cover: './delta.png', url: './delta.html',
     },
     {
@@ -26,17 +26,17 @@ const russianContent = {
     },
     {
       title: 'Дубовая Роща',
-      description: 'Illustration / Graphic Design / Print / Social Impact',
+      description: 'Illustration / Graphic Design / Social Impact',
       cover: './dubovaya.png', url: './shelter.html',
     },
   ],
 };
 
 const englishProjects = [
-  { title: 'TPK COSMOSPRAY', description: 'Product Design / B2B / E-commerce / Design System', url: './cosmospray-en.html' },
-  { title: 'Delta Security', description: 'Product Design / B2B / Risk Analytics / Data-heavy UI', url: './delta-en.html' },
+  { title: 'TPK COSMOSPRAY', description: 'Product Design / B2B / E-commerce / Brand Identity', url: './cosmospray-en.html' },
+  { title: 'Delta Security', description: 'Product Design / B2B / Dashboard', url: './delta-en.html' },
   { title: 'Solok Cosmetics', description: 'Product Design / B2C / E-commerce / Brand Identity', url: './solok-en.html' },
-  { title: 'Dubovaya Roshcha', description: 'Illustration / Graphic Design / Print / Social Impact', url: './shelter-en.html' },
+  { title: 'Dubovaya Roshcha', description: 'Illustration / Graphic Design / Social Impact', url: './shelter-en.html' },
 ];
 
 export const content = document.documentElement.lang === 'en' ? {
