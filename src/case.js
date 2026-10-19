@@ -33,9 +33,10 @@ fluid.start();
 const animations = [...document.querySelectorAll('[data-animated-media]')].map(frame => ({
   frame, video:frame.querySelector('video'), toggle:frame.querySelector('.video-toggle'),
   hoverOnly:frame.classList.contains('case-screen-media'), hovered:false,
-  userPaused:false, manualPlayback:false, visible:false,
+  userPaused:false, manualPlayback:false, visible:false, hasPlayed:false,
 }));
 function updateToggle(item) {
+  item.frame.classList.toggle('has-played',item.hasPlayed);
   item.toggle.setAttribute('aria-pressed',String(item.video.paused));
   item.toggle.setAttribute('aria-label',item.video.paused ? item.toggle.dataset.playLabel : item.toggle.dataset.pauseLabel);
 }
@@ -78,6 +79,10 @@ for (const item of animations) {
     if (hoverControlled(item)) updatePlayback(item);
   },{ signal:abort.signal });
   for (const event of ['play','pause']) item.video.addEventListener(event,() => updateToggle(item),{ signal:abort.signal });
+  item.video.addEventListener('playing',() => {
+    item.hasPlayed = true;
+    updateToggle(item);
+  },{ signal:abort.signal });
   item.video.addEventListener('timeupdate',() => {
     // A media-query change can arrive while decoded frames are still queued.
     // Enforce automatic playback policy, while allowing an explicit Play.

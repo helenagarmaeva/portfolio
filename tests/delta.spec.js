@@ -201,9 +201,9 @@ test('screen demos play on desktop hover, pause on exit and resume without resta
   const hero = page.locator('.case-hero-media video');
   await expect(hero.locator('source:not([media])')).toHaveAttribute('src','./delta/DeltaMain-original-120.mp4');
   const sections = page.locator('.case-body > .case-section > .reveal > h2 > .sr-only');
-  await expect(sections).toHaveText(['UX-исследования','Редизайн','Экраны','Дизайн-система','Результат']);
+  await expect(sections).toHaveText(['UX-аудит','Редизайн','Экраны','Дизайн-система','Результат']);
   const frames = page.locator('.case-screen-item');
-  await expect(frames.locator('figcaption .sr-only')).toHaveText(['Гибкая визуализация','Карточка физ.лиц','Модальные окна']);
+  await expect(frames.locator('figcaption .sr-only')).toHaveText(['Гибкая визуализация','Карточка физического лица','Модальные окна']);
   for (const [i,name] of ['DeltaData','DeltaToggle','DeltaModal'].entries()) {
     await expect(frames.nth(i).locator('source')).toHaveAttribute('src',`./delta/${name}-original-60.mp4`);
   }
@@ -270,7 +270,7 @@ test('screen demos play on desktop hover, pause on exit and resume without resta
 
 test('updated English content and mobile animation fallbacks keep the new layout readable', async ({ browser }) => {
   for (const [path,captions] of [
-    ['delta.html',['Гибкая визуализация','Карточка физ.лиц','Модальные окна']],
+    ['delta.html',['Гибкая визуализация','Карточка физического лица','Модальные окна']],
     ['delta-en.html',['Flexible visualization','Individual profile','Modal dialogs']],
   ]) {
     const context = await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});

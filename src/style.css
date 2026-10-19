@@ -10,7 +10,7 @@
   color: #efefef;
   font-weight: 400;
   --ease: cubic-bezier(.35, 0, 0, 1);
-  --muted: #717171;
+  --muted: #7a7a7a;
 }
 
 * { box-sizing: border-box; }
