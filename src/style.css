@@ -131,6 +131,11 @@ h2 { font-size: 40px; font-weight: 500; line-height: 1.15; letter-spacing: -1.8p
 .motion-ready .bio .reveal-line { transform: none; transition: none; }
 .background-fallback .fluid-background { visibility: hidden; }
 
+.back-to-top { position: fixed; z-index: 20; right: calc(max(5.5vw, 24px) + 1.5ch - 22px); bottom: 48px; display: grid; place-items: center; width: 44px; height: 44px; color: var(--muted); font-size: 18px; transition: color .35s ease; }
+.back-to-top:is(:hover, :focus-visible) { color: #fff; }
+.back-to-top svg { width: 28px; height: 28px; transition: transform .6s var(--ease); }
+.back-to-top:is(:hover, :focus-visible) svg { transform: translateY(-7px); }
+
 @media (max-width: 1279px) {
   .hero { padding-inline: clamp(24px, calc((100vw - 640px) / 2), 320px); }
   .cases { padding-inline: clamp(24px, calc((100vw - 800px) / 2), 240px); }
@@ -142,6 +147,7 @@ h2 { font-size: 40px; font-weight: 500; line-height: 1.15; letter-spacing: -1.8p
   .email-link { margin-right: 12px; }
 }
 @media (max-width: 760px) {
+  .back-to-top { bottom: 36px; right: calc(24px + 1.5ch - 22px); font-size: 16px; }
   .language-button { top: 18px; right: 24px; font-size: 16px; }
   .hero { min-height: 100svh; padding: 80px 24px 32px; }
   .intro-layout { width: 100%; }

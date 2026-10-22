@@ -66,10 +66,6 @@
 .case-link--next:is(:hover, :focus-visible) svg { transform: translate(0, -50%); }
 .case-link--next:is(:hover, :focus-visible) .case-link-label { transform: translateX(-32px); }
 .case-page .language-button { min-width: 3ch; text-align: center; }
-.back-to-top { position: fixed; z-index: 20; right: calc(max(5.5vw, 24px) + 1.5ch - 22px); bottom: 48px; display: grid; place-items: center; width: 44px; height: 44px; color: var(--muted); font-size: 18px; transition: color .35s ease; }
-.back-to-top:is(:hover, :focus-visible) { color: #fff; }
-.back-to-top svg { width: 28px; height: 28px; transition: transform .6s var(--ease); }
-.back-to-top:is(:hover, :focus-visible) svg { transform: translateY(-7px); }
 @media (max-width: 1279px) {
   .case-container { padding-inline: clamp(24px, calc((100vw - 800px) / 2), 240px); }
   .case-summary { gap: 32px; }
@@ -103,7 +99,6 @@
   .case-link-label { overflow-wrap: anywhere; }
   .case-media { border-radius: 12px; }
   .video-toggle { border-radius: 12px; }
-  .back-to-top { bottom: 36px; right: calc(24px + 1.5ch - 22px); font-size: 16px; }
 }
 @media (hover: none), (pointer: coarse) {
   .case-link { padding: 6px 0 6px 28px; }

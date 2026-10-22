@@ -32,6 +32,14 @@ document.querySelector('.scroll-cue').addEventListener('click', event => {
   if (smoothScroll) smoothScroll.scrollTo(top, { duration: 1.3 });
   else window.scrollTo({ top, behavior: reducedMotion.matches ? 'instant' : 'smooth' });
 });
+const backToTop = document.querySelector('.back-to-top');
+function scrollToTop(event) {
+  event.preventDefault();
+  if (smoothScroll) smoothScroll.scrollTo(0, { duration: 1.3 });
+  else window.scrollTo({ top: 0, behavior: reducedMotion.matches ? 'instant' : 'smooth' });
+}
+backToTop.addEventListener('click', scrollToTop);
+
 function safeUrl(value) {
   if (!value) return null;
   try {
@@ -113,6 +121,7 @@ window.addEventListener('pageshow', () => fluid.start());
 
 if (import.meta.hot) {
   import.meta.hot.dispose(() => {
+    backToTop.removeEventListener('click', scrollToTop);
     fluid.destroy();
     reveals.destroy();
     portraitMotionAbort.abort();
